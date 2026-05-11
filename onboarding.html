@@ -258,8 +258,21 @@ footer p { font-size: 13px; color: #2e2e2e; }
 </footer>
 
 <script>
-  document.getElementById('onboarding-form').addEventListener('submit', function(e) {
+  document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
     e.preventDefault();
+    const f = e.target;
+    const{error} = await db.from('griffin_clients').insert([{
+      full_name: f['your-name'].value,
+      email: f['email'].value,
+      phone: f['phone'].value,
+      business_name: f['business-name'].value,
+      business_type: f['industry'].value,
+      target_audience: f['target-audience'].value,
+      ad_goals: f['offer'].value,
+      brand_voice: f['brand-tone'].value,
+      notes: f['notes'].value
+    }]);
+    if(error){ alert('Error: '+error.message); return; }
     document.getElementById('form-wrap').style.display = 'none';
     const ty = document.getElementById('thankyou');
     ty.style.display = 'block';
@@ -278,7 +291,7 @@ footer p { font-size: 13px; color: #2e2e2e; }
 
 <script>
 
-const db = window.supabase.createClient(,https://gcatvqcntgizjsdoabva.supabase.co, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYXR2cWNudGdpempzZG9hYnZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NDIwNTIsImV4cCI6MjA5NDAxODA1Mn0.MvEWq_fB7UxfdSECOou5nnxG5y5qQ9LcYCeB_aXVJW4 );
+const db = window.supabase.createClient("https://gcatvqcntgizjsdoabva.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYXR2cWNudGdpempzZG9hYnZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NDIwNTIsImV4cCI6MjA5NDAxODA1Mn0.MvEWq_fB7UxfdSECOou5nnxG5y5qQ9LcYCeB_aXVJW4 ");
 
 document.querySelector("form").addEventListener("submit",async function(e){
 
