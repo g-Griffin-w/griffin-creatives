@@ -269,3 +269,50 @@ footer p { font-size: 13px; color: #2e2e2e; }
 
 </body>
 </html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+  const _supabase = window.supabase.createClient(https://gcatvqcntgizjsdoabva.supabase.co,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYXR2cWNudGdpempzZG9hYnZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NDIwNTIsImV4cCI6MjA5NDAxODA1Mn0.MvEWq_fB7UxfdSECOou5nnxG5y5qQ9LcYCeB_aXVJW4);
+
+  document.querySelector("form").addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const btn = document.querySelector("[type=submit]");
+
+    btn.textContent = "Submitting...";
+
+    btn.disabled = true;
+
+    const { error } = await _supabase.from("griffin_clients").insert([{
+
+      full_name: e.target.your_name?.value || e.target.full_name?.value,
+
+      email: e.target.email.value,
+
+      phone: e.target.phone?.value,
+
+      business_name: e.target.business_name.value,
+
+      website: e.target.website?.value,
+
+      business_type: e.target.niche?.value,
+
+      target_audience: e.target.target_audience?.value,
+
+      ad_goals: e.target.offer?.value,
+
+      brand_voice: e.target.tone?.value,
+
+      notes: e.target.notes?.value
+
+    }]);
+
+    if (error) { alert("Error: " + error.message); btn.textContent = "Submit"; btn.disabled = false; }
+
+    else { document.querySelector("form").innerHTML = "<div style=text-align:center;padding:60px><h2 style=color:#ff6b00>You are In!</h2><p style=color:#ccc>Deliverables ready in 48 hours.</p></div>"; }
+
+  });
+
+</script>
