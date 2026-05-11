@@ -316,3 +316,27 @@ footer p { font-size: 13px; color: #2e2e2e; }
   });
 
 </script>
+<script>
+document.querySelector("form").onsubmit = async function(e) {
+  e.preventDefault();
+  const f = e.target;
+  const { createClient } = window.supabase;
+  const db = createClient(
+    document.querySelector("script[src*='supabase']").nextElementSibling.textContent.match(/createClient\("([^"]+)"/)[1],
+    document.querySelector("script[src*='supabase']").nextElementSibling.textContent.match(/createClient\("[^"]+","([^"]+)"/)[1]
+  );
+  const { error } = await db.from("griffin_clients").insert([{
+    full_name:       f["your-name"]?.value,
+    email:           f["email"]?.value,
+    phone:           f["phone"]?.value,
+    business_name:   f["business-name"]?.value,
+    business_type:   f["industry"]?.value,
+    target_audience: f["target-audience"]?.value,
+    ad_goals:        f["offer"]?.value,
+    brand_voice:     f["brand-tone"]?.value,
+    notes:           f["notes"]?.value
+  }]);
+  if (error) { alert("Error: " + error.message); }
+  else { f.innerHTML = "<div style='text-align:center;padding:60px'><h2 style='color:#ff6b00'>You're In!</h2><p style='color:#ccc'>Deliverables ready in 48 hours.</p></div>"; }
+};
+</script>
