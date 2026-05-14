@@ -89,7 +89,10 @@ textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
 .submit-wrap { margin-top: 40px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 .btn-submit { padding: 16px 44px; background: var(--orange); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; border: none; border-radius: 2px; cursor: pointer; transition: opacity 0.2s; }
 .btn-submit:hover { opacity: 0.85; }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 .submit-note { font-size: 12px; color: #333; font-weight: 300; }
+.form-error { color: var(--orange); font-size: 14px; margin-top: 16px; }
+.form-error a { color: var(--orange); }
 
 /* THANK YOU */
 .thankyou { display: none; text-align: center; padding: 80px 40px; }
@@ -243,8 +246,8 @@ footer p { font-size: 13px; color: #2e2e2e; }
           <path d="M5 14l7 7L23 7" stroke="#ff4d00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <h2>BRIEF <span>RECEIVED.</span></h2>
-      <p>We've got everything we need to get started. Expect to hear from us within 24 hours — your first batch of ads will be ready in 48.</p>
+      <h2>YOU'RE <span>ALL SET.</span></h2>
+      <p>Thanks! Your deliverables are being generated and will arrive in your Google Drive within 48 hours. You'll get an email when they're ready.</p>
       <a href="index.html">← Back to Home</a>
     </div>
 
@@ -257,75 +260,68 @@ footer p { font-size: 13px; color: #2e2e2e; }
   <p>Built with AI. Powered by strategy.</p>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const f = e.target;
-    const{error} = await db.from('griffin_clients').insert([{
-      full_name: f['your-name'].value,
-      email: f['email'].value,
-      phone: f['phone'].value,
-      business_name: f['business-name'].value,
-      business_type: f['industry'].value,
-      target_audience: f['target-audience'].value,
-      ad_goals: f['offer'].value,
-      brand_voice: f['brand-tone'].value,
-      notes: f['notes'].value
-    }]);
-    if(error){ alert('Error: '+error.message); return; }
-    document.getElementById('form-wrap').style.display = 'none';
-    const ty = document.getElementById('thankyou');
-    ty.style.display = 'block';
-    window.scrollTo({ top: ty.offsetTop - 100, behavior: 'smooth' });
-  });
+  const db = window.supabase.createClient(
+    "https://gcatvqcntgizjsdoabva.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYXR2cWNudGdpempzZG9hYnZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NDIwNTIsImV4cCI6MjA5NDAxODA1Mn0.MvEWq_fB7UxfdSECOou5nnxG5y5qQ9LcYCeB_aXVJW4"
+  );
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const cid = urlParams.get('cid');
+
+  if (!cid) {
+    document.getElementById('form-wrap').innerHTML =
+      "<div style='text-align:center;padding:60px'>" +
+      "<h2 style='color:var(--orange);font-family:\"Bebas Neue\",sans-serif;font-size:42px;letter-spacing:.04em'>INVALID LINK</h2>" +
+      "<p style='color:var(--gray);font-size:16px;line-height:1.7;margin-top:16px'>Please use the link from your welcome email to access this form.<br>" +
+      "If you're having trouble, contact <a href='mailto:hello@griffincreativelab.com' style='color:var(--orange)'>hello@griffincreativelab.com</a>.</p>" +
+      "</div>";
+  } else {
+    document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const f = e.target;
+      const btn = f.querySelector('.btn-submit');
+      const existingError = f.querySelector('.form-error');
+      if (existingError) existingError.remove();
+
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+
+      const { error } = await db
+        .from('griffin_clients')
+        .update({
+          business_name:       f['business-name'].value,
+          website:             f['website'].value,
+          business_type:       f['industry'].value,
+          target_audience:     f['target-audience'].value,
+          ad_goals:            f['offer'].value,
+          platforms:           f['social-handles'].value,
+          brand_voice:         f['brand-tone'].value,
+          notes:               f['notes'].value,
+          onboarding_complete: true
+        })
+        .eq('stripe_customer_id', cid);
+
+      if (error) {
+        console.error(error);
+        btn.disabled = false;
+        btn.textContent = 'Submit Brief →';
+        const errEl = document.createElement('p');
+        errEl.className = 'form-error';
+        errEl.innerHTML = 'Something went wrong. Please contact ' +
+          '<a href="mailto:hello@griffincreativelab.com">hello@griffincreativelab.com</a>.';
+        f.querySelector('.submit-wrap').after(errEl);
+        return;
+      }
+
+      document.getElementById('form-wrap').style.display = 'none';
+      const ty = document.getElementById('thankyou');
+      ty.style.display = 'block';
+      window.scrollTo({ top: ty.offsetTop - 100, behavior: 'smooth' });
+    });
+  }
 </script>
 
 </body>
 </html>
-
-
-
-
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-
-const db = window.supabase.createClient("https://gcatvqcntgizjsdoabva.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYXR2cWNudGdpempzZG9hYnZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NDIwNTIsImV4cCI6MjA5NDAxODA1Mn0.MvEWq_fB7UxfdSECOou5nnxG5y5qQ9LcYCeB_aXVJW4 ");
-
-document.querySelector("form").addEventListener("submit",async function(e){
-
-  e.preventDefault();
-
-  const f=e.target;
-
-  const{error}=await db.from("griffin_clients").insert([{
-
-    full_name:f["your-name"].value,
-
-    email:f["email"].value,
-
-    phone:f["phone"].value,
-
-    business_name:f["business-name"].value,
-
-    business_type:f["industry"].value,
-
-    target_audience:f["target-audience"].value,
-
-    ad_goals:f["offer"].value,
-
-    brand_voice:f["brand-tone"].value,
-
-    notes:f["notes"].value
-
-  }]);
-
-  if(error){alert("Error: "+error.message);console.error(error);}
-
-  else{document.querySelector("form").innerHTML="<div style='text-align:center;padding:60px'><h2 style='color:#ff6b00'>You're In!</h2><p style='color:#ccc'>Deliverables ready in 48 hours.</p></div>";}
-
-});
-
-</script>
-
