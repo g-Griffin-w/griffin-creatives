@@ -257,75 +257,55 @@ footer p { font-size: 13px; color: #2e2e2e; }
   <p>Built with AI. Powered by strategy.</p>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const f = e.target;
-    const{error} = await db.from('griffin_clients').insert([{
+const db = window.supabase.createClient(
+  "https://gcatvqcntgizjsdoabva.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYXR2cWNudGdpempzZG9hYnZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NDIwNTIsImV4cCI6MjA5NDAxODA1Mn0.MvEWq_fB7UxfdSECOou5nnxG5y5qQ9LcYCeB_aXVJW4"
+);
+
+const urlParams = new URLSearchParams(window.location.search);
+const cid = urlParams.get('cid');
+
+if (!cid) {
+  document.getElementById('form-wrap').innerHTML =
+    '<div style="text-align:center;padding:60px"><h2 style="color:#ff4d00;font-family:Bebas Neue,sans-serif;font-size:42px;letter-spacing:.02em;">MISSING CUSTOMER ID</h2><p style="color:#888;font-weight:300;margin-top:16px;">Please use the onboarding link from your welcome email. If you need help, email hello@griffincreativelab.com.</p></div>';
+}
+
+document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!cid) return;
+  const f = e.target;
+  const locationNote = f['location'].value ? '\n\nLocation: ' + f['location'].value : '';
+  const { error } = await db.from('griffin_clients')
+    .update({
       full_name: f['your-name'].value,
-      email: f['email'].value,
       phone: f['phone'].value,
       business_name: f['business-name'].value,
+      website: f['website'].value,
       business_type: f['industry'].value,
       target_audience: f['target-audience'].value,
       ad_goals: f['offer'].value,
       brand_voice: f['brand-tone'].value,
-      notes: f['notes'].value
-    }]);
-    if(error){ alert('Error: '+error.message); return; }
-    document.getElementById('form-wrap').style.display = 'none';
-    const ty = document.getElementById('thankyou');
-    ty.style.display = 'block';
-    window.scrollTo({ top: ty.offsetTop - 100, behavior: 'smooth' });
-  });
+      platforms: f['social-handles'].value,
+      notes: f['notes'].value + locationNote,
+      onboarding_complete: true
+    })
+    .eq('stripe_customer_id', cid);
+
+  if (error) {
+    alert('Error: ' + error.message);
+    console.error(error);
+    return;
+  }
+
+  document.getElementById('form-wrap').style.display = 'none';
+  const ty = document.getElementById('thankyou');
+  ty.style.display = 'block';
+  window.scrollTo({ top: ty.offsetTop - 100, behavior: 'smooth' });
+});
 </script>
 
 </body>
 </html>
-
-
-
-
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-
-const db = window.supabase.createClient("https://gcatvqcntgizjsdoabva.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYXR2cWNudGdpempzZG9hYnZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NDIwNTIsImV4cCI6MjA5NDAxODA1Mn0.MvEWq_fB7UxfdSECOou5nnxG5y5qQ9LcYCeB_aXVJW4 ");
-
-document.querySelector("form").addEventListener("submit",async function(e){
-
-  e.preventDefault();
-
-  const f=e.target;
-
-  const{error}=await db.from("griffin_clients").insert([{
-
-    full_name:f["your-name"].value,
-
-    email:f["email"].value,
-
-    phone:f["phone"].value,
-
-    business_name:f["business-name"].value,
-
-    business_type:f["industry"].value,
-
-    target_audience:f["target-audience"].value,
-
-    ad_goals:f["offer"].value,
-
-    brand_voice:f["brand-tone"].value,
-
-    notes:f["notes"].value
-
-  }]);
-
-  if(error){alert("Error: "+error.message);console.error(error);}
-
-  else{document.querySelector("form").innerHTML="<div style='text-align:center;padding:60px'><h2 style='color:#ff6b00'>You're In!</h2><p style='color:#ccc'>Deliverables ready in 48 hours.</p></div>";}
-
-});
-
-</script>
 
