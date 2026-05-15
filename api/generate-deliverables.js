@@ -5,10 +5,19 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { business_name, business_type, target_audience, ad_goals, brand_voice, notes, plan } = req.body;
+  const { business_name, business_type, target_audience, ad_goals, brand_voice, notes, amount_total } = req.body;
+  let { plan } = req.body;
+
+  // Derive plan from amount_total if not explicitly provided
+  if (!plan && amount_total) {
+    const amt = Number(amount_total);
+    if (amt === 50000) plan = 'launch';
+    else if (amt === 120000) plan = 'scale';
+    else if (amt === 250000) plan = 'dominate';
+  }
 
   if (!business_name || !plan) {
-    return res.status(400).json({ success: false, error: 'Missing required fields' });
+    return res.status(400).json({ success: false, error: 'Missing required fields', received: { business_name: !!business_name, plan, amount_total } });
   }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
