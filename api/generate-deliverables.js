@@ -9,11 +9,12 @@ module.exports = async (req, res) => {
   let { plan } = req.body;
 
   // Derive plan from amount_total if not explicitly provided
+  // Supports both legacy pricing (120000/250000) and new pricing (130000/260000) for backward compatibility
   if (!plan && amount_total) {
     const amt = Number(amount_total);
     if (amt === 50000) plan = 'launch';
-    else if (amt === 120000) plan = 'scale';
-    else if (amt === 250000) plan = 'dominate';
+    else if (amt === 120000 || amt === 130000) plan = 'scale';
+    else if (amt === 250000 || amt === 260000) plan = 'dominate';
   }
 
   if (!business_name || !plan) {
