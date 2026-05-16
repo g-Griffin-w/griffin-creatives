@@ -188,9 +188,15 @@ footer p { font-size: 13px; color: #2e2e2e; }
         </div>
 
         <div class="field-group">
-          <label class="field-label" for="offer">Current Offer or Promotion</label>
+          <label class="field-label" for="offer">Primary Offer / Hook</label>
           <input type="text" id="offer" name="offer" placeholder="Free roof inspection + 10% off first repair">
-          <p class="field-hint">Any limited-time deal, discount, or hook we can lead with in your ads.</p>
+          <p class="field-hint">The main thing you want to lead with — what every visitor should see first.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="promos">Additional Promos &amp; Deals</label>
+          <textarea id="promos" name="promos" placeholder="Free gutter cleaning with any roof repair&#10;Refer a friend, get $100&#10;Senior discount: 15% off&#10;Storm damage inspection — free quote in 24hrs"></textarea>
+          <p class="field-hint">List every other deal, discount, or angle you want featured across your ads. One per line. The more we have, the more variety in your creative.</p>
         </div>
 
         <div class="field-group">
@@ -218,6 +224,25 @@ footer p { font-size: 13px; color: #2e2e2e; }
         <div class="field-group">
           <label class="field-label" for="website">Website URL</label>
           <input type="url" id="website" name="website" placeholder="https://yourbusiness.com">
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="phone-display">Phone to Display on Ads (optional)</label>
+            <input type="tel" id="phone-display" name="phone-display" placeholder="(555) 000-0000">
+            <p class="field-hint">Leave blank to use your contact phone above. Override here if you use a tracking number.</p>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="booking-link">Booking / Scheduling Link</label>
+            <input type="url" id="booking-link" name="booking-link" placeholder="https://calendly.com/yourbiz/15min">
+            <p class="field-hint">Calendly, Square Appointments, Acuity, etc. Used in "Book Now" CTAs.</p>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="website-display">Landing Page URL for Ads (optional)</label>
+          <input type="url" id="website-display" name="website-display" placeholder="https://yourbusiness.com/free-quote">
+          <p class="field-hint">Leave blank to use your main website above. Override here if you want ads pointed to a specific landing page.</p>
         </div>
 
         <hr class="form-divider">
@@ -286,6 +311,10 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
     brand_voice: f['brand-tone'].value,
     platforms: f['social-handles'].value,
     notes: f['notes'].value + locationNote,
+    promos: f['promos'].value,
+    phone_display: f['phone-display'].value || f['phone'].value,
+    website_display: f['website-display'].value || f['website'].value,
+    booking_link: f['booking-link'].value,
     onboarding_complete: true
   }).eq('stripe_customer_id', cid);
   if (error) { alert('Error: ' + error.message); console.error(error); return; }
