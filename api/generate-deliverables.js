@@ -23,6 +23,29 @@ module.exports = async (req, res) => {
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+  // Counts for visual + video deliverables per plan
+  const visualCount = plan === 'dominate' ? 20 : plan === 'scale' ? 10 : 0;
+  const videoCount = plan === 'dominate' ? 10 : plan === 'scale' ? 5 : 0;
+
+  // Strip markdown code fences and parse JSON safely
+  function parseClaudeJson(text) {
+    if (!text) return [];
+    let cleaned = text.trim();
+    // Remove ```json or ``` fences if present
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+    // Find first [ and last ] in case Claude added preamble
+    const first = cleaned.indexOf('[');
+    const last = cleaned.lastIndexOf(']');
+    if (first !== -1 && last !== -1 && last > first) {
+      cleaned = cleaned.slice(first, last + 1);
+    }
+    try {
+      return JSON.parse(cleaned);
+    } catch (e) {
+      return { _parse_error: e.message, _raw: text };
+    }
+  }
+
   function fill(template) {
     return template
       .replace(/{{business_name}}/g, business_name || '')
@@ -40,33 +63,56 @@ module.exports = async (req, res) => {
 
   const calendarPrompt = fill('You are a social media strategist for GriffinCreative. Generate a content calendar for: Business: {{business_name}}, Industry: {{business_type}}, Audience: {{target_audience}}, Offer: {{ad_goals}}, Tone: {{brand_voice}}, Notes: {{notes}}, Plan: {{plan}}. If launch or scale: 30-day calendar. Each day: day number, platform, content type, topic/hook, full caption, 10-15 hashtags, best time. If dominate: 4 weekly calendars plus weekly video plan. Mix educational, promotional, social proof, behind-the-scenes, engagement posts.');
 
-  const visualPrompt = fill('You are a visual ad creative director for GriffinCreative. Generate visual ad concept briefs for Ideogram AI for: Business: {{business_name}}, Industry: {{business_type}}, Audience: {{target_audience}}, Offer: {{ad_goals}}, Tone: {{brand_voice}}, Notes: {{notes}}, Plan: {{plan}}. If scale: 10 briefs. If dominate: 20 briefs. Each brief: format, concept, background, headline text (max 8 words), subheadline (max 12 words), CTA (max 5 words), color palette, mood/style, ready-to-paste Ideogram prompt.');
+  const visualPrompt = fill(`You are a visual ad creative director for GriffinCreative. Generate exactly ${visualCount} static image ad concepts for: Business: {{business_name}}, Industry: {{business_type}}, Audience: {{target_audience}}, Offer: {{ad_goals}}, Tone: {{brand_voice}}, Notes: {{notes}}, Plan: {{plan}}.
+
+Return ONLY a valid JSON array (no prose, no markdown fences) with exactly ${visualCount} objects. Each object must have these exact keys:
+{
+  "concept": "short name of the concept (2-5 words)",
+  "headline": "the main on-image headline (max 8 words)",
+  "subheadline": "supporting line (max 12 words)",
+  "cta": "call to action button text (max 5 words)",
+  "image_prompt": "a single ready-to-paste prompt for a text-to-image model (nano-banana-2). Describe the scene, subject, composition, lighting, mood, color palette, and instruct the model to render the headline text on the image clearly. Aspect ratio 1:1 or 4:5. Include brand-safe, photorealistic or stylized direction as appropriate to the tone."
+}
+
+Output the JSON array and nothing else.`);
+
+  const videoPrompt = fill(`You are a short-form video ad director for GriffinCreative. Generate exactly ${videoCount} hook-style video ad concepts (5-10 seconds each) for: Business: {{business_name}}, Industry: {{business_type}}, Audience: {{target_audience}}, Offer: {{ad_goals}}, Tone: {{brand_voice}}, Notes: {{notes}}, Plan: {{plan}}.
+
+Return ONLY a valid JSON array (no prose, no markdown fences) with exactly ${videoCount} objects. Each object must have these exact keys:
+{
+  "concept": "short name of the hook concept (2-5 words)",
+  "hook_text": "the on-screen hook caption (max 10 words)",
+  "video_prompt": "a single ready-to-paste prompt for a text-to-video model (kling-video). Describe the subject, action, camera movement, setting, lighting, mood, pacing, and any text overlay. Vertical 9:16 aspect ratio. 5-10 seconds. Keep the scene single-shot, hook-first, scroll-stopping."
+}
+
+Output the JSON array and nothing else.`);
 
   try {
     const prompts = [
-      { key: 'ad_copy', text: adCopyPrompt },
-      { key: 'email_sequences', text: emailPrompt },
-      { key: 'content_calendar', text: calendarPrompt },
+      { key: 'ad_copy', text: adCopyPrompt, parseJson: false },
+      { key: 'email_sequences', text: emailPrompt, parseJson: false },
+      { key: 'content_calendar', text: calendarPrompt, parseJson: false },
     ];
 
     if (plan === 'scale' || plan === 'dominate') {
-      prompts.push({ key: 'visual_ads', text: visualPrompt });
+      prompts.push({ key: 'visual_prompts', text: visualPrompt, parseJson: true });
+      prompts.push({ key: 'video_prompts', text: videoPrompt, parseJson: true });
     }
 
     const results = await Promise.all(
-      prompts.map(async ({ key, text }) => {
+      prompts.map(async ({ key, text, parseJson }) => {
         const msg = await client.messages.create({
           model: 'claude-sonnet-4-5',
-          max_tokens: 4000,
+          max_tokens: 8000,
           messages: [{ role: 'user', content: text }],
         });
-        return { key, content: msg.content[0].text };
+        return { key, content: msg.content[0].text, parseJson };
       })
     );
 
     const deliverables = {};
-    results.forEach(({ key, content }) => {
-      deliverables[key] = content;
+    results.forEach(({ key, content, parseJson }) => {
+      deliverables[key] = parseJson ? parseClaudeJson(content) : content;
     });
 
     return res.status(200).json({ success: true, client: business_name, plan, deliverables });
