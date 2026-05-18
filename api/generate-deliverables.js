@@ -136,22 +136,25 @@ Return ONLY a valid JSON array (no prose, no markdown fences) with exactly ${vid
 Output the JSON array and nothing else.`);
 
   try {
+    // Speed optimization: Haiku for structured JSON outputs (much faster),
+    // Sonnet only for the long-form creative writing.
+    // Right-sized max_tokens per task to avoid worst-case generation time.
     const prompts = [
-      { key: 'ad_copy', text: adCopyPrompt, parseJson: false },
-      { key: 'email_sequences', text: emailPrompt, parseJson: false },
-      { key: 'content_calendar', text: calendarPrompt, parseJson: false },
+      { key: 'ad_copy',          text: adCopyPrompt,    parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 4000 },
+      { key: 'email_sequences',  text: emailPrompt,     parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 3000 },
+      { key: 'content_calendar', text: calendarPrompt,  parseJson: false, model: 'claude-haiku-4-5-20251001', max_tokens: 6000 },
     ];
 
     if (plan === 'scale' || plan === 'dominate') {
-      prompts.push({ key: 'visual_prompts', text: visualPrompt, parseJson: true });
-      prompts.push({ key: 'video_prompts', text: videoPrompt, parseJson: true });
+      prompts.push({ key: 'visual_prompts', text: visualPrompt, parseJson: true, model: 'claude-haiku-4-5-20251001', max_tokens: 4000 });
+      prompts.push({ key: 'video_prompts',  text: videoPrompt,  parseJson: true, model: 'claude-haiku-4-5-20251001', max_tokens: 2500 });
     }
 
     const results = await Promise.all(
-      prompts.map(async ({ key, text, parseJson }) => {
+      prompts.map(async ({ key, text, parseJson, model, max_tokens }) => {
         const msg = await client.messages.create({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 8000,
+          model,
+          max_tokens,
           messages: [{ role: 'user', content: text }],
         });
         return { key, content: msg.content[0].text, parseJson };
