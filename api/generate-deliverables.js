@@ -124,12 +124,12 @@ Plan: {{plan}}
 
 Rules:
 - Each of the ${videoCount} concepts should be a different hook angle — pattern interrupt, problem reveal, transformation, lifestyle moment, behind-the-scenes, "POV you just walked in," etc. Spread across the active promos.
-- The hook_text field holds the caption that will be overlaid in post-production by a separate video templating service. The video_prompt itself must produce a 100% clean visual with ZERO text rendered in-frame — no signs, no labels, no captions, no business names, no end-cards, no logos, no written words of any kind. AI video models render text poorly, so all text is added in post.
+- The hook_text field holds the caption that will be overlaid in post-production by a separate video templating service. HARD LIMIT: hook_text must be 6 words or fewer AND 35 characters or fewer (including spaces). Anything longer overflows the on-screen text box and breaks the ad layout. Punchy, scroll-stopping copy only — good examples: "Roof leak? Read this.", "Stop overpaying for repairs", "Don't wait for storm damage". The video_prompt itself must produce a 100% clean visual with ZERO text rendered in-frame — no signs, no labels, no captions, no business names, no end-cards, no logos, no written words of any kind. AI video models render text poorly, so all text is added in post.
 
 Return ONLY a valid JSON array (no prose, no markdown fences) with exactly ${videoCount} objects. Each object must have these exact keys:
 {
   "concept": "short name of the hook concept (2-5 words)",
-  "hook_text": "the on-screen hook caption to overlay in post (max 10 words)",
+  "hook_text": "the on-screen hook caption to overlay in post — MAX 6 words AND MAX 35 characters total including spaces (HARD LIMIT — longer text breaks the ad layout)",
   "video_prompt": "a single ready-to-paste prompt for kling-video. Describe ONLY the visual: subject, action, camera movement, setting, lighting, mood, pacing, color palette. DO NOT mention any text, captions, signs, labels, logos, written words, business names, phone numbers, or end-cards — the video must be 100% text-free clean visuals. Vertical 9:16 aspect ratio. 10 seconds. Single-shot, scroll-stopping."
 }
 
