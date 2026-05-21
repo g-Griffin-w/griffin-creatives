@@ -1,5 +1,42 @@
 const Anthropic = require('@anthropic-ai/sdk');
 
+// Creatomate template IDs — set these as environment variables in Vercel.
+// Each template is identical EXCEPT for the ElevenLabs voice (Charlie vs Sarah).
+const CHARLIE_TEMPLATE_ID = process.env.CREATOMATE_CHARLIE_TEMPLATE_ID;
+const SARAH_TEMPLATE_ID = process.env.CREATOMATE_SARAH_TEMPLATE_ID;
+
+// Industries that should use Sarah's warm professional female voice.
+// Everything else defaults to Charlie's friendly energetic male voice.
+const SARAH_INDUSTRIES = [
+  // Beauty / wellness
+  'spa', 'beauty', 'cosmetic', 'aesthetic', 'botox', 'laser', 'derma', 'facial',
+  // Salons
+  'salon', 'hair', 'nail', 'lash', 'brow', 'makeup',
+  // Healthcare
+  'dental', 'dentist', 'orthodont', 'medical', 'clinic', 'health', 'chiropract', 'therapy',
+  // Professional services
+  'real estate', 'realtor', 'mortgage', 'broker',
+  'law', 'attorney', 'legal', 'accountant', 'financial', 'tax', 'insurance',
+  // Pet
+  'pet', 'vet', 'grooming', 'kennel',
+  // Food
+  'restaurant', 'cafe', 'bakery', 'food', 'catering',
+  // Events
+  'wedding', 'event', 'photographer', 'florist',
+  // Retail
+  'retail', 'ecommerce', 'boutique', 'store',
+];
+
+// Returns the Creatomate template ID + voice label based on business type keywords.
+function pickTemplate(business_type) {
+  const lower = (business_type || '').toLowerCase();
+  const isSarah = SARAH_INDUSTRIES.some((kw) => lower.includes(kw));
+  return {
+    template_id: isSarah ? SARAH_TEMPLATE_ID : CHARLIE_TEMPLATE_ID,
+    voice_name: isSarah ? 'Sarah' : 'Charlie',
+  };
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -135,6 +172,9 @@ Return ONLY a valid JSON array (no prose, no markdown fences) with exactly ${vid
 
 Output the JSON array and nothing else.`);
 
+  // Smart default: pick Creatomate template (Charlie vs Sarah) based on industry keywords.
+  const { template_id: creatomate_template_id, voice_name } = pickTemplate(business_type);
+
   try {
     // Speed optimization: Haiku for structured JSON outputs (much faster),
     // Sonnet only for the long-form creative writing.
@@ -166,7 +206,14 @@ Output the JSON array and nothing else.`);
       deliverables[key] = parseJson ? parseClaudeJson(content) : content;
     });
 
-    return res.status(200).json({ success: true, client: business_name, plan, deliverables });
+    return res.status(200).json({
+      success: true,
+      client: business_name,
+      plan,
+      template_id: creatomate_template_id,
+      voice_name,
+      deliverables,
+    });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
