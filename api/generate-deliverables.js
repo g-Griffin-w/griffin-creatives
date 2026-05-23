@@ -50,13 +50,14 @@ module.exports = async (req, res) => {
   } = req.body;
   let { plan } = req.body;
 
-  // Derive plan from amount_total if not explicitly provided
-  // Supports both legacy pricing (120000/250000) and new pricing (130000/260000) for backward compatibility
+  // Derive plan from amount_total if not explicitly provided.
+  // Current pricing: Launch $700, Scale $1,750, Dominate $3,500.
+  // Older amounts retained for backward compatibility with any legacy subscriptions still active.
   if (!plan && amount_total) {
     const amt = Number(amount_total);
-    if (amt === 50000) plan = 'launch';
-    else if (amt === 120000 || amt === 130000) plan = 'scale';
-    else if (amt === 250000 || amt === 260000) plan = 'dominate';
+    if (amt === 70000 || amt === 50000) plan = 'launch';
+    else if (amt === 175000 || amt === 120000 || amt === 130000) plan = 'scale';
+    else if (amt === 350000 || amt === 250000 || amt === 260000) plan = 'dominate';
   }
 
   if (!business_name || !plan) {
