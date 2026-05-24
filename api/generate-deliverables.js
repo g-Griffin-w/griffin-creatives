@@ -30,6 +30,16 @@ function pickVoice(business_type) {
   return isSarah ? 'Sarah' : 'Charlie';
 }
 
+// Client-friendly usage guides prepended to each deliverable doc.
+// Static text — no AI generation needed, safe to edit anytime.
+const USAGE_GUIDES = {
+  ad_copy: `📋 HOW TO USE THESE AD SCRIPTS\n\nThese are ready-to-deploy ad scripts written specifically for your business.\n\n1. SOCIAL ADS (Meta, Instagram, TikTok): Copy each script's hook, body, and CTA into your ad platform. Pair with an image or video from your camera roll.\n\n2. GOOGLE ADS: Copy each headline and description into Google Ads Editor. Each headline goes in a separate field — Google rotates them automatically.\n\n3. ROTATION STRATEGY: Run 3-4 ads at the same time, NOT all of them at once. Kill the worst performers weekly. Scale the winners with more budget.\n\n4. REFRESH CADENCE: Swap in fresh scripts every 2-3 weeks to avoid ad fatigue. You'll get a new batch each month.\n\nQuestions? Reply to your delivery email.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`,
+
+  email_sequences: `📧 HOW TO USE THESE EMAIL SEQUENCES\n\nThese are nurture and conversion sequences ready to load into your email platform.\n\n1. SETUP: Copy each email into your email platform (Mailchimp, ConvertKit, Klaviyo, Brevo). Each email becomes a campaign in a sequence.\n\n2. TIMING: Most sequences are designed for Day 1, Day 3, Day 7 cadence. Use your platform's "automation" or "drip sequence" feature.\n\n3. TRIGGER: Connect the sequence to your signup form so new subscribers automatically enter Day 1.\n\n4. PERSONALIZATION: Replace any [bracketed placeholders] with your platform's merge tags (e.g., *|FIRSTNAME|* in Mailchimp).\n\n5. METRICS: Watch open rates. Under 20% means your subject lines need refreshing. Over 40% means you're crushing it — scale it.\n\nQuestions? Reply to your delivery email.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`,
+
+  content_calendar: `📅 HOW TO USE THIS CONTENT CALENDAR\n\nYour 30-day social media plan, ready to post. No more staring at a blank screen wondering what to share.\n\n1. POST WHAT'S WRITTEN: Each day shows the platform, topic, full caption, hashtags, and best posting time. Just post it as-is.\n\n2. BATCH SCHEDULING: Use Buffer, Later, or your platform's native scheduler to queue an entire month at once. Saves hours every week.\n\n3. CUSTOMIZATION: Captions work as-is, but feel free to swap in your own photos when you have them. Captions match your brand voice already.\n\n4. HASHTAGS: Use all 10-15 hashtags on Instagram. On LinkedIn or Twitter/X, pick the 3-5 best ones.\n\n5. ENGAGEMENT: Spend 10 minutes a day replying to comments. Algorithms reward active accounts with more reach.\n\nQuestions? Reply to your delivery email.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`,
+};
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -198,7 +208,13 @@ Output the JSON array and nothing else.`);
 
     const deliverables = {};
     results.forEach(({ key, content, parseJson }) => {
-      deliverables[key] = parseJson ? parseClaudeJson(content) : content;
+      if (parseJson) {
+        deliverables[key] = parseClaudeJson(content);
+      } else {
+        // Prepend usage guide for client-friendly docs (ad_copy, email_sequences, content_calendar)
+        const usageGuide = USAGE_GUIDES[key] || '';
+        deliverables[key] = usageGuide + content;
+      }
     });
 
     return res.status(200).json({
