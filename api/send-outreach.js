@@ -131,21 +131,36 @@ async function generateEmail(lead) {
   return parsed;
 }
 
+// MIME-encode a header value if it contains non-ASCII characters (RFC 2047).
+// Required for Subject lines with em dashes, smart quotes, emojis, etc.
+function encodeMimeHeader(value) {
+  // eslint-disable-next-line no-control-regex
+  if (/^[\x00-\x7F]*$/.test(value)) return value;
+  const base64 = Buffer.from(value, 'utf-8').toString('base64');
+  return `=?utf-8?B?${base64}?=`;
+}
+
 // Build raw RFC 2822 email and send via Gmail API
 async function sendEmail({ to, subject, body }) {
   const fromEmail = process.env.GMAIL_FROM_EMAIL;
   const fromName = process.env.GMAIL_FROM_NAME;
 
+  const fromHeader = `${encodeMimeHeader(fromName)} <${fromEmail}>`;
+  const subjectHeader = encodeMimeHeader(subject);
+
   const headers = [
-    `From: ${fromName} <${fromEmail}>`,
+    `From: ${fromHeader}`,
     `To: ${to}`,
-    `Subject: ${subject}`,
+    `Subject: ${subjectHeader}`,
     'MIME-Version: 1.0',
     'Content-Type: text/plain; charset=utf-8',
-    'Content-Transfer-Encoding: 7bit',
+    'Content-Transfer-Encoding: base64',
   ];
 
-  const message = headers.join('\r\n') + '\r\n\r\n' + body;
+  // Base64-encode the body (handles UTF-8 cleanly, matches Content-Transfer-Encoding)
+  const bodyEncoded = Buffer.from(body, 'utf-8').toString('base64').match(/.{1,76}/g).join('\r\n');
+
+  const message = headers.join('\r\n') + '\r\n\r\n' + bodyEncoded;
 
   const encoded = Buffer.from(message)
     .toString('base64')
