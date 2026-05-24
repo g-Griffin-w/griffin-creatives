@@ -47,7 +47,7 @@
 
 ### Stripe live mode (Phase 7)
 
-- 3 live products created (Launch $500/mo, Scale $1300/mo, Dominate $2600/mo)
+- 3 live products created — pricing updated May 23: Launch $700/mo, Scale $1750/mo, Dominate $3500/mo (originally launched at $500/$1300/$2600, raised to current numbers same week)
 - 3 live payment links generated
 - Live event destination created in Stripe pointing to Make.com webhook
 - Signing secret copied
@@ -109,7 +109,7 @@
 - Onboarding welcome video (5-min Loom)
 - 3 industry playbook PDFs
 - Revision request system (button in delivery email → form → re-run API)
-- Founding client rate: 20% discount on Launch ($400) and Scale ($999) for first 5 clients in exchange for testimonial
+- Founding client rate: 20% discount on Launch ($560) and Scale ($1400) for first 5 clients in exchange for testimonial
 - Goal: 3 paying clients by Day 30
 
 ### Days 31-60 (Phase B — 8 clients)
@@ -234,11 +234,13 @@ These were discussed but I'm not 100% sure if they were finished. Tell me which 
 | Metric | Day 30 | Day 60 | Day 90 |
 |---|---|---|---|
 | Paying clients | 3 | 8 | 10-12 |
-| MRR | $1.5k-3k | $5k-8k | $10k-15k |
+| MRR | $2k-4k | $7k-11k | $13k-18k |
 | Cold outreach sent | 100 | 200 | 300 |
 | Reply rate | 5%+ | 8%+ | 10%+ |
 | Conversion (reply → buy) | 10%+ | 15%+ | 20%+ |
 | Churn | n/a | <10% | <8% |
+
+*MRR ranges assume blended avg of ~$1,300/client across Launch/Scale/Dominate at new pricing.*
 
 ---
 

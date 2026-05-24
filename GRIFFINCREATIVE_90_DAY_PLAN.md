@@ -14,7 +14,7 @@ By end of Day 90, GriffinCreative should have:
 - A Performance tier (AI-managed campaigns) ready to launch
 - Sender domain warmed + delivering to inbox reliably
 - Public website fully wired for self-serve purchase
-- ~$5k-15k MRR
+- ~$7k-20k MRR
 
 The plan is sequenced so revenue-generating work always takes priority over feature work. Build only what unlocks the next sale.
 
@@ -44,7 +44,7 @@ The plan is sequenced so revenue-generating work always takes priority over feat
 
 ### Week 3 (Days 15-21)
 - [ ] Outreach: 50 cold DMs/emails to local businesses in chosen niches
-- [ ] Offer "Founding client" rate: $400 Launch / $999 Scale (20% discount for first 5 clients in exchange for testimonial)
+- [ ] Offer "Founding client" rate: $560 Launch / $1,400 Scale (20% discount for first 5 clients in exchange for testimonial)
 - [ ] Goal: 1 paying client by end of week 3
 - [ ] Document the onboarding experience — what felt rough?
 
@@ -56,7 +56,7 @@ The plan is sequenced so revenue-generating work always takes priority over feat
 
 **Day 30 checkpoint:**
 - 3 paying clients
-- ~$1,500-3,000 MRR
+- ~$2,000-4,000 MRR
 - Deliverability dialed in
 - 1 founding client willing to record a video testimonial
 
@@ -98,7 +98,7 @@ The plan is sequenced so revenue-generating work always takes priority over feat
 
 **Day 60 checkpoint:**
 - 8 paying clients
-- ~$5k-8k MRR
+- ~$7k-11k MRR
 - 1 detailed case study documented
 - 2-3 upsell revenue streams active
 - Affiliate program live
@@ -145,7 +145,7 @@ The plan is sequenced so revenue-generating work always takes priority over feat
 
 **Day 90 checkpoint:**
 - 10-12 total paying clients (creative + performance)
-- ~$10k-15k MRR
+- ~$13k-18k MRR
 - 2-3 case studies with documented ROI
 - Performance tier live and selling
 - Clear data on where to invest next
@@ -189,11 +189,11 @@ These can come in Days 91-180 if revenue justifies it.
 | Metric | Day 30 target | Day 60 target | Day 90 target |
 |---|---|---|---|
 | Paying clients | 3 | 8 | 10-12 |
-| MRR | $1.5k-3k | $5k-8k | $10k-15k |
+| MRR | $2k-4k | $7k-11k | $13k-18k |
 | Cold outreach sent | 100 | 200 | 300 |
 | Outreach reply rate | 5%+ | 8%+ | 10%+ |
 | Conversion rate (reply → buy) | 10%+ | 15%+ | 20%+ |
-| Avg client revenue | $500-750 | $700-1000 | $800-1200 |
+| Avg client revenue | $700-1,100 | $900-1,400 | $1,100-1,600 |
 | Churn (monthly) | n/a | <10% | <8% |
 
 ---

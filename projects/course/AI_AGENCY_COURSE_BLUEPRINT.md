@@ -60,7 +60,7 @@
 **Lessons:**
 - 1.1 Why "Done-For-You AI Agency" is the right model right now
 - 1.2 Picking your niche (decision framework: pain × revenue × accessibility)
-- 1.3 Pricing strategy — why $500/$1,300/$2,600 works
+- 1.3 Pricing strategy — why $700/$1,750/$3,500 works (and the case study of GriffinCreative testing at $500/$1,300/$2,600 first, then raising to current pricing within the launch week)
 - 1.4 Service definition — what to include, what to exclude
 - 1.5 Brand decisions — naming, voice, visual identity
 - 1.6 Avoiding the "AI agency" branding trap (lessons learned about toning down "AI" in marketing)
