@@ -33,6 +33,7 @@ function pickVoice(business_type) {
 // Client-friendly usage guides prepended to each deliverable doc.
 // Static text — no AI generation needed, safe to edit anytime.
 const USAGE_GUIDES = {
+  action_plan: `🎯 START HERE — YOUR 30-DAY ACTION PLAN\n\nThis is your roadmap. Read this BEFORE opening the other docs.\n\nThe other docs in this folder (Ad Scripts, Email Sequences, Content Calendar) are the RAW MATERIAL. This Action Plan tells you exactly how and when to deploy each piece — week by week, task by task. Don't try to do it all at once.\n\n👇 Your 30-day plan below 👇\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`,
   ad_copy: `📋 HOW TO USE THESE AD SCRIPTS\n\nThese are ready-to-deploy ad scripts written specifically for your business.\n\n1. SOCIAL ADS (Meta, Instagram, TikTok): Copy each script's hook, body, and CTA into your ad platform. Pair with an image or video from your camera roll.\n\n2. GOOGLE ADS: Copy each headline and description into Google Ads Editor. Each headline goes in a separate field — Google rotates them automatically.\n\n3. ROTATION STRATEGY: Run 3-4 ads at the same time, NOT all of them at once. Kill the worst performers weekly. Scale the winners with more budget.\n\n4. REFRESH CADENCE: Swap in fresh scripts every 2-3 weeks to avoid ad fatigue. You'll get a new batch each month.\n\nQuestions? Reply to your delivery email.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`,
 
   email_sequences: `📧 HOW TO USE THESE EMAIL SEQUENCES\n\nThese are nurture and conversion sequences ready to load into your email platform.\n\n1. SETUP: Copy each email into your email platform (Mailchimp, ConvertKit, Klaviyo, Brevo). Each email becomes a campaign in a sequence.\n\n2. TIMING: Most sequences are designed for Day 1, Day 3, Day 7 cadence. Use your platform's "automation" or "drip sequence" feature.\n\n3. TRIGGER: Connect the sequence to your signup form so new subscribers automatically enter Day 1.\n\n4. PERSONALIZATION: Replace any [bracketed placeholders] with your platform's merge tags (e.g., *|FIRSTNAME|* in Mailchimp).\n\n5. METRICS: Watch open rates. Under 20% means your subject lines need refreshing. Over 40% means you're crushing it — scale it.\n\nQuestions? Reply to your delivery email.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`,
@@ -120,6 +121,77 @@ module.exports = async (req, res) => {
 
   const calendarPrompt = fill('You are a social media strategist for GriffinCreative. Generate a content calendar for: Business: {{business_name}}, Industry: {{business_type}}, Audience: {{target_audience}}, Offer: {{ad_goals}}, Tone: {{brand_voice}}, Notes: {{notes}}, Plan: {{plan}}. If launch or scale: 30-day calendar. Each day: day number, platform, content type, topic/hook, full caption, 10-15 hashtags, best time. If dominate: 4 weekly calendars plus weekly video plan. Mix educational, promotional, social proof, behind-the-scenes, engagement posts.');
 
+  const actionPlanPrompt = fill(`You are a deployment coach for GriffinCreative. Your job: turn the AI-generated deliverables into a simple, week-by-week action plan that a busy small business owner can actually execute.
+
+Client info:
+- Business: {{business_name}}
+- Industry: {{business_type}}
+- Audience: {{target_audience}}
+- Goal: {{ad_goals}}
+- Plan: {{plan}}
+
+Write a 30-day Quick Start Action Plan organized into 4 weeks. Format as plain text with clear week-by-week sections.
+
+CRITICAL RULES:
+- Be conversational and direct. Talk like a smart friend helping them, not a corporate document.
+- Each week has ONE main focus + 2-3 specific tasks. Don't overwhelm.
+- Include LINKS to the tools they'll need (Facebook Ads Manager: https://business.facebook.com, Google Ads: https://ads.google.com, Mailchimp: https://mailchimp.com, Buffer: https://buffer.com, Loom: https://loom.com)
+- Recommend STARTING BUDGETS: Facebook ads start at $15-30/day, Google search ads start at $20-50/day for service businesses.
+- Set realistic expectations: Week 1 = setup + first clicks, Week 3 = first leads expected, Week 4 = optimization.
+- Reassure them: "Reply to your delivery email any time with questions."
+
+STRUCTURE (use this exact structure):
+
+# YOUR 30-DAY QUICK START ACTION PLAN
+
+You just received your full ad creative package — congrats. This plan tells you exactly what to do with it, week by week. You do NOT need to do everything at once. Pace yourself, hit each week's goals, and you'll see results.
+
+## WEEK 1: GET YOUR FACEBOOK AD LIVE
+**Goal:** First ad running by end of the week.
+**Time needed:** 60-90 minutes total this week.
+- Task 1: ... (specific to their industry — explain setting up Facebook Business Manager and what to put where)
+- Task 2: ...
+- Task 3: ...
+**What to expect:** You'll see clicks within hours of launching. Don't worry about leads yet — that comes Week 3.
+
+## WEEK 2: ADD GOOGLE SEARCH ADS + EMAIL
+**Goal:** Capture high-intent search traffic + start nurturing leads.
+**Time needed:** 90 minutes total this week.
+- Task 1: Google Ads setup and copy paste (specific keywords for their industry)
+- Task 2: Mailchimp signup and load Email Sequence #1
+- Task 3: ...
+**What to expect:** Search ads convert higher than social. Email nurture takes 7-10 days to start producing.
+
+## WEEK 3: SOCIAL MEDIA + REVIEW WHAT'S WORKING
+**Goal:** Get social presence going + check ad performance.
+**Time needed:** 60 minutes this week.
+- Task 1: Start posting from your content calendar (recommend Buffer for scheduling)
+- Task 2: Review Facebook ads — kill any with cost-per-click over $X, scale winners
+- Task 3: ...
+**What to expect:** First leads should be coming in by now. If not, we'll troubleshoot.
+
+## WEEK 4: OPTIMIZE + PREP FOR MONTH 2
+**Goal:** Double down on winners, kill losers, request next batch.
+**Time needed:** 45 minutes this week.
+- Task 1: Pause the worst-performing ads
+- Task 2: Increase budget on the best ad by 50%
+- Task 3: Reply to your delivery email — let us know what to focus on next month
+
+## QUESTIONS?
+Reply to your delivery email at any time. We respond within 24 hours.
+
+## REALISTIC TIMELINE
+- Days 1-7: Setup work, first ad clicks
+- Days 8-14: More clicks, first email opens
+- Days 15-21: First inbound leads (typically)
+- Days 22-30: Optimization, scale what works
+
+This is real, not magic. Stick with the plan and you'll see results.
+
+---
+
+Make every task specific to {{business_type}} (e.g., a roofer's Facebook targeting differs from an insurance agent's). Reference their actual goal {{ad_goals}}. Keep tone supportive, never condescending. Output ONLY the action plan — no preamble.`);
+
   const visualPrompt = fill(`You are a visual ad creative director for GriffinCreative. Generate exactly ${visualCount} static image ad concepts for:
 
 Business: {{business_name}}
@@ -185,9 +257,10 @@ Output the JSON array and nothing else.`);
     // Sonnet only for the long-form creative writing.
     // Right-sized max_tokens per task to avoid worst-case generation time.
     const prompts = [
-      { key: 'ad_copy',          text: adCopyPrompt,    parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 4000 },
-      { key: 'email_sequences',  text: emailPrompt,     parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 3000 },
-      { key: 'content_calendar', text: calendarPrompt,  parseJson: false, model: 'claude-haiku-4-5-20251001', max_tokens: 6000 },
+      { key: 'action_plan',      text: actionPlanPrompt, parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 3000 },
+      { key: 'ad_copy',          text: adCopyPrompt,     parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 4000 },
+      { key: 'email_sequences',  text: emailPrompt,      parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 3000 },
+      { key: 'content_calendar', text: calendarPrompt,   parseJson: false, model: 'claude-haiku-4-5-20251001', max_tokens: 6000 },
     ];
 
     if (plan === 'scale' || plan === 'dominate') {
