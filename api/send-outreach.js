@@ -210,6 +210,13 @@ module.exports = async (req, res) => {
   // Optional: ?dry_run=1 generates emails but doesn't send (for testing)
   const dryRun = req.query?.dry_run === '1';
 
+  // Optional: ?limit=N caps the batch size (useful for fast dry-run tests).
+  // Defaults to BATCH_SIZE (25). Clamped 1..BATCH_SIZE.
+  const rawLimit = parseInt(req.query?.limit, 10);
+  const batchLimit = Number.isFinite(rawLimit)
+    ? Math.max(1, Math.min(BATCH_SIZE, rawLimit))
+    : BATCH_SIZE;
+
   try {
     // Pull next batch of queued leads
     const { data: leads, error: fetchError } = await supabase
@@ -217,7 +224,7 @@ module.exports = async (req, res) => {
       .select('*')
       .eq('status', 'queued')
       .order('created_at', { ascending: true })
-      .limit(BATCH_SIZE);
+      .limit(batchLimit);
 
     if (fetchError) {
       return res.status(500).json({ error: 'Supabase fetch failed', detail: fetchError.message });
@@ -275,8 +282,10 @@ module.exports = async (req, res) => {
           results.sent++;
         }
 
-        // Throttle (skip on the last iteration)
-        if (lead !== leads[leads.length - 1]) {
+        // Throttle between sends to avoid Gmail rate flags.
+        // Skip on the last iteration AND skip entirely during dry-run
+        // (nothing is being sent, so no rate limit to respect).
+        if (!dryRun && lead !== leads[leads.length - 1]) {
           await sleep(randomDelay());
         }
       } catch (err) {
