@@ -107,12 +107,46 @@ OUTPUT FORMAT (JSON only, no markdown fences, no preamble):
 // Helpers
 // ============================================================
 
+// Clean a raw Apollo company name for use in the email:
+//   - Strip trademark / copyright / registered symbols (®, ™, ©)
+//   - Drop common legal suffixes (LLC, Inc, Corp, etc.)
+//   - Convert ALL-CAPS names to Title Case (HOMEMASTERS -> Homemasters),
+//     but leave intentional mixed-case (iRoofing, RoofersCoffeeShop) alone.
+function sanitizeCompanyName(raw) {
+  if (!raw) return '';
+  let name = raw.trim();
+  name = name.replace(/[®™©]/g, '').trim();
+  name = name.replace(
+    /\s+(LLC|L\.L\.C\.|Inc\.?|Incorporated|Corp\.?|Corporation|Co\.?|Company|Ltd\.?|Limited)\.?$/i,
+    '',
+  ).trim();
+  // ALL-CAPS → Title Case (only if no lowercase letter exists)
+  if (name.length > 3 && /[A-Z]/.test(name) && !/[a-z]/.test(name)) {
+    name = name.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  return name;
+}
+
+// Hard-correct any near-miss of "griffincreative" that Claude might emit.
+// We have shipped a typo here once (grifficreative — missing the 'n');
+// never again.
+function enforceBrandName(text) {
+  if (!text) return text;
+  return text
+    .replace(/\bgrifficreative\b/gi, 'griffincreative')
+    .replace(/\bgriffncreative\b/gi, 'griffincreative')
+    .replace(/\bgriffin\s+creative\b/gi, 'griffincreative')
+    .replace(/\bGriffinCreative\b/g, 'griffincreative')
+    .replace(/\bGriffin\s*Creative\s*Lab\b/gi, 'griffincreative');
+}
+
 // Build the Claude prompt with lead data filled in
 function buildPrompt(lead) {
+  const cleanCompany = sanitizeCompanyName(lead.company_name);
   return COLD_EMAIL_PROMPT
     .replace(/{{first_name}}/g, lead.first_name || '')
     .replace(/{{job_title}}/g, lead.job_title || '')
-    .replace(/{{company_name}}/g, lead.company_name || '')
+    .replace(/{{company_name}}/g, cleanCompany)
     .replace(/{{company_city}}/g, lead.company_city || '')
     .replace(/{{company_state}}/g, lead.company_state || '')
     .replace(/{{niche}}/g, lead.niche || '');
@@ -144,6 +178,9 @@ async function generateEmail(lead) {
   if (!parsed.subject || !parsed.body) {
     throw new Error('Claude returned malformed email (missing subject or body)');
   }
+  // Post-process: hard-correct brand name typos in BOTH subject and body
+  parsed.subject = enforceBrandName(parsed.subject);
+  parsed.body = enforceBrandName(parsed.body);
   return parsed;
 }
 
