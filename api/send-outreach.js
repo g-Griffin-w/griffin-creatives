@@ -128,16 +128,17 @@ function sanitizeCompanyName(raw) {
 }
 
 // Hard-correct any near-miss of "griffincreative" that Claude might emit.
-// We have shipped a typo here once (grifficreative — missing the 'n');
-// never again.
+// Claude has hallucinated "grifficreative" (missing n), "griffinncreative"
+// (double n), "Griffin Creative", "GriffinCreativeLab", etc. — so we use a
+// single permissive pattern: "griff" + 1-5 i/n characters in any order +
+// optional whitespace + "creative" + optional " lab", case-insensitive.
+// Always normalized to canonical lowercase "griffincreative".
 function enforceBrandName(text) {
   if (!text) return text;
-  return text
-    .replace(/\bgrifficreative\b/gi, 'griffincreative')
-    .replace(/\bgriffncreative\b/gi, 'griffincreative')
-    .replace(/\bgriffin\s+creative\b/gi, 'griffincreative')
-    .replace(/\bGriffinCreative\b/g, 'griffincreative')
-    .replace(/\bGriffin\s*Creative\s*Lab\b/gi, 'griffincreative');
+  return text.replace(
+    /\bgriff[in]{1,5}\s*creative(?:\s+lab)?\b/gi,
+    'griffincreative',
+  );
 }
 
 // Build the Claude prompt with lead data filled in
