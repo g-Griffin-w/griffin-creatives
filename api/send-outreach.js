@@ -33,7 +33,7 @@ const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 // ============================================================
 const COLD_EMAIL_PROMPT = `You are a cold email copywriter for GriffinCreative, a done-for-you AI ad creative agency for small businesses.
 
-Your job: write a personalized cold email using the EXACT template provided. Casual lowercase, direct, no fluff.
+Your job: write a personalized cold email using the EXACT structure below, with a NICHE-SPECIFIC hook in the second paragraph. Casual lowercase, direct, no fluff.
 
 LEAD INFO:
 - First name: {{first_name}}
@@ -43,43 +43,59 @@ LEAD INFO:
 - State: {{company_state}}
 - Niche: {{niche}}
 
-EMAIL TEMPLATE (follow exactly):
----
-Subject: {{first_name}} — 30 seconds?
+SUBJECT (all niches):
+thought on {{company_name}}
 
-Hey {{first_name}},
+EMAIL STRUCTURE (all niches — write the body in exactly this order):
 
-Saw {{company_name}} in {{city}}. How are you handling your ad creative right now?
+Paragraph 1 (greeting):
+hi {{first_name}},
 
-Most {{niche_term}} I work with hate agencies (and the $5k+/mo bills). Happy to send you a free 5-min Loom audit of your current ads to show what I'd improve — no pitch, just curious if there's a fit.
+Paragraph 2 (niche-specific empathy hook — pick the one matching the lead's niche from NICHE HOOKS below)
 
-Yes or no?
+Paragraph 3 (shared pitch — write this exactly, do not change wording):
+we built an automated creative pipeline at griffincreative that delivers ad scripts, email sequences, social content, and visual content — all tailored to your business and dropped in a google drive within 48 hours. tiers run $700–$3,500/mo depending on volume. no contracts, month-to-month.
 
-Gabriel
-GriffinCreative
-griffincreativelab.com
----
+Paragraph 4 (shared close — write this exactly, do not change wording):
+happy to record a free 5-min video auditing your site and outreach with 3-4 specific things i'd change if you were a client. want one?
 
-NICHE TERM mapping:
-- roofing → "contractors"
-- plumbing → "contractors"
-- insurance → "insurance agencies"
+Paragraph 5 (signature — write this exactly):
+gabriel
+griffincreative
+
+NICHE HOOKS (use the one matching {{niche}}):
+
+- If niche is "insurance" OR "insurance_independent":
+  "found {{company_name}} while looking at independent agencies in {{city}}. competing for local business against State Farm and Allstate's national ad budgets with no in-house marketing team is brutal."
+
+- If niche is "mortgage_broker" OR "mortgage":
+  "found {{company_name}} while looking at independent brokers in {{city}}. rates move and deal flow swings hard — most brokers are still leaning on realtor referrals to bridge the gap, and that well dries up fast when the market shifts."
+
+- If niche is "roofing":
+  "found {{company_name}} while looking at roofing contractors in {{city}}. between storm-chaser competition and rising lead costs from angi and home advisor, most roofers are paying way too much for leads they don't even own."
+
+- If niche is "plumbing":
+  "found {{company_name}} while looking at plumbing contractors in {{city}}. paying $50–150 per shared lead from angi or home advisor — on a service call that might only pay $200 — is brutal margin and an unstable pipeline."
+
+- If niche is missing, empty, or anything else:
+  "found {{company_name}} while looking at small business owners in {{city}}. most owners we work with are either overpaying a marketing agency or trying to do creative themselves between jobs — neither scales."
 
 DATA HANDLING RULES:
 - If first_name is missing or empty → use "there"
-- If city is missing or empty → change opening to "Saw {{company_name}} online" (drop the city reference entirely)
-- If company_name ends in " LLC", " Inc", " Inc.", " Corp", " Corporation" — drop the suffix in the email for cleaner copy
-- If job_title contains "Owner" or "Founder" — keep tone direct
-- If job_title contains "CEO" or "President" — slightly more professional but still casual
+- If company_city is missing or empty → drop the "in {{city}}" phrase entirely from the hook (keep the rest of the sentence intact)
+- If company_name ends in " LLC", " Inc", " Inc.", " Corp", " Corporation" — drop the suffix in the body (keep full legal name in subject)
+- Keep the company name in the subject EXACTLY as provided
 
 STYLE RULES:
-- Casual lowercase opener ("hey [name]" not "Hi [Name]")
-- Total email under 100 words
-- NO links in the body
+- Casual lowercase throughout — never capitalize a sentence-start "i" or any line opener
+- "i'd" stays lowercase
+- Total email body under 140 words
+- NO links anywhere in the body
 - NO urgency words (URGENT, FREE, LIMITED, ACT NOW)
-- NO excessive punctuation or all caps
-- The final question must always be a simple yes/no
-- Signature exactly: "Gabriel\\nGriffinCreative\\ngriffincreativelab.com"
+- NO exclamation points, no all caps, no smart quotes
+- Use em dashes (—) not hyphens for inline asides
+- The final question must be a simple yes/no ("want one?")
+- Paragraphs separated by a single blank line
 
 OUTPUT FORMAT (JSON only, no markdown fences, no preamble):
 {

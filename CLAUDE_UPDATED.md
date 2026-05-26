@@ -81,20 +81,84 @@ Phase 7 ✅ COMPLETE — End-to-end Stripe live mode + first sales pipeline. Str
 
 Phase 8 — Hybrid retainer + commission model + GTM/GA4/CallRail. Not started. Trigger to start: 3-5 paying clients with case study data.
 
-CURRENT STATE (May 23, 2026):
+CURRENT STATE (May 25, 2026):
 - Production-ready agency taking live payments
-- 142 verified roofing leads queued in outreach_leads
-- Cron-job.org fires daily 9 AM to send 25 personalized cold emails
-- First batch goes out Sunday May 24 morning (will pause/un-pause cron based on weekday strategy)
+- Roofing cold email batch in progress (~50 sent already; queue draining)
+- STRATEGIC PIVOT (May 25): primary outreach niches are now Insurance (independent agencies) + Mortgage (independent brokers). Reason: contractor/roofing pipeline revealed deployment risk — busy trades are unlikely to ship templates without hand-holding. Insurance + mortgage are service/expertise niches where AI-generated copy + the existing pipeline land cleanly without needing real product photos. Roofing/plumbing kept as secondary fallback (existing queue + 82-lead plumbing batch).
+- Cold email agent updated to be NICHE-AWARE — picks empathy hook from the `niche` column (insurance_independent / mortgage_broker / roofing / plumbing / generic fallback). Logic lives in COLD_EMAIL_PROMPT inside api/send-outreach.js.
+- Cron-job.org fires daily 9 AM, 25 emails/day, URL pinned to https://www.griffincreativelab.com (HTTPS fix shipped)
 - Email deliverability 10/10 mail-tester score
 - Voice routing tested and working (Sarah for med spa, Charlie for contractor)
 
+LOCKED COLD EMAIL TEMPLATES (May 25):
+
+Subject (all niches): "thought on [company_name]"
+
+Body structure (Claude generates per-lead using these exact blocks):
+  P1: "hi [first_name],"
+  P2: niche-specific empathy hook (see below)
+  P3 (pitch — verbatim, do not edit casually):
+      "we built an automated creative pipeline at griffincreative that delivers ad scripts,
+       email sequences, social content, and visual content — all tailored to your business
+       and dropped in a google drive within 48 hours. tiers run $700–$3,500/mo depending
+       on volume. no contracts, month-to-month."
+  P4 (close — verbatim):
+      "happy to record a free 5-min video auditing your site and outreach with 3-4 specific
+       things i'd change if you were a client. want one?"
+  P5: "gabriel / griffincreative"
+
+Niche hooks (each is one short paragraph in P2):
+  - insurance_independent → "found [company] while looking at independent agencies in [city]. competing for local business against State Farm and Allstate's national ad budgets with no in-house marketing team is brutal."
+  - mortgage_broker → "found [company] while looking at independent brokers in [city]. rates move and deal flow swings hard — most brokers are still leaning on realtor referrals to bridge the gap, and that well dries up fast when the market shifts."
+  - roofing → angie/home advisor lead-cost angle
+  - plumbing → $50–150 per shared lead margin angle
+  - missing/other → generic "overpaying an agency or doing creative themselves between jobs" fallback
+
+To tweak voice: edit COLD_EMAIL_PROMPT in api/send-outreach.js, redeploy, re-test with ?dry_run=1.
+
+APOLLO SEARCH CRITERIA (locked, May 25):
+
+Insurance (niche tag: insurance_independent)
+- Industry: Insurance
+- Keywords: "independent insurance agency", "P&C agency", "life insurance agency"
+- Job titles: Owner, Principal, Agency Owner, Founder, Managing Partner
+- Company size: 1-25 employees
+- Country: US
+- Exclude carriers/captives: State Farm, Allstate, Farmers, Liberty Mutual, Nationwide, Geico, Progressive corporate
+
+Mortgage brokers (niche tag: mortgage_broker)
+- Industry: Financial Services OR Real Estate
+- Keywords: "mortgage broker", "mortgage company", "home loans"
+- Job titles: Owner, Branch Manager, Principal, Founder, Senior Loan Officer (only at small shops)
+- Company size: 1-50 employees
+- Country: US
+- Exclude national lenders: Rocket, loanDepot, Better, UWM, Quicken
+
+Why financial advisors got rejected: FINRA/SEC compliance means every piece of marketing has to pre-clear a compliance officer. Kills our 48-hour deployment story. Mortgage brokers (NMLS) face much lighter ad rules and are more urgent buyers.
+
+CSV TRANSFORM SCRIPT (May 25):
+- Location: /Users/gabewigginton/griffin-creatives/scripts/apollo-to-supabase.py
+- Cleans an Apollo people export → 12-column Supabase outreach_leads CSV, dedupes by email, stamps niche on every row
+- Usage:
+    python scripts/apollo-to-supabase.py \
+      --input ~/Downloads/apollo-insurance-export.csv \
+      --output ~/griffin-creatives/insurance-leads-clean.csv \
+      --niche insurance_independent
+- Valid niche values: insurance_independent, mortgage_broker, roofing, plumbing
+
 NEXT IMMEDIATE STEPS:
-1. Monitor cron-job.org firing tomorrow 9 AM — verify 25 leads moved from queued → sent
-2. Monitor hello@griffincreativelab.com inbox for replies (expect 5-10% reply rate over 24-72 hours)
-3. Record manual Loom video audits for any "yes" replies
-4. End of this week: import Plumbing (82 leads) + Insurance (194 leads) batches to expand pipeline
-5. Week 2-3: build AI sales reply agent (after 50-100 cold emails sent = real reply data)
+1. Push the niche-aware send-outreach.js update:
+   cd ~/griffin-creatives && git add . && git commit -m 'niche-aware cold email agent + apollo-to-supabase script' && git push
+2. After Vercel deploy (~30s), dry-run test with the CRON_SECRET from Vercel dashboard:
+   curl -X POST "https://www.griffincreativelab.com/api/send-outreach?dry_run=1" \
+     -H "Authorization: Bearer <paste_actual_secret_here>"
+   — verify the still-queued roofing leads render the new roofing hook correctly
+3. Build the locked Apollo mortgage broker search; export ~150 leads
+4. Re-pull / clean the Apollo insurance independent search; export ~150-200 leads
+5. Run apollo-to-supabase.py on each export (with the correct --niche flag) and import the cleaned CSVs into Supabase outreach_leads (status=queued)
+6. Let cron fire daily — monitor hello@griffincreativelab.com inbox for replies. Track reply rate per niche.
+7. After 100+ sends across both niches, evaluate which hook performs better and tune
+8. Once 1 paying client signs, decide whether to build a photo-upload pipeline to unlock visual-results niches (med spas, dentists, contractors with real before/after) — DEFER until then
 
 IMPORTANT NOTES:
 - Stripe LIVE mode active — webhook, products, payment links all configured
