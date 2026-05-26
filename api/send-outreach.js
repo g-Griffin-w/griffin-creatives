@@ -56,12 +56,10 @@ Paragraph 2 (niche-specific empathy hook — pick the one matching the lead's ni
 Paragraph 3 (shared pitch — write this exactly, do not change wording):
 we built an automated creative pipeline at griffincreative that delivers ad scripts, email sequences, social content, and visual content — all tailored to your business and dropped in a google drive within 48 hours. tiers run $700–$3,500/mo depending on volume. no contracts, month-to-month.
 
-Paragraph 4 (shared close — write this exactly, do not change wording):
+Paragraph 4 (shared close — write this exactly, do not change wording — this is the FINAL paragraph of the body):
 happy to record a free 5-min video auditing your site and outreach with 3-4 specific things i'd change if you were a client. want one?
 
-Paragraph 5 (signature — write this exactly):
-gabriel
-griffincreative
+DO NOT include a signature, sign-off, name, brand name, or anything else after "want one?". The body MUST end with the question "want one?". A canonical signature is appended automatically by the system.
 
 NICHE HOOKS (use the one matching {{niche}}):
 
@@ -127,18 +125,40 @@ function sanitizeCompanyName(raw) {
   return name;
 }
 
-// Hard-correct any near-miss of "griffincreative" that Claude might emit.
-// Claude has hallucinated "grifficreative" (missing n), "griffinncreative"
-// (double n), "Griffin Creative", "GriffinCreativeLab", etc. — so we use a
-// single permissive pattern: "griff" + 1-5 i/n characters in any order +
-// optional whitespace + "creative" + optional " lab", case-insensitive.
-// Always normalized to canonical lowercase "griffincreative".
+// Hard-correct any near-miss of "griffincreative" that Claude might emit
+// inside the body (e.g. in the pitch paragraph). Backstop for the verbatim
+// pitch — the signature is handled by applyCanonicalSignature() and never
+// trusts the model.
 function enforceBrandName(text) {
   if (!text) return text;
   return text.replace(
-    /\bgriff[in]{1,5}\s*creative(?:\s+lab)?\b/gi,
+    /\bgri[f]{1,2}[in]{0,5}\s*c\s*reative(?:\s+lab)?\b/gi,
     'griffincreative',
   );
+}
+
+// The signature is non-negotiable and 100% deterministic, so we never let
+// the model write it. We slice the body at the locked closing question
+// ("want one?") and append a canonical signature ourselves. This is
+// bulletproof against any spelling typo Claude tries.
+const CANONICAL_SIGNATURE = '\n\ngabriel\ngriffincreative\ngriffincreativelab.com';
+
+function applyCanonicalSignature(body) {
+  if (!body) return CANONICAL_SIGNATURE.trimStart();
+  const trimmed = body.trimEnd();
+  // Locate the locked close — case-insensitive, last occurrence wins.
+  const closeRegex = /want one\?/gi;
+  let lastMatch = null;
+  let m;
+  while ((m = closeRegex.exec(trimmed)) !== null) {
+    lastMatch = m;
+  }
+  if (!lastMatch) {
+    // Close was somehow missing — just append signature at the end.
+    return trimmed + CANONICAL_SIGNATURE;
+  }
+  const cutoff = lastMatch.index + lastMatch[0].length;
+  return trimmed.slice(0, cutoff) + CANONICAL_SIGNATURE;
 }
 
 // Build the Claude prompt with lead data filled in
@@ -179,9 +199,12 @@ async function generateEmail(lead) {
   if (!parsed.subject || !parsed.body) {
     throw new Error('Claude returned malformed email (missing subject or body)');
   }
-  // Post-process: hard-correct brand name typos in BOTH subject and body
+  // Post-process: scrub any brand-name typos Claude wrote in the body,
+  // then strip whatever signature Claude appended and replace with the
+  // canonical one. The signature is deterministic and never trusted to AI.
   parsed.subject = enforceBrandName(parsed.subject);
   parsed.body = enforceBrandName(parsed.body);
+  parsed.body = applyCanonicalSignature(parsed.body);
   return parsed;
 }
 
