@@ -48,16 +48,62 @@ COMMITMENT: 60 days minimum on DTC before any further pivots. Statistical eviden
 
 ---
 
-E-COMMERCE PIVOT REBUILD (in build order):
+E-COMMERCE PIVOT REBUILD STATUS (updated late night May 27):
 
-1. WEBSITE REWRITE — kill "Built For" 3-card section. Update hero + positioning to DTC-focused with the locked tagline. (in progress)
-2. ONBOARDING FORM — add product photo upload (3-5 photos), brand asset uploads (logo, hex colors), Shopify URL field, current ad spend, top-performing ad URL.
-3. SUPABASE SCHEMA — add product_image_urls (text[]), brand_asset_urls (text[]), shopify_url, top_ad_url fields to griffin_clients.
-4. generate-deliverables.js — rewrite prompts for DTC deliverable mix: static product ads (with their product photo inserted via Photoshop-style AI), motion ad scripts, UGC scripts (for them or paid creators to record), hook + CTA variations, landing page copy, email sequences.
-5. UGC AUTOMATION RESEARCH — investigate Billo ($59/video), JoinBrands ($39/video), Trend.io as fulfillment partners for actual UGC video. May resell at margin.
-6. COLD EMAIL — rewrite COLD_EMAIL_PROMPT for DTC angle. Locked tagline: "our systems produce high-volume creative production for fast growing e-commerce brands."
-7. APOLLO SEARCH — fast-growing DTC brands, Shopify (technology filter), 11-200 employees, founder/CMO/Head of Growth titles, US.
-8. EXISTING QUEUE — let insurance queue drain (~2 more days at 25/day) so we don't waste enriched leads. Pause after that.
+✅ 1. WEBSITE REWRITE — DONE. "Built For" section now shows 3 DTC deliverable cards (Static Product Ads / UGC Scripts + Briefs / Hooks + Copy). Hero updated to "MORE WINNERS. LESS WAITING." with locked DTC positioning above the fold. "What We Deliver" cards + pricing tier feature lists ALL refreshed to DTC language.
+✅ 2. ONBOARDING FORM (onboarding.html) — DONE. Rewrote with DTC fields: Shopify URL, brand category dropdown, monthly ad spend dropdown, top-performing ad URL, product photo URLs textarea, brand assets URL textarea. Removed contractor-shaped fields.
+✅ 3. SUPABASE SCHEMA MIGRATION — DONE. Added columns to griffin_clients: product_image_urls, brand_asset_urls, shopify_url, top_performing_ad_url, monthly_ad_spend (all text type — clients paste public Drive/Dropbox links, no file upload infra needed).
+✅ 4. generate-deliverables.js — FULL DTC REWRITE DONE. New deliverable keys returned: action_plan, ad_hooks, static_ads, ugc_briefs, email_flows, content_calendar, landing_page_copy (Scale/Dominate only). Voice routing now always returns "DTC" marker.
+✅ 5. WHAT WE DELIVER cards on index.html — DONE. 6 cards now show DTC deliverable types (Static Product Ads, UGC Briefs, Hooks + Copy, Email Flows, Landing Page Copy, Content Calendar).
+✅ 6. PRICING TIER FEATURE LISTS on index.html — DONE. Launch/Scale/Dominate now describe DTC deliverable counts and DTC-relevant features (creative review call, A/B subject lines, weekly calendars on Dominate, etc.).
+✅ 7. COLD EMAIL ecommerce_dtc hook — DONE earlier in session. New niche hook in send-outreach.js: "creative fatigue kills ROAS faster than bad targeting".
+✅ 8. APOLLO DTC SEARCH + ENRICH — DONE earlier. 22 high-quality DTC leads enriched + queued.
+✅ 9. OLD QUEUE PAUSED — DONE earlier. 28 roofing + 50 insurance leads set to status='skipped' (cron now focuses on DTC + mortgage only).
+✅ 10. CO-FOUNDER OPERATING MODE — Locked into top of this CLAUDE.md so every future session opens in the right behavioral mode.
+✅ 11. SUPPORTING DOCS CREATED for first-client readiness:
+       - projects/scripts/dtc-sales-call-script.md — 15-min Calendly discovery framework
+       - projects/scripts/dtc-loom-audit-framework.md — 5-min Loom audit template for cold-email replies
+       - projects/scripts/makecom-dtc-pivot-changes.md — exact instructions to update Make.com Scenarios B + C for the new deliverable keys
+
+⏸️ USER MUST DO BEFORE FIRST DTC CLIENT (gating items):
+   A. **Push all code changes** (after waking up):
+      cd ~/griffin-creatives && git add . && git commit -m 'DTC pivot complete: pipeline, onboarding, pricing, website' && git push
+   B. **Update Make.com Scenario B** per projects/scripts/makecom-dtc-pivot-changes.md (rename Google Docs to new keys: ad_hooks, static_ads, ugc_briefs, email_flows, landing_page_copy; rewrite delivery email body).
+   C. **Pause Make.com Scenario C** (or add filter on voice_name === "DTC" to skip the AI voiceover branch — UGC needs real humans, not AI voice).
+   D. **Update Stripe products** to reflect new DTC deliverable mix on receipts (user said they'd handle Stripe updates themselves). Pricing stays at $700 / $1,750 / $3,500 for now.
+   E. **End-to-end test the pipeline**: insert a test griffin_clients row with onboarding_complete=true → confirm Scenario B fires → confirm Drive folder is created with all new DTC docs → delete test record.
+
+DTC DELIVERABLE MIX PER TIER (locked May 27):
+
+Launch ($700/mo):
+- 12 static product ad concepts
+- 8 UGC creator briefs / scripts
+- 15 hook + copy variations
+- 1 email flow (Welcome Series)
+- 30-day social content calendar
+- 30-day deployment action plan
+
+Scale ($1,750/mo):
+- 25 static product ad concepts
+- 15 UGC creator briefs / scripts
+- 30 hook + copy variations
+- 3 email flows (Welcome / Abandoned Cart / Post-Purchase)
+- 4 landing page copy variations
+- 30-day social content calendar
+- 30-day deployment action plan
+- Monthly creative review call
+
+Dominate ($3,500/mo):
+- 40 static product ad concepts
+- 25 UGC creator briefs with shot lists
+- 50 hook + copy variations (6 angle categories)
+- 5 email flows with A/B subject lines (Welcome / Cart / Post-Purchase / Win-Back / Browse Abandonment)
+- 8 landing page copy variations
+- Weekly content calendars
+- 30-day deployment action plan
+- Bi-weekly creative strategy calls
+- Priority 24hr turnaround
+- 2 revisions per month
 
 ---
 

@@ -1,44 +1,200 @@
 const Anthropic = require('@anthropic-ai/sdk');
 
-// Industries that should use Sarah's warm professional female voice.
-// Everything else defaults to Charlie's friendly energetic male voice.
-// Make.com's Scenario C uses a Router with filters on voice_name to pick the right Creatomate template.
-const SARAH_INDUSTRIES = [
-  // Beauty / wellness
-  'spa', 'beauty', 'cosmetic', 'aesthetic', 'botox', 'laser', 'derma', 'facial',
-  // Salons
-  'salon', 'hair', 'nail', 'lash', 'brow', 'makeup',
-  // Healthcare
-  'dental', 'dentist', 'orthodont', 'medical', 'clinic', 'health', 'chiropract', 'therapy',
-  // Professional services
-  'real estate', 'realtor', 'mortgage', 'broker',
-  'law', 'attorney', 'legal', 'accountant', 'financial', 'tax', 'insurance',
-  // Pet
-  'pet', 'vet', 'grooming', 'kennel',
-  // Food
-  'restaurant', 'cafe', 'bakery', 'food', 'catering',
-  // Events
-  'wedding', 'event', 'photographer', 'florist',
-  // Retail
-  'retail', 'ecommerce', 'boutique', 'store',
-];
+// =============================================================================
+// GriffinCreative — Deliverable Generator (DTC E-Commerce Pivot, May 27, 2026)
+// =============================================================================
+// This pipeline serves fast-growing DTC brands. Old contractor / insurance /
+// mortgage logic has been retired. Deliverable mix per plan:
+//
+//   Launch   ($700/mo):   12 static ads, 8 UGC briefs, 15 hooks, 1 email flow,
+//                          30-day social calendar, 30-day action plan
+//   Scale    ($1,750/mo): 25 static ads, 15 UGC briefs, 30 hooks, 3 email flows,
+//                          4 landing page copy variations, 30-day calendar,
+//                          30-day action plan
+//   Dominate ($3,500/mo): 40 static ads, 25 UGC briefs, 50 hooks, 5 email flows,
+//                          8 landing page copy variations, weekly calendars,
+//                          30-day action plan
+//
+// AI voiceover (ElevenLabs) was disabled for DTC clients — UGC needs real
+// humans on camera, not synthesized voices, so we deliver scripts/briefs that
+// the brand's own creators (or paid UGC actors from Billo / JoinBrands) record.
+// `voice_name` field is retained = "DTC" for Make.com Scenario C compatibility
+// but Scenario C should be PAUSED or REPURPOSED for static-only motion graphics.
+// =============================================================================
 
-// Returns the voice label ("Sarah" or "Charlie") based on business type keywords.
-function pickVoice(business_type) {
-  const lower = (business_type || '').toLowerCase();
-  const isSarah = SARAH_INDUSTRIES.some((kw) => lower.includes(kw));
-  return isSarah ? 'Sarah' : 'Charlie';
+// Plan-specific counts. Centralized so it's easy to bump if pricing changes.
+function planCounts(plan) {
+  if (plan === 'dominate') {
+    return { staticAds: 40, ugc: 25, hooks: 50, emails: 5, landing: 8 };
+  }
+  if (plan === 'scale') {
+    return { staticAds: 25, ugc: 15, hooks: 30, emails: 3, landing: 4 };
+  }
+  return { staticAds: 12, ugc: 8, hooks: 15, emails: 1, landing: 0 };
 }
 
-// Client-friendly usage guides prepended to each deliverable doc.
-// Static text — no AI generation needed, safe to edit anytime.
+// Email flow names per plan — used to brief Claude on which flows to produce.
+function emailFlowsList(plan) {
+  if (plan === 'dominate') {
+    return [
+      'Welcome Series (3 emails) — new subscriber introduction',
+      'Abandoned Cart (3 emails) — recover lost checkouts',
+      'Post-Purchase (3 emails) — onboarding + reorder',
+      'Win-Back (3 emails) — re-engage lapsed customers',
+      'Browse Abandonment (2 emails) — recover product page visitors',
+    ];
+  }
+  if (plan === 'scale') {
+    return [
+      'Welcome Series (3 emails) — new subscriber introduction',
+      'Abandoned Cart (3 emails) — recover lost checkouts',
+      'Post-Purchase (3 emails) — onboarding + reorder',
+    ];
+  }
+  return [
+    'Welcome Series (3 emails) — new subscriber introduction (the highest-leverage flow if you only run one)',
+  ];
+}
+
+// Static text prepended to each deliverable doc. DTC-focused now.
 const USAGE_GUIDES = {
-  action_plan: `🎯 START HERE — YOUR 30-DAY ACTION PLAN\n\nThis is your roadmap. Read this BEFORE opening the other docs.\n\nThe other docs in this folder (Ad Scripts, Email Sequences, Content Calendar) are the RAW MATERIAL. This Action Plan tells you exactly how and when to deploy each piece — week by week, task by task. Don't try to do it all at once.\n\n👇 Your 30-day plan below 👇\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`,
-  ad_copy: `📋 HOW TO USE THESE AD SCRIPTS\n\nThese are ready-to-deploy ad scripts written specifically for your business.\n\n1. SOCIAL ADS (Meta, Instagram, TikTok): Copy each script's hook, body, and CTA into your ad platform. Pair with an image or video from your camera roll.\n\n2. GOOGLE ADS: Copy each headline and description into Google Ads Editor. Each headline goes in a separate field — Google rotates them automatically.\n\n3. ROTATION STRATEGY: Run 3-4 ads at the same time, NOT all of them at once. Kill the worst performers weekly. Scale the winners with more budget.\n\n4. REFRESH CADENCE: Swap in fresh scripts every 2-3 weeks to avoid ad fatigue. You'll get a new batch each month.\n\nQuestions? Reply to your delivery email.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`,
+  action_plan: `🎯 START HERE — YOUR 30-DAY DTC DEPLOYMENT PLAN
 
-  email_sequences: `📧 HOW TO USE THESE EMAIL SEQUENCES\n\nThese are nurture and conversion sequences ready to load into your email platform.\n\n1. SETUP: Copy each email into your email platform (Mailchimp, ConvertKit, Klaviyo, Brevo). Each email becomes a campaign in a sequence.\n\n2. TIMING: Most sequences are designed for Day 1, Day 3, Day 7 cadence. Use your platform's "automation" or "drip sequence" feature.\n\n3. TRIGGER: Connect the sequence to your signup form so new subscribers automatically enter Day 1.\n\n4. PERSONALIZATION: Replace any [bracketed placeholders] with your platform's merge tags (e.g., *|FIRSTNAME|* in Mailchimp).\n\n5. METRICS: Watch open rates. Under 20% means your subject lines need refreshing. Over 40% means you're crushing it — scale it.\n\nQuestions? Reply to your delivery email.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`,
+This is your week-by-week roadmap. Read THIS document BEFORE opening the others.
 
-  content_calendar: `📅 HOW TO USE THIS CONTENT CALENDAR\n\nYour 30-day social media plan, ready to post. No more staring at a blank screen wondering what to share.\n\n1. POST WHAT'S WRITTEN: Each day shows the platform, topic, full caption, hashtags, and best posting time. Just post it as-is.\n\n2. BATCH SCHEDULING: Use Buffer, Later, or your platform's native scheduler to queue an entire month at once. Saves hours every week.\n\n3. CUSTOMIZATION: Captions work as-is, but feel free to swap in your own photos when you have them. Captions match your brand voice already.\n\n4. HASHTAGS: Use all 10-15 hashtags on Instagram. On LinkedIn or Twitter/X, pick the 3-5 best ones.\n\n5. ENGAGEMENT: Spend 10 minutes a day replying to comments. Algorithms reward active accounts with more reach.\n\nQuestions? Reply to your delivery email.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`,
+The other docs in this folder (Hooks, Static Ads, UGC Briefs, Email Flows, Content Calendar) are your raw creative arsenal. This Plan tells you what to deploy when, what to test first, and what your media buyer should expect to see week-by-week.
+
+Do NOT try to deploy everything at once. The whole point of high-volume creative is to test, kill losers fast, and scale winners. Pacing matters.
+
+👇 Your 30-day plan below 👇
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`,
+
+  ad_hooks: `📋 HOW TO USE THESE HOOKS + AD COPY
+
+These are 15-50 hook variations + matched copy designed for high-volume split-testing on Meta and TikTok. Creative fatigue is the #1 ROAS-killer for DTC — fresh creative every 7-14 days is how you keep CPM down and ROAS up.
+
+1. SPLIT-TEST IN BATCHES OF 5: Don't run all hooks at once. Group them into batches of 5, run for 3-5 days, kill bottom 2, scale top 1.
+
+2. PAIR WITH STATIC ADS + UGC: Each hook is creative-format-agnostic. You can pair the same hook with a static ad, a UGC script, or a motion graphic for different angles.
+
+3. CATEGORIES: Hooks are organized by angle — pain-point, transformation, social-proof, curiosity, list/contrarian, founder voice. Test all categories — DTC audiences respond differently per category.
+
+4. METRICS TO WATCH: Hook rate (3-sec video view %), CTR on Meta, thumbstop ratio on TikTok. Anything under 30% hook rate is a kill candidate.
+
+5. REFRESH CADENCE: We'll send a new batch every 30 days. Stop running any creative that's been live 21+ days — even winners burn out.
+
+Questions? Reply to your delivery email.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`,
+
+  static_ads: `🎨 HOW TO USE THESE STATIC PRODUCT AD CONCEPTS
+
+Each concept below is a fully-formed static ad — headline, subheadline, CTA, and a ready-to-paste image generation prompt that references YOUR product photos.
+
+1. GENERATE THE VISUALS: Take each "image_prompt" and feed it into Midjourney, nano-banana, or Photoshop your product into the described scene. (We'll handle generation directly in your Drive folder for Scale + Dominate tiers.)
+
+2. EXPORT IN MULTIPLE RATIOS: Each static should be exported as 1:1 (feed), 4:5 (mobile-feed), and 9:16 (Stories). Most ad managers will auto-crop, but native sizing wins.
+
+3. RUN IN ABO + CBO: Static ads are easier to read at small budgets — start at $20-50/day per concept in ABO. Scale winners to CBO when they cross 2x ROAS.
+
+4. NATIVE-FEEL FIRST, BRAND-POLISH SECOND: The first 3-day cohort of any static should look UGC-native (slightly imperfect lighting, real-world setting) — not a glossy product render. We've matched the prompts to this style.
+
+5. ROTATE WEEKLY: Static fatigue is faster than video — swap in fresh concepts every 7-14 days.
+
+Questions? Reply to your delivery email.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`,
+
+  ugc_briefs: `🎬 HOW TO USE THESE UGC CREATOR BRIEFS
+
+These are talking-head scripts and shot lists ready to hand to:
+  (a) Your own customers / community members willing to film
+  (b) Paid UGC creators on Billo ($59/video), JoinBrands ($39/video), or Trend.io
+
+We don't deliver finished UGC video — UGC's whole value is real humans, not AI avatars. We deliver the SCRIPT, the HOOK, the SHOT LIST, and the CTA so any creator can film a polished ad in 30 minutes.
+
+1. PICK YOUR CREATORS: If you don't have in-house creators, post the brief on Billo or JoinBrands. Their marketplaces have thousands of vetted creators across every DTC vertical.
+
+2. WHAT TO SEND THEM: The brief includes (1) the hook in the first 3 seconds, (2) the narrative arc, (3) the b-roll shots needed, (4) the CTA. They handle the rest.
+
+3. RECORD VERTICAL (9:16): All UGC should be filmed in portrait for TikTok + Reels. Square crops easily for feed if needed.
+
+4. PAYMENT NOTE: Most UGC marketplaces charge $30-100 per video. Budget 1 month of testing = $300-500 in UGC fulfillment for Launch tier, $700-1200 for Scale, $1000-2000 for Dominate.
+
+5. WHAT TO RUN: Start with 3 UGC videos at a time in Meta + TikTok. Kill bottom 2 after 3-day window. Scale winner.
+
+Questions? Reply to your delivery email.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`,
+
+  email_flows: `📧 HOW TO USE THESE EMAIL FLOWS
+
+Each flow below is a complete sequence ready to load into Klaviyo (recommended), Omnisend, or your email tool of choice. DTC email is where 25-40% of total revenue should come from once flows are dialed.
+
+1. SETUP IN KLAVIYO: Each email = a new email block inside a Klaviyo flow. Use the trigger noted at the top of each flow (e.g., "Trigger: subscriber added to default Welcome list").
+
+2. TIMING NOTED INLINE: We've included send timing for each email in the flow (Email 1 = immediately, Email 2 = +24hr, etc.). Don't change these — they're tested cadences.
+
+3. PERSONALIZATION: Klaviyo merge tags noted as {{ first_name|default:"there" }} — paste directly into Klaviyo's text editor and it'll auto-fill.
+
+4. SUBJECT LINES: Each email has 1 primary subject line. Scale + Dominate tier includes A/B variants — use Klaviyo's split-test feature to run them simultaneously.
+
+5. METRICS TO WATCH: Open rate (target 40%+), click rate (target 5%+), revenue per email (target $0.50+ for promo, $0.10+ for nurture).
+
+Questions? Reply to your delivery email.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`,
+
+  content_calendar: `📅 HOW TO USE THIS CONTENT CALENDAR
+
+30 days of organic social content for Instagram, TikTok, and your owned channels. This is for organic — paid creative lives in the Hooks + Static Ads + UGC Briefs docs.
+
+1. POST AS-IS: Captions, hashtags, and post types are pre-written. Just queue them up in Buffer, Later, or Meta Business Suite.
+
+2. PAIR WITH YOUR PRODUCT PHOTOS: Each post has a recommended visual. Use your own product shots, customer UGC, or behind-the-scenes content.
+
+3. CADENCE: 1 post per day on IG, 3-4 short-form videos per week on TikTok. Don't skip days — algorithmic momentum compounds.
+
+4. ENGAGEMENT WINDOW: 15 minutes of replying to comments within the first hour of posting = 2-3x reach uplift. Set a reminder.
+
+5. CONTENT MIX: We've balanced education / entertainment / promotional / social-proof across the 30 days. Don't reorder unless you have a reason.
+
+Questions? Reply to your delivery email.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`,
+
+  landing_page_copy: `📄 HOW TO USE THESE LANDING PAGE COPY VARIATIONS
+
+We've drafted 4-8 variations of your landing page copy — designed for split-testing the hero, value props, and CTAs to lift conversion rate from cold traffic.
+
+1. PICK ONE TO LAUNCH WITH: Start with Variation 1. It's the most "safe / conversion-validated" framing.
+
+2. THEN RUN A/B TESTS: After you have 1000+ visitors on Variation 1, test Variation 2 head-to-head using Shopify's A/B tool, Optimizely, or just two URLs with split traffic in Meta.
+
+3. SECTIONS COVERED: Each variation includes — Hero headline, hero subhead, hero CTA, value prop block (3 cards), social proof block, FAQ, urgency/CTA close.
+
+4. PLUG INTO YOUR THEME: All copy is plain text, ready for your Shopify theme editor or whatever page builder you use (Pagefly, GemPages, Replo, etc.).
+
+5. WHAT TO MEASURE: Conversion rate (visit → add-to-cart), time on page, bounce rate. The winning variation usually shows up in 7-10 days at decent traffic.
+
+Questions? Reply to your delivery email.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`,
 };
 
 module.exports = async (req, res) => {
@@ -58,12 +214,17 @@ module.exports = async (req, res) => {
     website_display,
     promos,
     booking_link,
+    // DTC-specific fields (added May 27 pivot)
+    shopify_url,
+    product_image_urls,
+    brand_asset_urls,
+    top_performing_ad_url,
+    monthly_ad_spend,
   } = req.body;
   let { plan } = req.body;
 
-  // Derive plan from amount_total if not explicitly provided.
-  // Current pricing: Launch $700, Scale $1,750, Dominate $3,500.
-  // Older amounts retained for backward compatibility with any legacy subscriptions still active.
+  // Derive plan from Stripe amount_total. Keeps legacy mappings for any
+  // active subs from the older $500/$1,300/$2,600 pricing tier.
   if (!plan && amount_total) {
     const amt = Number(amount_total);
     if (amt === 70000 || amt === 50000) plan = 'launch';
@@ -72,22 +233,22 @@ module.exports = async (req, res) => {
   }
 
   if (!business_name || !plan) {
-    return res.status(400).json({ success: false, error: 'Missing required fields', received: { business_name: !!business_name, plan, amount_total } });
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required fields',
+      received: { business_name: !!business_name, plan, amount_total },
+    });
   }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const counts = planCounts(plan);
+  const emailFlows = emailFlowsList(plan);
 
-  // Counts for visual + video deliverables per plan
-  const visualCount = plan === 'dominate' ? 20 : plan === 'scale' ? 10 : 0;
-  const videoCount = plan === 'dominate' ? 10 : plan === 'scale' ? 5 : 0;
-
-  // Strip markdown code fences and parse JSON safely
+  // Robust JSON parser for Claude responses (strips fences, slices to brackets)
   function parseClaudeJson(text) {
     if (!text) return [];
     let cleaned = text.trim();
-    // Remove ```json or ``` fences if present
     cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
-    // Find first [ and last ] in case Claude added preamble
     const first = cleaned.indexOf('[');
     const last = cleaned.lastIndexOf(']');
     if (first !== -1 && last !== -1 && last > first) {
@@ -100,172 +261,378 @@ module.exports = async (req, res) => {
     }
   }
 
+  // Variable substitution for prompts.
   function fill(template) {
     return template
-      .replace(/{{business_name}}/g, business_name || '')
-      .replace(/{{business_type}}/g, business_type || '')
-      .replace(/{{target_audience}}/g, target_audience || '')
-      .replace(/{{ad_goals}}/g, ad_goals || '')
-      .replace(/{{brand_voice}}/g, brand_voice || '')
-      .replace(/{{notes}}/g, notes || '')
-      .replace(/{{plan}}/g, plan || '')
-      .replace(/{{phone_display}}/g, phone_display || '')
-      .replace(/{{website_display}}/g, website_display || '')
-      .replace(/{{promos}}/g, promos || '')
-      .replace(/{{booking_link}}/g, booking_link || '');
+      .replace(/{{business_name}}/g,         business_name || '')
+      .replace(/{{business_type}}/g,         business_type || '')
+      .replace(/{{target_audience}}/g,       target_audience || '')
+      .replace(/{{ad_goals}}/g,              ad_goals || '')
+      .replace(/{{brand_voice}}/g,           brand_voice || '')
+      .replace(/{{notes}}/g,                 notes || '')
+      .replace(/{{plan}}/g,                  plan || '')
+      .replace(/{{phone_display}}/g,         phone_display || '')
+      .replace(/{{website_display}}/g,       website_display || '')
+      .replace(/{{promos}}/g,                promos || '')
+      .replace(/{{booking_link}}/g,          booking_link || '')
+      .replace(/{{shopify_url}}/g,           shopify_url || '(not provided)')
+      .replace(/{{product_image_urls}}/g,    product_image_urls || '(not provided — client should email these to hello@griffincreativelab.com)')
+      .replace(/{{brand_asset_urls}}/g,      brand_asset_urls || '(not provided)')
+      .replace(/{{top_performing_ad_url}}/g, top_performing_ad_url || '(none provided)')
+      .replace(/{{monthly_ad_spend}}/g,      monthly_ad_spend || 'undisclosed')
+      .replace(/{{email_flows_list}}/g,      emailFlows.map((f) => '- ' + f).join('\n'));
   }
 
-  const adCopyPrompt = fill('You are an expert direct-response copywriter for GriffinCreative. Generate all ad copy for: Business: {{business_name}}, Industry: {{business_type}}, Audience: {{target_audience}}, Offer: {{ad_goals}}, Tone: {{brand_voice}}, Notes: {{notes}}, Plan: {{plan}}. If launch: 8 social media ad scripts (Hook/Body/CTA), 4 Google search ads (3 headlines 30 chars, 2 descriptions 90 chars), 2 video scripts (Hook 0-3s/Problem 3-8s/Solution 8-20s/CTA 20-30s). If scale: 20 social, 8 Google, 5 video. If dominate: 30 social, 15 Google, 8 video, 4 weeks video topics. Label everything clearly.');
+  // -------------------- PROMPT 1: AD HOOKS + COPY VARIATIONS --------------------
+  const adHooksPrompt = fill(`You are an elite DTC performance creative strategist for GriffinCreative. Generate exactly ${counts.hooks} short-form ad hook variations with paired body copy + CTA, designed for split-testing on Meta and TikTok.
 
-  const emailPrompt = fill('You are an expert email copywriter for GriffinCreative. Generate email sequences for: Business: {{business_name}}, Industry: {{business_type}}, Audience: {{target_audience}}, Offer: {{ad_goals}}, Tone: {{brand_voice}}, Notes: {{notes}}, Plan: {{plan}}. If launch: 1 sequence of 3 emails (Welcome, Value, Offer). If scale: 3 sequences of 3 emails each (Welcome, Re-engagement, Post-purchase). If dominate: 5 sequences of 3 emails each (Welcome, Nurture, Re-engagement, Post-purchase, Win-back) with two A/B subject line variants per email. Each email: subject line(s), preview text, full body, CTA button text.');
+BRAND CONTEXT:
+- Brand: {{business_name}}
+- Category: {{business_type}}
+- Shopify: {{shopify_url}}
+- Target customer: {{target_audience}}
+- Primary offer / hook: {{ad_goals}}
+- Brand voice: {{brand_voice}}
+- Active promos to vary across hooks: {{promos}}
+- Monthly ad spend: {{monthly_ad_spend}}
+- Top-performing existing ad reference: {{top_performing_ad_url}}
+- Notes: {{notes}}
 
-  const calendarPrompt = fill('You are a social media strategist for GriffinCreative. Generate a content calendar for: Business: {{business_name}}, Industry: {{business_type}}, Audience: {{target_audience}}, Offer: {{ad_goals}}, Tone: {{brand_voice}}, Notes: {{notes}}, Plan: {{plan}}. If launch or scale: 30-day calendar. Each day: day number, platform, content type, topic/hook, full caption, 10-15 hashtags, best time. If dominate: 4 weekly calendars plus weekly video plan. Mix educational, promotional, social proof, behind-the-scenes, engagement posts.');
+RULES:
+- Spread hooks evenly across 6 categories: pain-point, transformation/result, social-proof/UGC-feel, curiosity/contrarian, list/numbered, founder-voice.
+- Hooks must work as the FIRST 3 SECONDS of a video OR the headline of a static. Aim for 6-12 words max.
+- Body copy supports the hook with 1-2 specific benefit lines. CTAs are 2-4 word action phrases.
+- Avoid clichés ("Look no further", "In today's fast-paced world", etc.). Specific > clever.
+- Reference the brand's actual product / category. No generic copy.
 
-  const actionPlanPrompt = fill(`You are a deployment coach for GriffinCreative. Your job: turn the AI-generated deliverables into a simple, week-by-week action plan that a busy small business owner can actually execute.
+STRUCTURE (format as plain text, easy to read, NOT JSON):
 
-Client info:
-- Business: {{business_name}}
-- Industry: {{business_type}}
+# AD HOOKS + COPY — ${counts.hooks} VARIATIONS
+
+## PAIN-POINT HOOKS (X variations)
+**Hook 1:** [the hook]
+- Body: [1-2 sentences expanding on the pain + solution]
+- CTA: [action phrase]
+
+[repeat for each pain-point variation]
+
+## TRANSFORMATION HOOKS (X variations)
+[same structure]
+
+## SOCIAL-PROOF / UGC-FEEL HOOKS (X variations)
+[same structure]
+
+## CURIOSITY / CONTRARIAN HOOKS (X variations)
+[same structure]
+
+## LIST / NUMBERED HOOKS (X variations)
+[same structure]
+
+## FOUNDER-VOICE HOOKS (X variations)
+[same structure]
+
+End with a 1-paragraph testing note: "Run these in batches of 5 — start with X category if your top-performing ad is Y..." (use the brand's existing top-performing ad URL above to inform this if provided).
+
+Output only the formatted content, no preamble or explanation.`);
+
+  // -------------------- PROMPT 2: STATIC PRODUCT ADS --------------------
+  const staticAdsPrompt = fill(`You are a static ad creative director for GriffinCreative. Generate exactly ${counts.staticAds} static product ad concepts for:
+
+Brand: {{business_name}}
+Category: {{business_type}}
+Audience: {{target_audience}}
+Primary offer: {{ad_goals}}
+Active promos: {{promos}}
+Voice: {{brand_voice}}
+Product photo URLs the client provided: {{product_image_urls}}
+Brand asset URLs (logo, hex colors): {{brand_asset_urls}}
+Shopify: {{shopify_url}}
+Notes: {{notes}}
+
+RULES:
+- Each concept attacks a different angle: hero product shot, lifestyle scene, comparison ad, before/after, social-proof, "what's inside", limited-time urgency, problem/solution, founder story, customer testimonial framing, ingredient/feature deep-dive, etc.
+- Each image_prompt must reference the brand's actual product photo (when product_image_urls are provided — see below). If not provided, describe the product photographically.
+- HEADLINE must be 8 words or fewer. Sub-headlines max 12 words. CTAs max 4 words.
+- Designed for native feeds — slightly imperfect, lifestyle-real, NOT glossy/corporate. UGC-native energy.
+- Vary across the active promos when promos are listed.
+
+Return ONLY a valid JSON array with exactly ${counts.staticAds} objects:
+{
+  "concept": "short name (2-5 words)",
+  "angle": "which angle this attacks (e.g., 'before/after', 'social proof', 'urgency')",
+  "headline": "main on-image headline (≤8 words)",
+  "subheadline": "supporting line (≤12 words)",
+  "cta_button": "CTA text (≤4 words)",
+  "image_prompt": "ready-to-paste prompt for Midjourney/nano-banana. Describe: scene, composition, lighting, mood, color palette, the product (reference photo URLs above if provided), and instructions to render the headline text cleanly. 1:1 or 4:5 aspect ratio. UGC-native vibe unless brand voice suggests luxury/premium.",
+  "production_note": "1-sentence guidance to the client — e.g., 'Use product photo URL #2', 'pair with customer testimonial in caption', 'good for cold audience cohort A'"
+}
+
+Output the JSON array and nothing else.`);
+
+  // -------------------- PROMPT 3: UGC CREATOR BRIEFS --------------------
+  const ugcBriefsPrompt = fill(`You are a UGC creative director for GriffinCreative. Generate exactly ${counts.ugc} UGC creator briefs / scripts for:
+
+Brand: {{business_name}}
+Category: {{business_type}}
+Audience: {{target_audience}}
+Primary offer: {{ad_goals}}
+Active promos: {{promos}}
+Voice: {{brand_voice}}
+Product photo URLs the client provided: {{product_image_urls}}
+Notes: {{notes}}
+
+These briefs go to either (a) the brand's in-house creators OR (b) paid UGC actors on Billo/JoinBrands/Trend.io. Each brief must be COMPLETE enough that a creator who's never used the product can film it in 30-60 minutes.
+
+RULES:
+- Spread briefs across angles: testimonial / problem-solution / day-in-the-life / unboxing / demo / before-after / "things I wish I knew" / comparison / "you're using it wrong" / founder POV.
+- Each brief has a HOOK that opens with a 3-second pattern-interrupt. The hook MUST grab attention or the ad dies.
+- All scripts are first-person, conversational, native to TikTok/Reels. NO corporate language.
+- Specify b-roll shots the creator should capture (3-5 shots per script).
+- Each script is 30-60 seconds total length.
+
+STRUCTURE (format as plain text, NOT JSON):
+
+# UGC CREATOR BRIEFS — ${counts.ugc} SCRIPTS
+
+## SCRIPT 1: [angle name]
+**Hook (first 3 seconds):** [the literal first line they say into the camera + recommended facial expression / energy]
+**Setup (3-10 seconds):** [the situation/context they establish]
+**Problem (10-25 seconds):** [the relatable pain point]
+**Product reveal / solution (25-40 seconds):** [how the product fits in — must be authentic, not salesy]
+**Result / payoff (40-55 seconds):** [the outcome / how it changed things for them]
+**CTA (last 5 seconds):** [what to say to drive the action — "link in bio", "use code XYZ", etc.]
+**B-roll shots needed:**
+  - Shot 1: [description]
+  - Shot 2: [description]
+  - Shot 3: [description]
+**Filming notes:** [lighting/setting recommendations — e.g., "natural window light", "kitchen counter", "morning routine setting"]
+
+[repeat for each script]
+
+End with a 1-paragraph note on how to brief paid UGC actors if the client doesn't have in-house creators (mention Billo, JoinBrands, or Trend.io as starting marketplaces).
+
+Output only the formatted content, no preamble.`);
+
+  // -------------------- PROMPT 4: EMAIL FLOWS --------------------
+  const emailFlowsPrompt = fill(`You are an elite DTC email copywriter for GriffinCreative (think Klaviyo Master Class instructor energy). Write exactly ${counts.emails} complete email flows for:
+
+Brand: {{business_name}}
+Category: {{business_type}}
+Audience: {{target_audience}}
+Primary offer / hook: {{ad_goals}}
+Voice: {{brand_voice}}
+Notes: {{notes}}
+
+The flows to write (write ALL of them, in this order):
+{{email_flows_list}}
+
+RULES:
+- Each email has: trigger condition, send delay from trigger, subject line, preview text, full body copy with merge tags ({{ first_name|default:"there" }}), CTA button text + URL placeholder.
+- Plan-specific bonus: ${plan === 'dominate' ? 'For EVERY email, provide TWO A/B subject line variants.' : 'Provide ONE strong subject line per email.'}
+- Voice is conversational, founder-energy, NOT corporate. Short paragraphs. Punchy lines.
+- Each flow should drive a clear outcome (subscribe → first purchase, cart abandoner → checkout, etc.).
+
+STRUCTURE (format as plain text):
+
+# EMAIL FLOWS
+
+## FLOW 1: [flow name]
+**Trigger:** [Klaviyo trigger description]
+**Goal:** [what success looks like]
+
+### Email 1 of N — [purpose]
+- Send timing: [e.g., "Immediately on trigger" or "+24 hours after Email 1"]
+- Subject line${plan === 'dominate' ? ' (A)' : ''}: [subject]
+${plan === 'dominate' ? '- Subject line (B): [alternative subject for A/B test]\n' : ''}- Preview text: [preview]
+- Body:
+  [full email body, with merge tags, paragraph breaks]
+- CTA button: [button text]
+- CTA URL: [placeholder like SHOPIFY_PRODUCT_URL or CART_URL]
+
+[repeat for each email in the flow, then move to next flow]
+
+Output only the formatted content, no preamble.`);
+
+  // -------------------- PROMPT 5: SOCIAL CONTENT CALENDAR --------------------
+  const calendarPrompt = fill(`You are a DTC social media strategist for GriffinCreative. Generate a ${plan === 'dominate' ? '4-week (weekly calendars)' : '30-day'} organic social content calendar for:
+
+Brand: {{business_name}}
+Category: {{business_type}}
+Audience: {{target_audience}}
+Primary offer: {{ad_goals}}
+Voice: {{brand_voice}}
+Active promos: {{promos}}
+Notes: {{notes}}
+
+This is for ORGANIC social — paid creative is in the Hooks/Static Ads/UGC docs.
+
+RULES:
+- 1 post per day on Instagram, 3-4 short-form videos per week on TikTok, optional 1 LinkedIn post/week if founder-led.
+- Mix content types: educational, entertaining, behind-the-scenes, social proof, promotional, founder POV, customer spotlight, product education.
+- Each day specifies: day number, primary platform, content type, hook/topic, full caption (ready to copy/paste), 10-15 hashtags, best time to post.
+- Captions should feel native, not corporate. Use line breaks for readability.
+
+STRUCTURE (format as plain text by week):
+
+# 30-DAY CONTENT CALENDAR — ${plan === 'dominate' ? 'WEEK-BY-WEEK' : 'DAILY'}
+
+## WEEK 1
+### Day 1 — [Platform] — [Content type]
+**Hook/topic:** [the angle]
+**Caption:**
+[full caption with line breaks and emoji where appropriate]
+**Hashtags:** #tag1 #tag2 #tag3 ... (10-15 total)
+**Best time:** [e.g., "Tue 11am EST"]
+
+### Day 2 — [Platform] — [Content type]
+[same structure]
+
+[continue for all days through Day 30]
+
+Output only the formatted calendar, no preamble.`);
+
+  // -------------------- PROMPT 6: 30-DAY ACTION PLAN --------------------
+  const actionPlanPrompt = fill(`You are a DTC growth coach for GriffinCreative. Write a 30-day deployment plan for the brand to actually USE the creative we just generated.
+
+Brand context:
+- Brand: {{business_name}}
+- Category: {{business_type}}
 - Audience: {{target_audience}}
-- Goal: {{ad_goals}}
+- Primary goal: {{ad_goals}}
+- Monthly ad spend: {{monthly_ad_spend}}
 - Plan: {{plan}}
 
-Write a 30-day Quick Start Action Plan organized into 4 weeks. Format as plain text with clear week-by-week sections.
+Write a 30-day plan structured into 4 weeks. Conversational, direct, NOT corporate. Talk like a smart growth marketer helping a founder, not a strategy deck.
 
-CRITICAL RULES:
-- Be conversational and direct. Talk like a smart friend helping them, not a corporate document.
-- Each week has ONE main focus + 2-3 specific tasks. Don't overwhelm.
-- Include LINKS to the tools they'll need (Facebook Ads Manager: https://business.facebook.com, Google Ads: https://ads.google.com, Mailchimp: https://mailchimp.com, Buffer: https://buffer.com, Loom: https://loom.com)
-- Recommend STARTING BUDGETS: Facebook ads start at $15-30/day, Google search ads start at $20-50/day for service businesses.
-- Set realistic expectations: Week 1 = setup + first clicks, Week 3 = first leads expected, Week 4 = optimization.
-- Reassure them: "Reply to your delivery email any time with questions."
+CRITICAL:
+- Reference specific tools by name: Meta Ads Manager (https://adsmanager.facebook.com), TikTok Ads Manager (https://ads.tiktok.com), Klaviyo (https://klaviyo.com), Shopify, Billo (https://billo.app), JoinBrands (https://joinbrands.com).
+- Reference the actual deliverables they just received: Hooks doc, Static Ads doc, UGC Briefs doc, Email Flows doc, Content Calendar.
+- Set realistic expectations per week.
+- Include UGC fulfillment cost guidance ($30-100/video on marketplaces) if they don't have in-house creators.
 
 STRUCTURE (use this exact structure):
 
-# YOUR 30-DAY QUICK START ACTION PLAN
+# YOUR 30-DAY DTC DEPLOYMENT PLAN
 
-You just received your full ad creative package — congrats. This plan tells you exactly what to do with it, week by week. You do NOT need to do everything at once. Pace yourself, hit each week's goals, and you'll see results.
+You just got a month of fresh creative — hooks, static ads, UGC briefs, email flows, and a content calendar. This plan tells you exactly how to deploy it without burning out or making rookie testing mistakes.
 
-## WEEK 1: GET YOUR FACEBOOK AD LIVE
-**Goal:** First ad running by end of the week.
-**Time needed:** 60-90 minutes total this week.
-- Task 1: ... (specific to their industry — explain setting up Facebook Business Manager and what to put where)
-- Task 2: ...
-- Task 3: ...
-**What to expect:** You'll see clicks within hours of launching. Don't worry about leads yet — that comes Week 3.
+## WEEK 1: GET ADS LIVE
+**Focus:** First 5-10 ads testing on Meta + TikTok by end of week.
+**Time needed:** 3-4 hours.
+- Task 1: [specific Meta ABO setup with budget per concept based on {{monthly_ad_spend}}]
+- Task 2: [pick 5 hooks + pair with 5 statics, launch in 1 campaign]
+- Task 3: [post UGC briefs on Billo/JoinBrands if no in-house creators — give specific budget]
+**What to expect:** Hook rates within 48hr. Don't make optimization decisions yet — wait 72hr for statistical signal.
 
-## WEEK 2: ADD GOOGLE SEARCH ADS + EMAIL
-**Goal:** Capture high-intent search traffic + start nurturing leads.
-**Time needed:** 90 minutes total this week.
-- Task 1: Google Ads setup and copy paste (specific keywords for their industry)
-- Task 2: Mailchimp signup and load Email Sequence #1
-- Task 3: ...
-**What to expect:** Search ads convert higher than social. Email nurture takes 7-10 days to start producing.
+## WEEK 2: EMAIL FLOWS + UGC LIVE
+**Focus:** Activate Welcome flow + first UGC creatives.
+**Time needed:** 3 hours.
+- Task 1: Load Email Flow #1 (Welcome) into Klaviyo, connect to default signup
+- Task 2: First UGC videos back from creators — launch as 3 new ad sets
+- Task 3: First kill decisions on Week 1 ads — anything with hook rate <25% or CTR <0.5%
+**What to expect:** First email-attributed revenue + first UGC ad performance data.
 
-## WEEK 3: SOCIAL MEDIA + REVIEW WHAT'S WORKING
-**Goal:** Get social presence going + check ad performance.
-**Time needed:** 60 minutes this week.
-- Task 1: Start posting from your content calendar (recommend Buffer for scheduling)
-- Task 2: Review Facebook ads — kill any with cost-per-click over $X, scale winners
-- Task 3: ...
-**What to expect:** First leads should be coming in by now. If not, we'll troubleshoot.
+## WEEK 3: SCALE WINNERS, ADD ABANDONED CART
+**Focus:** Double down on what's working.
+**Time needed:** 2-3 hours.
+- Task 1: Increase budget 50% on top-performing ad set (let it cook 72hr before judging again)
+- Task 2: ${plan === 'launch' ? 'If your Welcome flow is converting, add the abandoned cart trigger using the Welcome flow logic as a template.' : 'Load Email Flow #2 (Abandoned Cart) into Klaviyo.'}
+- Task 3: Refresh ad rotation — pull in 5 more hooks from your batch
+**What to expect:** Blended CAC starts trending down. Email starts contributing 15-20% of revenue.
 
-## WEEK 4: OPTIMIZE + PREP FOR MONTH 2
-**Goal:** Double down on winners, kill losers, request next batch.
-**Time needed:** 45 minutes this week.
-- Task 1: Pause the worst-performing ads
-- Task 2: Increase budget on the best ad by 50%
-- Task 3: Reply to your delivery email — let us know what to focus on next month
+## WEEK 4: OPTIMIZE + PREP MONTH 2
+**Focus:** Lock in what's working, plan next batch.
+**Time needed:** 2 hours.
+- Task 1: Audit which hooks / static angles drove best ROAS
+- Task 2: Reply to your delivery email with results — we'll tune next batch to double down
+- Task 3: ${plan === 'dominate' || plan === 'scale' ? 'Schedule your monthly strategy call to debrief month 1' : 'Decide if you want to upgrade to Scale tier for more creative volume'}
+**What to expect:** You'll know exactly which 2-3 angles to scale into month 2.
+
+## TIMELINE EXPECTATIONS
+- Days 1-7: Setup + first hook rate data
+- Days 8-14: First conversion data + UGC creator turnaround
+- Days 15-21: Email revenue kicks in, ad scaling decisions
+- Days 22-30: Locked-in winners + planning month 2 batch
+
+## REALISTIC METRICS YOU SHOULD SEE
+- Hook rate (3-sec view %): 30-50% on winners, kill anything under 25%
+- CTR: 1-2% on Meta cold, 1.5-3% on TikTok cold
+- ROAS: 1.5-2.5x in month 1 is normal; 3x+ usually happens month 2 once winners are scaled
 
 ## QUESTIONS?
-Reply to your delivery email at any time. We respond within 24 hours.
-
-## REALISTIC TIMELINE
-- Days 1-7: Setup work, first ad clicks
-- Days 8-14: More clicks, first email opens
-- Days 15-21: First inbound leads (typically)
-- Days 22-30: Optimization, scale what works
-
-This is real, not magic. Stick with the plan and you'll see results.
+Reply to your delivery email anytime. We respond within 24 hours and tune next month's batch to whatever you tell us is working.
 
 ---
 
-Make every task specific to {{business_type}} (e.g., a roofer's Facebook targeting differs from an insurance agent's). Reference their actual goal {{ad_goals}}. Keep tone supportive, never condescending. Output ONLY the action plan — no preamble.`);
+Output only the action plan content, no preamble.`);
 
-  const visualPrompt = fill(`You are a visual ad creative director for GriffinCreative. Generate exactly ${visualCount} static image ad concepts for:
+  // -------------------- PROMPT 7: LANDING PAGE COPY (Scale + Dominate only) --------------------
+  const landingPagePrompt = fill(`You are a high-converting DTC landing page copywriter for GriffinCreative. Write exactly ${counts.landing} complete landing page copy variations for:
 
-Business: {{business_name}}
-Industry: {{business_type}}
+Brand: {{business_name}}
+Category: {{business_type}}
 Audience: {{target_audience}}
-Primary offer / goal: {{ad_goals}}
-Active promos (use these — vary across the ${visualCount} ads): {{promos}}
-Tone: {{brand_voice}}
+Primary offer: {{ad_goals}}
+Voice: {{brand_voice}}
+Shopify: {{shopify_url}}
 Notes: {{notes}}
-Phone to display on ads: {{phone_display}}
-Website to display on ads: {{website_display}}
-Booking link: {{booking_link}}
-Plan: {{plan}}
 
-Rules:
-- Each of the ${visualCount} concepts should attack a DIFFERENT angle: a promo, a problem/solution, a testimonial-style, a benefit-led, a "limited time" urgency, a social proof, a "what to expect," a before/after style framing, etc. Spread across the active promos listed above.
-- Every image must include the business name AND either the phone number OR the website (or both) as a small text element near the bottom of the image. Treat it like a contact footer.
-- Text on images should be SHORT and rendered cleanly. nano-banana renders text well but keep headlines under 8 words.
+RULES:
+- Each variation attacks a different angle: pain-point-led, transformation-led, social-proof-led, founder-story-led, urgency/scarcity-led, comparison-led, ingredient/quality-led, etc.
+- Each variation includes: hero headline, hero subhead, hero CTA button, 3 value-prop blocks (each with headline + 1-line description), social proof section (review snippets / press / partner logos placeholder), FAQ (5 questions + answers), urgency close + final CTA.
+- Tone matches brand voice. Specific > generic. NO corporate fluff.
 
-Return ONLY a valid JSON array (no prose, no markdown fences) with exactly ${visualCount} objects. Each object must have these exact keys:
-{
-  "concept": "short name of the concept (2-5 words)",
-  "headline": "the main on-image headline (max 8 words)",
-  "subheadline": "supporting line (max 12 words)",
-  "cta": "call to action button text (max 5 words)",
-  "image_prompt": "a single ready-to-paste prompt for nano-banana. Must describe: scene/subject, composition, lighting, mood, color palette, the exact headline text to render on the image, and instructions to render a small contact footer with the business name and phone/website. Aspect ratio 1:1 or 4:5. Photorealistic or stylized as fits the tone."
-}
+STRUCTURE (format as plain text):
 
-Output the JSON array and nothing else.`);
+# LANDING PAGE COPY — ${counts.landing} VARIATIONS
 
-  const videoPrompt = fill(`You are a short-form video ad director for GriffinCreative. Generate exactly ${videoCount} hook-style video ad concepts (10 seconds each) for:
+## VARIATION 1: [angle name]
+**Angle:** [1 sentence explaining the framing]
 
-Business: {{business_name}}
-Industry: {{business_type}}
-Audience: {{target_audience}}
-Primary offer / goal: {{ad_goals}}
-Active promos (vary across the ${videoCount} videos): {{promos}}
-Tone: {{brand_voice}}
-Notes: {{notes}}
-Phone to display: {{phone_display}}
-Website to display: {{website_display}}
-Plan: {{plan}}
+### HERO
+- Headline: [hero headline]
+- Subhead: [supporting subhead]
+- CTA button: [button text]
 
-Rules:
-- Each of the ${videoCount} concepts should be a different hook angle — pattern interrupt, problem reveal, transformation, lifestyle moment, behind-the-scenes, "POV you just walked in," etc. Spread across the active promos.
-- The hook_text field holds the caption that will be overlaid in post-production by a separate video templating service. HARD LIMIT: hook_text must be 6 words or fewer AND 35 characters or fewer (including spaces). Anything longer overflows the on-screen text box and breaks the ad layout. Punchy, scroll-stopping copy only — good examples: "Roof leak? Read this.", "Stop overpaying for repairs", "Don't wait for storm damage". The video_prompt itself must produce a 100% clean visual with ZERO text rendered in-frame — no signs, no labels, no captions, no business names, no end-cards, no logos, no written words of any kind. AI video models render text poorly, so all text is added in post.
+### VALUE PROPS (3 cards)
+1. **[Card 1 headline]** — [1-line description]
+2. **[Card 2 headline]** — [1-line description]
+3. **[Card 3 headline]** — [1-line description]
 
-Return ONLY a valid JSON array (no prose, no markdown fences) with exactly ${videoCount} objects. Each object must have these exact keys:
-{
-  "concept": "short name of the hook concept (2-5 words)",
-  "hook_text": "the on-screen hook caption to overlay in post — MAX 6 words AND MAX 35 characters total including spaces (HARD LIMIT — longer text breaks the ad layout)",
-  "video_prompt": "a single ready-to-paste prompt for kling-video. Describe ONLY the visual: subject, action, camera movement, setting, lighting, mood, pacing, color palette. DO NOT mention any text, captions, signs, labels, logos, written words, business names, phone numbers, or end-cards — the video must be 100% text-free clean visuals. Vertical 9:16 aspect ratio. 10 seconds. Single-shot, scroll-stopping."
-}
+### SOCIAL PROOF
+[2-3 sentence framing + placeholder for review snippets + partner/press logos]
 
-Output the JSON array and nothing else.`);
+### FAQ (5 questions)
+**Q1: [question]**
+A: [answer]
 
-  // Smart default: pick voice (Charlie vs Sarah) based on industry keywords.
-  // Scenario C's Router uses this to choose which Creatomate template to render with.
-  const voice_name = pickVoice(business_type);
+[repeat for Q2-Q5]
+
+### URGENCY CLOSE + FINAL CTA
+- Closing headline: [final pitch headline]
+- Closing body: [2-3 sentence final pitch]
+- CTA button: [button text]
+
+[repeat full structure for each variation]
+
+Output only the formatted content, no preamble.`);
+
+  // For Make.com Scenario C compatibility — DTC clients use "DTC" marker.
+  // Scenario C should be PAUSED for any voice_name === "DTC" to skip AI voiceover.
+  const voice_name = 'DTC';
 
   try {
-    // Speed optimization: Haiku for structured JSON outputs (much faster),
-    // Sonnet only for the long-form creative writing.
-    // Right-sized max_tokens per task to avoid worst-case generation time.
     const prompts = [
-      { key: 'action_plan',      text: actionPlanPrompt, parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 3000 },
-      { key: 'ad_copy',          text: adCopyPrompt,     parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 4000 },
-      { key: 'email_sequences',  text: emailPrompt,      parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 3000 },
-      { key: 'content_calendar', text: calendarPrompt,   parseJson: false, model: 'claude-haiku-4-5-20251001', max_tokens: 6000 },
+      { key: 'action_plan',      text: actionPlanPrompt,  parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 3500 },
+      { key: 'ad_hooks',         text: adHooksPrompt,     parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 5000 },
+      { key: 'static_ads',       text: staticAdsPrompt,   parseJson: true,  model: 'claude-haiku-4-5-20251001', max_tokens: 6000 },
+      { key: 'ugc_briefs',       text: ugcBriefsPrompt,   parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 5000 },
+      { key: 'email_flows',      text: emailFlowsPrompt,  parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 5000 },
+      { key: 'content_calendar', text: calendarPrompt,    parseJson: false, model: 'claude-haiku-4-5-20251001', max_tokens: 7000 },
     ];
 
     if (plan === 'scale' || plan === 'dominate') {
-      prompts.push({ key: 'visual_prompts', text: visualPrompt, parseJson: true, model: 'claude-haiku-4-5-20251001', max_tokens: 4000 });
-      prompts.push({ key: 'video_prompts',  text: videoPrompt,  parseJson: true, model: 'claude-haiku-4-5-20251001', max_tokens: 2500 });
+      prompts.push({ key: 'landing_page_copy', text: landingPagePrompt, parseJson: false, model: 'claude-sonnet-4-5', max_tokens: 4000 });
     }
 
     const results = await Promise.all(
@@ -284,7 +651,6 @@ Output the JSON array and nothing else.`);
       if (parseJson) {
         deliverables[key] = parseClaudeJson(content);
       } else {
-        // Prepend usage guide for client-friendly docs (ad_copy, email_sequences, content_calendar)
         const usageGuide = USAGE_GUIDES[key] || '';
         deliverables[key] = usageGuide + content;
       }

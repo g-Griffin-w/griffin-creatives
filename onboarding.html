@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Client Onboarding — GriffenCreative</title>
+<title>Client Onboarding — GriffinCreative</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,7 +27,7 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; padding: 20px 40p
 .sec-tag { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--orange); letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 16px; }
 .page-header h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(52px, 8vw, 96px); line-height: 0.95; letter-spacing: 0.02em; margin-bottom: 20px; }
 .page-header h1 .accent { color: var(--orange); }
-.page-header p { font-size: 17px; color: var(--gray); font-weight: 300; line-height: 1.7; max-width: 540px; }
+.page-header p { font-size: 17px; color: var(--gray); font-weight: 300; line-height: 1.7; max-width: 580px; }
 
 /* FORM WRAPPER */
 .form-section { padding: 0 40px 120px; }
@@ -79,11 +79,15 @@ select {
 }
 select option { background: #111; color: var(--white); }
 
-textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
 
 /* DIVIDER */
 .form-divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 .form-section-label { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.06em; color: var(--gray); margin-bottom: 28px; }
+
+/* INSTRUCTION BLOCK (for upload sections) */
+.upload-note { background: #0d0d0d; border-left: 3px solid var(--orange); padding: 16px 20px; margin-bottom: 16px; font-size: 13px; color: var(--gray); font-weight: 300; line-height: 1.7; }
+.upload-note strong { color: var(--white); font-weight: 500; }
 
 /* SUBMIT */
 .submit-wrap { margin-top: 40px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
@@ -119,7 +123,7 @@ footer p { font-size: 13px; color: #2e2e2e; }
 <body>
 
 <nav>
-  <a href="index.html" class="logo">GRIFFEN<span>CREATIVE</span></a>
+  <a href="index.html" class="logo">GRIFFIN<span>CREATIVE</span></a>
   <div class="nav-links">
     <a href="index.html#services">Services</a>
     <a href="index.html#pricing">Pricing</a>
@@ -131,8 +135,8 @@ footer p { font-size: 13px; color: #2e2e2e; }
 <div class="page-header">
   <div class="page-header-inner">
     <span class="sec-tag">// Client Onboarding</span>
-    <h1>LET'S BUILD<br>YOUR <span class="accent">BRAND.</span></h1>
-    <p>Fill out this quick brief so we can hit the ground running. The more detail you give us, the better your first batch of ads will be.</p>
+    <h1>LET'S BUILD<br>YOUR <span class="accent">CREATIVE.</span></h1>
+    <p>Quick brief — about 5 minutes. The more specific you are about your brand, product, and what's currently working, the sharper your first month's creative will be. Your first batch lands in your Google Drive within 48 hours of submission.</p>
   </div>
 </div>
 
@@ -143,23 +147,23 @@ footer p { font-size: 13px; color: #2e2e2e; }
     <div id="form-wrap" class="form-card">
       <form id="onboarding-form" novalidate>
 
-        <div class="form-section-label">Your Info</div>
+        <div class="form-section-label">Your Brand</div>
 
         <div class="field-row">
           <div class="field-group">
-            <label class="field-label" for="business-name">Business Name</label>
-            <input type="text" id="business-name" name="business-name" placeholder="Apex Roofing Co." required>
+            <label class="field-label" for="business-name">Brand Name</label>
+            <input type="text" id="business-name" name="business-name" placeholder="e.g. Glow Skincare Co." required>
           </div>
           <div class="field-group">
             <label class="field-label" for="your-name">Your Name</label>
-            <input type="text" id="your-name" name="your-name" placeholder="Jane Smith" required>
+            <input type="text" id="your-name" name="your-name" placeholder="e.g. Sarah Chen" required>
           </div>
         </div>
 
         <div class="field-row">
           <div class="field-group">
             <label class="field-label" for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="jane@yourbusiness.com" required>
+            <input type="email" id="email" name="email" placeholder="you@yourbrand.com" required>
           </div>
           <div class="field-group">
             <label class="field-label" for="phone">Phone Number</label>
@@ -169,47 +173,105 @@ footer p { font-size: 13px; color: #2e2e2e; }
 
         <div class="field-row">
           <div class="field-group">
-            <label class="field-label" for="location">Business Location</label>
-            <input type="text" id="location" name="location" placeholder="Phoenix, AZ" required>
+            <label class="field-label" for="shopify-url">Shopify URL</label>
+            <input type="url" id="shopify-url" name="shopify-url" placeholder="https://yourbrand.com" required>
+            <p class="field-hint">Your main storefront — Shopify, WooCommerce, Squarespace Commerce, etc.</p>
           </div>
           <div class="field-group">
-            <label class="field-label" for="industry">Industry / Niche</label>
-            <input type="text" id="industry" name="industry" placeholder="Roofing, Med Spa, Real Estate..." required>
+            <label class="field-label" for="industry">Brand Category</label>
+            <select id="industry" name="industry" required>
+              <option value="" disabled selected>Select your category...</option>
+              <option value="Beauty / Skincare">Beauty / Skincare</option>
+              <option value="Supplements / Wellness">Supplements / Wellness</option>
+              <option value="Food / Beverage">Food / Beverage</option>
+              <option value="Apparel / Fashion">Apparel / Fashion</option>
+              <option value="Home Goods / Lifestyle">Home Goods / Lifestyle</option>
+              <option value="Pet">Pet</option>
+              <option value="Consumer Tech">Consumer Tech / Electronics</option>
+              <option value="Baby / Kids">Baby / Kids</option>
+              <option value="Outdoor / Sports">Outdoor / Sports</option>
+              <option value="Other DTC">Other DTC E-commerce</option>
+            </select>
           </div>
         </div>
 
         <hr class="form-divider">
-        <div class="form-section-label">Your Brand</div>
+        <div class="form-section-label">Your Product + Customer</div>
 
         <div class="field-group">
-          <label class="field-label" for="target-audience">Target Audience</label>
-          <input type="text" id="target-audience" name="target-audience" placeholder="Homeowners 35–60, Phoenix metro area, household income $80k+" required>
-          <p class="field-hint">Be as specific as possible — age range, location, income, pain points.</p>
+          <label class="field-label" for="offer">Hero Product / Primary Offer</label>
+          <input type="text" id="offer" name="offer" placeholder="e.g. Vitamin C serum subscription, 20% off first order + free shipping" required>
+          <p class="field-hint">The main product or offer you want lead creative to push.</p>
         </div>
 
         <div class="field-group">
-          <label class="field-label" for="offer">Primary Offer / Hook</label>
-          <input type="text" id="offer" name="offer" placeholder="Free roof inspection + 10% off first repair">
-          <p class="field-hint">The main thing you want to lead with — what every visitor should see first.</p>
+          <label class="field-label" for="target-audience">Target Customer</label>
+          <textarea id="target-audience" name="target-audience" placeholder="e.g. Women 28-45 dealing with hormonal acne, willing to spend $30-60 on premium skincare, follow beauty content on TikTok and IG, frustrated with drugstore products that don't work" required></textarea>
+          <p class="field-hint">Describe your ideal customer — age, gender, life situation, pain points, where they hang out online. Specific beats generic by 10x.</p>
         </div>
 
         <div class="field-group">
-          <label class="field-label" for="promos">Additional Promos &amp; Deals</label>
-          <textarea id="promos" name="promos" placeholder="Free gutter cleaning with any roof repair&#10;Refer a friend, get $100&#10;Senior discount: 15% off&#10;Storm damage inspection — free quote in 24hrs"></textarea>
-          <p class="field-hint">List every other deal, discount, or angle you want featured across your ads. One per line. The more we have, the more variety in your creative.</p>
+          <label class="field-label" for="promos">Active Promos &amp; Angles</label>
+          <textarea id="promos" name="promos" placeholder="20% off first order&#10;Free shipping over $50&#10;Subscribe &amp; save 15%&#10;Limited edition launch&#10;Buy 2 get 1 free bundles"></textarea>
+          <p class="field-hint">Every active promo, deal, bundle, or hook you want featured. One per line. More variety = more creative angles for testing.</p>
         </div>
 
         <div class="field-group">
-          <label class="field-label" for="brand-tone">Brand Tone</label>
+          <label class="field-label" for="brand-tone">Brand Voice</label>
           <select id="brand-tone" name="brand-tone" required>
-            <option value="" disabled selected>Select a tone...</option>
-            <option value="Luxurious">Luxurious</option>
-            <option value="Warm & Welcoming">Warm &amp; Welcoming</option>
-            <option value="Bold & Direct">Bold &amp; Direct</option>
-            <option value="Playful">Playful</option>
-            <option value="Professional">Professional</option>
+            <option value="" disabled selected>Pick your closest match...</option>
+            <option value="Luxurious & Premium">Luxurious &amp; Premium (think Augustinus Bader, Vacation)</option>
+            <option value="Warm & Approachable">Warm &amp; Approachable (think Honest Co., Pattern Brands)</option>
+            <option value="Bold & Direct">Bold &amp; Direct (think Liquid Death, Recess)</option>
+            <option value="Playful & Cheeky">Playful &amp; Cheeky (think Olipop, Crocs)</option>
+            <option value="Founder-Led & Authentic">Founder-Led &amp; Authentic (think founder posting raw videos)</option>
+            <option value="Clinical & Science-Backed">Clinical &amp; Science-Backed (think Skinceuticals, AG1)</option>
           </select>
-          <p class="field-hint">How should your brand sound? We'll match your copy to this voice.</p>
+          <p class="field-hint">All ad copy + scripts will match this voice.</p>
+        </div>
+
+        <hr class="form-divider">
+        <div class="form-section-label">Marketing Context</div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="monthly-ad-spend">Current Monthly Ad Spend</label>
+            <select id="monthly-ad-spend" name="monthly-ad-spend">
+              <option value="" disabled selected>Pick a range...</option>
+              <option value="Under $1K/mo">Under $1K/mo</option>
+              <option value="$1K–5K/mo">$1K–5K/mo</option>
+              <option value="$5K–15K/mo">$5K–15K/mo</option>
+              <option value="$15K–50K/mo">$15K–50K/mo</option>
+              <option value="$50K–200K/mo">$50K–200K/mo</option>
+              <option value="$200K+/mo">$200K+/mo</option>
+              <option value="Not running paid yet">Not running paid yet</option>
+            </select>
+            <p class="field-hint">Helps us pace our creative testing recommendations.</p>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="top-performing-ad-url">Top-Performing Ad URL</label>
+            <input type="url" id="top-performing-ad-url" name="top-performing-ad-url" placeholder="Link to your best-performing ad or Meta Ad Library link">
+            <p class="field-hint">Optional but powerful — share your winner so we can match its angle in next batch.</p>
+          </div>
+        </div>
+
+        <hr class="form-divider">
+        <div class="form-section-label">Brand Assets</div>
+
+        <div class="upload-note">
+          <strong>How to share assets:</strong> Upload your product photos and brand assets to a Google Drive folder, set sharing to "Anyone with the link can view," and paste the folder link below. (Dropbox, OneDrive, or any public link also works.)
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="product-image-urls">Product Photo URLs</label>
+          <textarea id="product-image-urls" name="product-image-urls" placeholder="https://drive.google.com/drive/folders/your-product-photos-folder&#10;or&#10;https://dropbox.com/sh/your-folder-link"></textarea>
+          <p class="field-hint">Required for high-quality static product ads. Upload 3–10 product photos minimum (hero shots + lifestyle if you have them). We'll use these as the visual base for your ads.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="brand-asset-urls">Brand Assets URL</label>
+          <textarea id="brand-asset-urls" name="brand-asset-urls" placeholder="https://drive.google.com/drive/folders/your-brand-assets&#10;or paste hex colors directly: #FF4D00, #080808, #F0ECE3&#10;Logo: https://yourbrand.com/logo.png"></textarea>
+          <p class="field-hint">Logo files, brand color hex codes, fonts, brand guidelines if you have them. The more we have, the more on-brand your creative.</p>
         </div>
 
         <hr class="form-divider">
@@ -217,32 +279,27 @@ footer p { font-size: 13px; color: #2e2e2e; }
 
         <div class="field-group">
           <label class="field-label" for="social-handles">Social Media Handles</label>
-          <input type="text" id="social-handles" name="social-handles" placeholder="@apexroofingco on IG, Facebook: /apexroofingco">
-          <p class="field-hint">List any platforms you're active on — Facebook, Instagram, TikTok, etc.</p>
+          <input type="text" id="social-handles" name="social-handles" placeholder="@glowskincareco on IG &amp; TikTok, Facebook: /glowskincareco">
+          <p class="field-hint">Lets us match your existing voice + see what's working organically.</p>
         </div>
 
         <div class="field-group">
-          <label class="field-label" for="website">Website URL</label>
-          <input type="url" id="website" name="website" placeholder="https://yourbusiness.com">
+          <label class="field-label" for="website-display">Landing Page URL for Ads (optional)</label>
+          <input type="url" id="website-display" name="website-display" placeholder="https://yourbrand.com/serum or https://yourbrand.com/quiz">
+          <p class="field-hint">Leave blank to use your main Shopify URL. Override if you have a specific landing page for ads.</p>
         </div>
 
         <div class="field-row">
           <div class="field-group">
             <label class="field-label" for="phone-display">Phone to Display on Ads (optional)</label>
             <input type="tel" id="phone-display" name="phone-display" placeholder="(555) 000-0000">
-            <p class="field-hint">Leave blank to use your contact phone above. Override here if you use a tracking number.</p>
+            <p class="field-hint">Most DTC brands skip this. Add only if you run phone-driven offers.</p>
           </div>
           <div class="field-group">
-            <label class="field-label" for="booking-link">Booking / Scheduling Link</label>
-            <input type="url" id="booking-link" name="booking-link" placeholder="https://calendly.com/yourbiz/15min">
-            <p class="field-hint">Calendly, Square Appointments, Acuity, etc. Used in "Book Now" CTAs.</p>
+            <label class="field-label" for="booking-link">Calendly / Scheduling Link (optional)</label>
+            <input type="url" id="booking-link" name="booking-link" placeholder="https://calendly.com/yourbiz/intro">
+            <p class="field-hint">Only relevant for consult-driven brands. Most DTC brands leave blank.</p>
           </div>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label" for="website-display">Landing Page URL for Ads (optional)</label>
-          <input type="url" id="website-display" name="website-display" placeholder="https://yourbusiness.com/free-quote">
-          <p class="field-hint">Leave blank to use your main website above. Override here if you want ads pointed to a specific landing page.</p>
         </div>
 
         <hr class="form-divider">
@@ -250,12 +307,12 @@ footer p { font-size: 13px; color: #2e2e2e; }
 
         <div class="field-group">
           <label class="field-label" for="notes">Additional Notes</label>
-          <textarea id="notes" name="notes" placeholder="Mention any competitors you admire, things you want to avoid, seasonal promotions, past ads that worked or flopped — anything that helps us understand your business."></textarea>
+          <textarea id="notes" name="notes" placeholder="Competitors you admire, things you want to avoid, upcoming launches, recent product wins or flops, seasonal pushes, anything else that helps us understand your brand."></textarea>
         </div>
 
         <div class="submit-wrap">
           <button type="submit" class="btn-submit">Submit Brief →</button>
-          <span class="submit-note">We'll be in touch within 24 hours.</span>
+          <span class="submit-note">Your first creative pack lands in your Google Drive within 48 hours.</span>
         </div>
 
       </form>
@@ -269,7 +326,7 @@ footer p { font-size: 13px; color: #2e2e2e; }
         </svg>
       </div>
       <h2>BRIEF <span>RECEIVED.</span></h2>
-      <p>We've got everything we need to get started. Expect to hear from us within 24 hours — your first batch of ads will be ready in 48.</p>
+      <p>We're on it. Your first creative pack — static product ads, UGC scripts, hook variations, email flows, and a 30-day deployment plan — drops into your Google Drive within 48 hours. Check your inbox.</p>
       <a href="index.html">← Back to Home</a>
     </div>
 
@@ -277,8 +334,8 @@ footer p { font-size: 13px; color: #2e2e2e; }
 </div>
 
 <footer>
-  <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;"><a href="index.html" style="color:var(--white);text-decoration:none;">GRIFFEN<span style="color:var(--orange);">CREATIVE</span></a></div>
-  <p>© 2026 GriffenCreative. All rights reserved.</p>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;"><a href="index.html" style="color:var(--white);text-decoration:none;">GRIFFIN<span style="color:var(--orange);">CREATIVE</span></a></div>
+  <p>© 2026 GriffinCreative. All rights reserved.</p>
   <p>Built with AI. Powered by strategy.</p>
 </footer>
 
@@ -299,22 +356,27 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
   e.preventDefault();
   if (!cid) return;
   const f = e.target;
-  const locationNote = f['location'].value ? '\n\nLocation: ' + f['location'].value : '';
   const { error } = await db.from('griffin_clients').update({
     full_name: f['your-name'].value,
     phone: f['phone'].value,
     business_name: f['business-name'].value,
-    website: f['website'].value,
+    website: f['shopify-url'].value,
     business_type: f['industry'].value,
     target_audience: f['target-audience'].value,
     ad_goals: f['offer'].value,
     brand_voice: f['brand-tone'].value,
     platforms: f['social-handles'].value,
-    notes: f['notes'].value + locationNote,
+    notes: f['notes'].value,
     promos: f['promos'].value,
     phone_display: f['phone-display'].value || f['phone'].value,
-    website_display: f['website-display'].value || f['website'].value,
+    website_display: f['website-display'].value || f['shopify-url'].value,
     booking_link: f['booking-link'].value,
+    // DTC pivot fields (May 27, 2026)
+    shopify_url: f['shopify-url'].value,
+    product_image_urls: f['product-image-urls'].value,
+    brand_asset_urls: f['brand-asset-urls'].value,
+    top_performing_ad_url: f['top-performing-ad-url'].value,
+    monthly_ad_spend: f['monthly-ad-spend'].value,
     onboarding_complete: true
   }).eq('stripe_customer_id', cid);
   if (error) { alert('Error: ' + error.message); console.error(error); return; }
@@ -327,4 +389,3 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
 
 </body>
 </html>
-
