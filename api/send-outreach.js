@@ -63,6 +63,9 @@ DO NOT include a signature, sign-off, name, brand name, or anything else after "
 
 NICHE HOOKS (use the one matching {{niche}}):
 
+- If niche is "ecommerce_dtc" OR "dtc" OR "ecommerce":
+  "found {{company_name}} while looking at fast-growing DTC brands. creative fatigue kills ROAS faster than bad targeting — and most in-house teams can't ship new ad variations fast enough to outrun it before winners burn out."
+
 - If niche is "insurance" OR "insurance_independent":
   "found {{company_name}} while looking at independent agencies in {{city}}. competing for local business against State Farm and Allstate's national ad budgets with no in-house marketing team is brutal."
 
