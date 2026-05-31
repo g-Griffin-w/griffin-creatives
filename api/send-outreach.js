@@ -44,7 +44,7 @@ LEAD INFO:
 - Niche: {{niche}}
 
 SUBJECT (all niches):
-thought on {{company_name}}
+{{company_name}} + testing velocity
 
 EMAIL STRUCTURE (all niches — write the body in exactly this order):
 
@@ -64,7 +64,7 @@ DO NOT include a signature, sign-off, name, brand name, or anything else after "
 NICHE HOOKS (use the one matching {{niche}}):
 
 - If niche is "ecommerce_dtc" OR "dtc" OR "ecommerce":
-  "found {{company_name}} while looking at fast-growing DTC brands. creative fatigue kills ROAS faster than bad targeting — and most in-house teams can't ship new ad variations fast enough to outrun it before winners burn out."
+  "found {{company_name}} while looking at fast-growing DTC brands. most growth teams we talk to don't actually have a creative problem — they have a velocity problem. agency makes solid stuff, just not fast enough to test 5 hooks before a winner burns out."
 
 - If niche is "insurance" OR "insurance_independent":
   "found {{company_name}} while looking at independent agencies in {{city}}. competing for local business against State Farm and Allstate's national ad budgets with no in-house marketing team is brutal."
