@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teardown #001 — Liquid Death 'Small Cans' | GriffinCreative</title>
+<meta name="description" content="We tore down Liquid Death's $1.4B Small Cans campaign — 30M views, 3:1 share-to-like — and built 30+ testable variants on top of it. Here's the volume layer behind hit creative.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --black: #080808; --white: #f0ece3; --orange: #ff4d00; --gray: #888; --card: #111; --border: #1e1e1e; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--white); overflow-x: hidden; line-height: 1.5; }
+
+/* NAV */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: rgba(8,8,8,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.04em; color: var(--white); text-decoration: none; }
+.logo span { color: var(--orange); }
+.nav-links { display: flex; gap: 32px; align-items: center; }
+.nav-links a { font-size: 13px; font-weight: 500; color: var(--gray); text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+.nav-links a:hover { color: var(--white); }
+.nav-cta { padding: 8px 20px; background: var(--orange) !important; color: #fff !important; border-radius: 2px; }
+
+/* HERO */
+.hero { padding: 160px 40px 80px; max-width: 1200px; margin: 0 auto; position: relative; }
+.hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(255,77,0,0.07) 0%, transparent 70%); pointer-events: none; }
+.crumb { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--orange); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 24px; }
+.crumb a { color: var(--gray); text-decoration: none; }
+.crumb a:hover { color: var(--white); }
+.hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(48px, 9vw, 112px); line-height: 0.95; letter-spacing: 0.01em; max-width: 1000px; margin-bottom: 28px; }
+.hero h1 .outline { -webkit-text-stroke: 1px var(--white); color: transparent; }
+.hero h1 .accent { color: var(--orange); }
+.hero-sub { font-size: 18px; color: var(--gray); max-width: 640px; line-height: 1.7; font-weight: 300; }
+.hero-meta { display: flex; gap: 32px; margin-top: 40px; flex-wrap: wrap; padding-top: 32px; border-top: 1px solid var(--border); }
+.meta-item { display: flex; flex-direction: column; gap: 4px; }
+.meta-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gray); letter-spacing: 0.1em; text-transform: uppercase; }
+.meta-value { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--white); letter-spacing: 0.04em; }
+
+/* SECTIONS */
+.section { padding: 80px 40px; max-width: 1200px; margin: 0 auto; }
+.section.dark { background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); max-width: none; }
+.section.dark .inner { max-width: 1200px; margin: 0 auto; }
+.sec-tag { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--orange); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; display: block; }
+.sec-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 5vw, 60px); line-height: 1; letter-spacing: 0.02em; margin-bottom: 24px; max-width: 900px; }
+.sec-title .accent { color: var(--orange); }
+.sec-body { font-size: 16px; color: var(--gray); max-width: 720px; font-weight: 300; line-height: 1.75; }
+.sec-body p + p { margin-top: 16px; }
+
+/* AD CARD */
+.ad-card { background: var(--card); border: 1px solid var(--border); padding: 40px; margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.ad-visual { aspect-ratio: 4/5; background: linear-gradient(135deg, #1a0a0a 0%, #0a0a0a 100%); border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; text-align: center; position: relative; }
+.ad-visual::before { content: 'AD MOCKUP'; position: absolute; top: 12px; left: 12px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--gray); letter-spacing: 0.1em; }
+.ad-tag-original { font-family: 'Bebas Neue', sans-serif; font-size: 56px; line-height: 0.95; color: var(--white); letter-spacing: 0.02em; margin-bottom: 16px; }
+.ad-tag-original .death { color: var(--orange); }
+.ad-sub-original { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray); letter-spacing: 0.08em; }
+.ad-stats { display: flex; flex-direction: column; gap: 20px; }
+.stat-row { padding: 20px 0; border-bottom: 1px solid var(--border); }
+.stat-row:last-child { border-bottom: none; }
+.stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 48px; line-height: 1; color: var(--orange); letter-spacing: 0.02em; }
+.stat-label { font-size: 13px; color: var(--gray); margin-top: 4px; font-weight: 300; }
+
+/* WORKING GRID */
+.working-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 40px; }
+.work-card { background: var(--black); padding: 28px; }
+.work-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--orange); letter-spacing: 0.1em; margin-bottom: 12px; }
+.work-card h4 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.03em; margin-bottom: 10px; }
+.work-card p { font-size: 13px; color: var(--gray); line-height: 1.7; font-weight: 300; }
+
+/* GAP CALLOUT */
+.callout { background: linear-gradient(135deg, rgba(255,77,0,0.06) 0%, transparent 70%); border-left: 3px solid var(--orange); padding: 36px 32px; margin-top: 40px; }
+.callout p { font-size: 17px; color: var(--white); line-height: 1.6; font-weight: 300; }
+.callout p + p { margin-top: 12px; color: var(--gray); }
+.callout strong { color: var(--orange); font-weight: 500; }
+
+/* VARIANTS */
+.variants-intro { font-size: 16px; color: var(--gray); max-width: 720px; font-weight: 300; line-height: 1.75; margin-bottom: 8px; }
+.variants-note { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray); margin-top: 8px; letter-spacing: 0.04em; }
+.variant-block { margin-top: 56px; }
+.variant-block h3 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 0.03em; margin-bottom: 8px; }
+.variant-block .count { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--orange); letter-spacing: 0.08em; margin-bottom: 24px; }
+.hook-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.hook-item { background: var(--black); padding: 28px; }
+.hook-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gray); letter-spacing: 0.1em; margin-bottom: 14px; }
+.hook-copy { font-family: 'Bebas Neue', sans-serif; font-size: 26px; line-height: 1.15; letter-spacing: 0.02em; color: var(--white); margin-bottom: 14px; }
+.hook-angle { font-size: 12px; color: var(--gray); font-weight: 300; line-height: 1.6; }
+.hook-angle strong { color: var(--orange); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.concept-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.concept-card { background: var(--black); padding: 28px; }
+.concept-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--orange); letter-spacing: 0.1em; margin-bottom: 14px; }
+.concept-card h5 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.03em; margin-bottom: 12px; }
+.concept-card .visual-note { font-size: 13px; color: var(--gray); font-weight: 300; line-height: 1.7; margin-bottom: 12px; }
+.concept-card .tag { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--orange); font-style: italic; border-top: 1px solid var(--border); padding-top: 12px; }
+
+.ugc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.ugc-card { background: var(--black); padding: 28px; }
+.ugc-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--orange); letter-spacing: 0.1em; margin-bottom: 14px; }
+.ugc-card h5 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.03em; margin-bottom: 12px; }
+.ugc-card p { font-size: 13px; color: var(--gray); font-weight: 300; line-height: 1.7; }
+.ugc-card .specs { display: flex; gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.ugc-card .spec { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray); letter-spacing: 0.06em; }
+
+/* METHOD */
+.method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 40px; }
+.method-card { background: var(--black); padding: 36px 28px; }
+.method-num { font-family: 'Bebas Neue', sans-serif; font-size: 56px; color: var(--border); line-height: 1; margin-bottom: 16px; }
+.method-card h4 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.03em; margin-bottom: 10px; }
+.method-card p { font-size: 13px; color: var(--gray); line-height: 1.7; font-weight: 300; }
+
+/* CTA */
+.cta-section { padding: 120px 40px; text-align: center; position: relative; max-width: 800px; margin: 0 auto; }
+.cta-section h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 7vw, 80px); line-height: 0.95; margin-bottom: 24px; }
+.cta-section h2 .outline { -webkit-text-stroke: 1px rgba(240,236,227,0.25); color: transparent; }
+.cta-section p { font-size: 16px; color: var(--gray); margin-bottom: 40px; font-weight: 300; max-width: 540px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+.btn-primary { padding: 16px 36px; background: var(--orange); color: #fff; font-size: 15px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; border: none; border-radius: 2px; cursor: pointer; text-decoration: none; transition: opacity 0.2s; display: inline-block; }
+.btn-primary:hover { opacity: 0.85; }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--border); padding: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+footer p { font-size: 13px; color: #2e2e2e; }
+footer .links { display: flex; gap: 24px; }
+footer .links a { font-size: 12px; color: var(--gray); text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+
+/* DISCLAIMER */
+.disclaimer { padding: 24px 40px; max-width: 1200px; margin: 0 auto; }
+.disclaimer p { font-family: 'DM Mono', monospace; font-size: 11px; color: #444; line-height: 1.6; max-width: 720px; }
+
+@media(max-width: 900px) {
+  nav { padding: 16px 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 120px 20px 60px; }
+  .section { padding: 60px 20px; }
+  .ad-card { grid-template-columns: 1fr; padding: 28px; gap: 28px; }
+  .working-grid, .hook-list, .ugc-grid { grid-template-columns: 1fr; }
+  .concept-grid, .method-grid { grid-template-columns: 1fr; }
+  .cta-section { padding: 80px 20px; }
+  footer { padding: 24px 20px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">GRIFFIN<span>CREATIVE</span></a>
+  <div class="nav-links">
+    <a href="/#services">Services</a>
+    <a href="/#pricing">Pricing</a>
+    <a href="/teardowns/">Teardowns</a>
+    <a href="https://calendly.com/hello-griffincreativelab/30min" target="_blank" class="nav-cta">Book a call</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="crumb"><a href="/teardowns/">// Teardowns</a> / 001 — Liquid Death</div>
+  <h1>WE TORE DOWN<br>A <span class="accent">$1.4B</span> <span class="outline">CAMPAIGN.</span></h1>
+  <p class="hero-sub">Liquid Death's "Small Cans" did 30M views and a 3:1 share-to-like ratio on social. Here's what we'd ship in week 1 if they plugged us in for testing — and why the volume layer matters even for the best creative team in DTC.</p>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <div class="meta-label">Brand</div>
+      <div class="meta-value">Liquid Death</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Campaign</div>
+      <div class="meta-value">Small Cans</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Original Format</div>
+      <div class="meta-value">Social / Short-Form</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Teardown By</div>
+      <div class="meta-value">GriffinCreative</div>
+    </div>
+  </div>
+</section>
+
+<!-- THE AD -->
+<section class="section dark">
+  <div class="inner">
+    <span class="sec-tag">// 01 — The Ad</span>
+    <h2 class="sec-title">Built to be shared,<br>not just <span class="accent">seen.</span></h2>
+    <div class="sec-body">
+      <p>"Small Cans" launched as the rollout for Liquid Death's 7.5oz format. Instead of leaning on the product spec, the campaign leaned hard into innuendo — turning the smaller size into a continuous stream of comment-bait jokes across Instagram and TikTok.</p>
+      <p>The campaign generated 30M+ views across both platforms. More telling: a 3:1 share-to-like ratio in the first 48 hours. That ratio is the real win — likes are passive; shares mean people sent it to someone with a "look at this" intent. That's the creative working as distribution.</p>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-visual">
+        <div class="ad-tag-original">SMALL<br>CANS.<br><span class="death">BIG DEATH.</span></div>
+        <div class="ad-sub-original">// LIQUID DEATH · 7.5OZ FORMAT LAUNCH</div>
+      </div>
+      <div class="ad-stats">
+        <div class="stat-row">
+          <div class="stat-num">30M+</div>
+          <div class="stat-label">Combined views, Instagram + TikTok</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-num">3:1</div>
+          <div class="stat-label">Share-to-like ratio, first 48 hours</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-num">1 of 1</div>
+          <div class="stat-label">Major hit creative per quarter — even at Liquid Death's pace</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT'S WORKING -->
+<section class="section">
+  <span class="sec-tag">// 02 — What's working</span>
+  <h2 class="sec-title">The original creative<br>does <span class="accent">4 things</span> right.</h2>
+  <p class="sec-body">Before any teardown talks about what to change, it has to defend what's working. Otherwise you're just rewriting copy for the sake of it.</p>
+
+  <div class="working-grid">
+    <div class="work-card">
+      <div class="work-num">// 01</div>
+      <h4>Single readable concept</h4>
+      <p>Every variant in the campaign points at the same joke. You "get it" in under a second. That's table stakes for social feed creative — the moment a viewer has to think, you've lost them.</p>
+    </div>
+    <div class="work-card">
+      <div class="work-num">// 02</div>
+      <h4>Comment-bait by design</h4>
+      <p>Innuendo invites people to add the joke themselves in the comments. That's why shares outpaced likes — the creative is half the joke, the audience completes it. Algorithm gold.</p>
+    </div>
+    <div class="work-card">
+      <div class="work-num">// 03</div>
+      <h4>Product IS the joke</h4>
+      <p>The smaller can isn't backdrop — it's the punchline. No creative-product mismatch. Every view of the ad is also a view of the product, sized exactly as the marketing claims.</p>
+    </div>
+    <div class="work-card">
+      <div class="work-num">// 04</div>
+      <h4>On-brand voice extended</h4>
+      <p>Punk irreverence applied to a logistically boring announcement (a new can size). That's the Liquid Death move — refuse to do a "normal" launch ever. The voice stays consistent across the portfolio.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE VELOCITY GAP -->
+<section class="section dark">
+  <div class="inner">
+    <span class="sec-tag">// 03 — The velocity gap</span>
+    <h2 class="sec-title">Even the best creative team<br>ships <span class="accent">one hit per quarter.</span></h2>
+    <div class="sec-body">
+      <p>Liquid Death has one of the best in-house creative teams in DTC. Their concept cadence is exceptional — but it's still finite. "Small Cans" was one campaign. Across an entire quarter.</p>
+      <p>For most DTC brands the cadence is worse — one hit per six months, if that. And here's the trap: a winning concept like "Small Cans" has a 4-8 week useful life on paid social before fatigue kills it. After that, you need the next concept ready. Or you need 30 variants of the current one that buy you another 90 days.</p>
+    </div>
+
+    <div class="callout">
+      <p>This is the volume layer. <strong>You don't replace the creative team that made the hit.</strong> You bolt on a pipeline that turns one winning concept into 30+ testable variants — so the winner runs longer, fatigue gets pushed out, and the in-house team keeps focus on the next hero campaign instead of churning out variant #14 of the current one.</p>
+      <p>That's what we'd build for Liquid Death. It's the same thing we build for brands at 1/10th their scale.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOOK VARIANTS -->
+<section class="section">
+  <span class="sec-tag">// 04 — Week 1 deliverables</span>
+  <h2 class="sec-title">5 of 40 hook variants<br>we'd ship in <span class="accent">48 hours.</span></h2>
+  <p class="variants-intro">The Dominate tier pipeline outputs 40 hook variants, 25 static ad concepts, 8 UGC creator briefs, 5 email flows, 8 landing page copy variations, and a 30-day content calendar — built around the winning concept. Here's a sample.</p>
+  <p class="variants-note">// Illustrative variants written by GriffinCreative — not actual Liquid Death campaign copy.</p>
+
+  <div class="variant-block">
+    <h3>Hook variants</h3>
+    <div class="count">// SAMPLE 5 OF 40 — each targets a different angle</div>
+    <div class="hook-list">
+      <div class="hook-item">
+        <div class="hook-num">VARIANT 01</div>
+        <div class="hook-copy">"Big cans are<br>for sellouts."</div>
+        <div class="hook-angle"><strong>Angle</strong><br>Anti-establishment — doubles down on the punk positioning. Tests whether explicit identity copy outperforms innuendo for the loyal audience.</div>
+      </div>
+      <div class="hook-item">
+        <div class="hook-num">VARIANT 02</div>
+        <div class="hook-copy">"7.5oz of murder.<br>Concentrated."</div>
+        <div class="hook-angle"><strong>Angle</strong><br>Brand-canonical death voice. Reframes the size reduction as a feature: same brand promise, more dense. No innuendo — tests whether voice alone carries it.</div>
+      </div>
+      <div class="hook-item">
+        <div class="hook-num">VARIANT 03</div>
+        <div class="hook-copy">"Small enough<br>to hide from<br>your mom."</div>
+        <div class="hook-angle"><strong>Angle</strong><br>Use-case humor for the younger half of the audience. Different innuendo register than the original — tests whether age-coded jokes shift comment demographics.</div>
+      </div>
+      <div class="hook-item">
+        <div class="hook-num">VARIANT 04</div>
+        <div class="hook-copy">"Same death.<br>Less liquid."</div>
+        <div class="hook-angle"><strong>Angle</strong><br>Pure brand symmetry — name flipped onto the spec. No joke, no innuendo. Tests whether the audience rewards copy that just plays with the wordmark itself.</div>
+      </div>
+      <div class="hook-item">
+        <div class="hook-num">VARIANT 05</div>
+        <div class="hook-copy">"For when<br>you don't want<br>to commit<br>that hard."</div>
+        <div class="hook-angle"><strong>Angle</strong><br>Anti-aspirational, tongue-in-cheek. Reframes smaller as a "low commitment" purchase decision. Tests whether soft humor outperforms shock for repeat-buyer segments.</div>
+      </div>
+      <div class="hook-item" style="background: var(--card); display: flex; flex-direction: column; justify-content: center;">
+        <div class="hook-num">+ 35 MORE</div>
+        <div class="hook-copy" style="color: var(--orange); font-size: 22px;">Angles 06–40<br>cover format use-cases,<br>environmental, retail<br>visibility, sober-curious,<br>cup-holder fit, and more.</div>
+        <div class="hook-angle">Each angle gets 2-3 copy variants, structured for A/B testing in Meta Ads Manager.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATIC CONCEPTS -->
+  <div class="variant-block">
+    <h3>Static ad concepts</h3>
+    <div class="count">// SAMPLE 3 OF 25 — each built around a different visual hook</div>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="concept-num">CONCEPT 01</div>
+        <h5>Coffin fitting</h5>
+        <p class="visual-note">Small can being lowered into a tiny custom-fit coffin. Mock-funeral aesthetic. Black velvet interior. Single floating spotlight.</p>
+        <div class="tag">"Small enough to bury in your backpack."</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-num">CONCEPT 02</div>
+        <h5>X-ray comparison</h5>
+        <p class="visual-note">Medical X-ray treatment showing two hands — one holding regular can, one holding small can. Skeletal hand grip, clean clinical lighting.</p>
+        <div class="tag">"See the difference."</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-num">CONCEPT 03</div>
+        <h5>Cupholder index</h5>
+        <p class="visual-note">Grid of 9 different cup holders — car, gym bag, stroller, lawn chair — small can fits all 9. Regular can crossed out in 7. Catalog-style layout.</p>
+        <div class="tag">"Fits where the others don't."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UGC BRIEFS -->
+  <div class="variant-block">
+    <h3>UGC creator briefs</h3>
+    <div class="count">// SAMPLE 2 OF 8 — for casting and brief distribution to UGC creators</div>
+    <div class="ugc-grid">
+      <div class="ugc-card">
+        <div class="ugc-num">BRIEF 01</div>
+        <h5>The pocket reveal</h5>
+        <p>Creator films pulling everyday "essentials" from their pocket one by one — phone, wallet, keys, AirPods, vape. Final reveal: small can fits where none of the regular drinks would. Punchline on-screen, not voiced.</p>
+        <div class="specs">
+          <div class="spec">// 15–22s vertical</div>
+          <div class="spec">// no voiceover</div>
+          <div class="spec">// natural lighting</div>
+        </div>
+      </div>
+      <div class="ugc-card">
+        <div class="ugc-num">BRIEF 02</div>
+        <h5>The roast comparison</h5>
+        <p>Side-by-side product shot of small can vs. competitor sparkling water in the regular size. Creator roasts the competitor on-brand — punk voice, deadpan delivery. Frames the smaller size as a flex, not a compromise.</p>
+        <div class="specs">
+          <div class="spec">// 20–30s vertical</div>
+          <div class="spec">// to-camera</div>
+          <div class="spec">// product visible 80%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METHOD -->
+<section class="section dark">
+  <div class="inner">
+    <span class="sec-tag">// 05 — How the pipeline works</span>
+    <h2 class="sec-title">One winning concept,<br>30 variants, <span class="accent">48 hours.</span></h2>
+
+    <div class="method-grid">
+      <div class="method-card">
+        <div class="method-num">01</div>
+        <h4>Concept intake</h4>
+        <p>You send us the winner — the ad, the angle, what's working, what fatigued. We map the concept into testable dimensions: hook, format, audience, visual register.</p>
+      </div>
+      <div class="method-card">
+        <div class="method-num">02</div>
+        <h4>Variant generation</h4>
+        <p>Our pipeline runs each dimension through structured prompting — generating hook copy, static concepts, UGC briefs, email flows, and landing page variations. Each variant ties to a specific testable hypothesis.</p>
+      </div>
+      <div class="method-card">
+        <div class="method-num">03</div>
+        <h4>Drive delivery</h4>
+        <p>Everything lands in your Google Drive in 48 hours, organized for direct handoff to your media buyer or production team. No kickoff calls. No revision cycles unless you want them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2><span class="outline">WANT THIS</span> ON<br>YOUR <span style="color: var(--orange);">BRAND?</span></h2>
+  <p>We do a free 5-min video teardown for every cold reply we get. Drop us a line — if your brand's a fit for the volume layer, we'll send the audit before you book the call.</p>
+  <a href="https://calendly.com/hello-griffincreativelab/30min" target="_blank" class="btn-primary">Book a strategy call</a>
+</section>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer">
+  <p>// Teardown #001 is an unsolicited illustrative analysis of Liquid Death's publicly available "Small Cans" campaign. GriffinCreative is not affiliated with, endorsed by, or representing Liquid Death. All proposed variants, concepts, and creative copy above are original work by GriffinCreative produced for demonstration purposes — none are actual Liquid Death campaign materials. Campaign performance figures cited from publicly reported sources.</p>
+</div>
+
+<footer>
+  <p>© GriffinCreative 2026 · griffincreativelab.com</p>
+  <div class="links">
+    <a href="/">Home</a>
+    <a href="/teardowns/">More teardowns</a>
+    <a href="mailto:hello@griffincreativelab.com">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>

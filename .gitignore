@@ -1,0 +1,18 @@
+# Source files for Instagram carousels — local-only design assets
+# Screenshot-source HTML that should never deploy to Vercel
+teardowns/instagram-carousel-*.html
+
+# Node
+node_modules/
+.env
+.env.local
+.env*.local
+
+# OS
+.DS_Store
+
+# Cowork worktrees / scratch
+.claude/worktrees/
+
+# Local pastes
+CLAUDE_GLOBAL_PASTE.md
