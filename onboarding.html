@@ -89,6 +89,22 @@ textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
 .upload-note { background: #0d0d0d; border-left: 3px solid var(--orange); padding: 16px 20px; margin-bottom: 16px; font-size: 13px; color: var(--gray); font-weight: 300; line-height: 1.7; }
 .upload-note strong { color: var(--white); font-weight: 500; }
 
+/* FILE UPLOAD ZONES */
+.upload-zone { background: #0d0d0d; border: 1px dashed var(--border); border-radius: 2px; padding: 36px 20px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--orange); background: #100a07; }
+.upload-cta { pointer-events: none; }
+.upload-icon { display: inline-block; width: 36px; height: 36px; line-height: 32px; border: 1px solid var(--border); border-radius: 50%; font-size: 24px; color: var(--orange); margin-bottom: 12px; font-weight: 300; }
+.upload-zone p { font-size: 13px; color: var(--gray); font-weight: 300; margin-bottom: 4px; }
+.upload-zone p:last-child { margin-bottom: 0; }
+.upload-link { color: var(--orange); text-decoration: underline; }
+.upload-hint { font-size: 11px !important; color: #444 !important; margin-top: 6px !important; }
+.upload-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.upload-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #0d0d0d; border: 1px solid var(--border); border-radius: 2px; font-size: 12px; font-weight: 300; color: var(--gray); }
+.upload-item.done { color: var(--white); border-color: var(--orange); }
+.upload-item.error { color: #ff6b6b; border-color: #4d1a1a; }
+.upload-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }
+.upload-status { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+
 /* SUBMIT */
 .submit-wrap { margin-top: 40px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 .btn-submit { padding: 16px 44px; background: var(--orange); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; border: none; border-radius: 2px; cursor: pointer; transition: opacity 0.2s; }
@@ -259,19 +275,39 @@ footer p { font-size: 13px; color: #2e2e2e; }
         <div class="form-section-label">Brand Assets</div>
 
         <div class="upload-note">
-          <strong>How to share assets:</strong> Upload your product photos and brand assets to a Google Drive folder, set sharing to "Anyone with the link can view," and paste the folder link below. (Dropbox, OneDrive, or any public link also works.)
+          <strong>Upload directly — no Drive folders needed.</strong> JPEG, PNG, WebP, or HEIC. Max 25&nbsp;MB per file. Drop multiple files at once.
         </div>
 
         <div class="field-group">
-          <label class="field-label" for="product-image-urls">Product Photo URLs</label>
-          <textarea id="product-image-urls" name="product-image-urls" placeholder="https://drive.google.com/drive/folders/your-product-photos-folder&#10;or&#10;https://dropbox.com/sh/your-folder-link"></textarea>
-          <p class="field-hint">Required for high-quality static product ads. Upload 3–10 product photos minimum (hero shots + lifestyle if you have them). We'll use these as the visual base for your ads.</p>
+          <label class="field-label">Product Photos</label>
+          <div class="upload-zone" id="upload-products">
+            <input type="file" id="file-products" multiple accept="image/jpeg,image/jpg,image/png,image/webp,image/heic,image/heif" style="display:none;">
+            <div class="upload-cta">
+              <span class="upload-icon">+</span>
+              <p>Drop product photos here or <span class="upload-link">click to upload</span></p>
+              <p class="upload-hint">3–10 photos minimum. Hero shots + lifestyle. We'll use these as the visual base for your ads.</p>
+            </div>
+          </div>
+          <div class="upload-list" id="list-products"></div>
         </div>
 
         <div class="field-group">
-          <label class="field-label" for="brand-asset-urls">Brand Assets URL</label>
-          <textarea id="brand-asset-urls" name="brand-asset-urls" placeholder="https://drive.google.com/drive/folders/your-brand-assets&#10;or paste hex colors directly: #FF4D00, #080808, #F0ECE3&#10;Logo: https://yourbrand.com/logo.png"></textarea>
-          <p class="field-hint">Logo files, brand color hex codes, fonts, brand guidelines if you have them. The more we have, the more on-brand your creative.</p>
+          <label class="field-label">Brand Assets (logo, palette swatches, guideline screenshots)</label>
+          <div class="upload-zone" id="upload-brand">
+            <input type="file" id="file-brand" multiple accept="image/jpeg,image/jpg,image/png,image/webp,image/heic,image/heif" style="display:none;">
+            <div class="upload-cta">
+              <span class="upload-icon">+</span>
+              <p>Drop brand assets here or <span class="upload-link">click to upload</span></p>
+              <p class="upload-hint">Logo, palette swatches, brand guideline screenshots. Optional but improves on-brand match.</p>
+            </div>
+          </div>
+          <div class="upload-list" id="list-brand"></div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="brand-asset-text">Brand Notes (optional)</label>
+          <textarea id="brand-asset-text" name="brand-asset-text" placeholder="Hex colors: #FF4D00, #080808, #F0ECE3&#10;Fonts: Bebas Neue, DM Sans&#10;Tone notes, visual references, anything that doesn't fit as an upload."></textarea>
+          <p class="field-hint">Paste hex codes, font names, or any text-only brand context. Stays alongside the uploaded assets.</p>
         </div>
 
         <hr class="form-divider">
@@ -352,10 +388,148 @@ if (!cid) {
   document.getElementById('form-wrap').innerHTML =
     '<div style="text-align:center;padding:60px"><h2 style="color:#ff4d00;font-family:Bebas Neue,sans-serif;font-size:42px;letter-spacing:.02em;">MISSING CUSTOMER ID</h2><p style="color:#888;font-weight:300;margin-top:16px;">Please use the onboarding link from your welcome email. If you need help, email hello@griffincreativelab.com.</p></div>';
 }
+
+// =====================================================================
+// FILE UPLOAD HANDLING
+// Each file is uploaded directly to Supabase Storage via a signed URL
+// generated by /api/get-upload-url. Successful paths are tracked locally
+// and written to the griffin_clients row on form submit.
+// =====================================================================
+const MAX_BYTES = 26214400; // 25 MB — matches bucket file_size_limit
+const ALLOWED_MIME = /^image\/(jpeg|jpg|png|webp|heic|heif)$/;
+
+const uploadedPaths = { products: [], brand: [] };
+const pendingUploads = new Set();
+
+function _addListItem(folder, name, status, className) {
+  const list = document.getElementById('list-' + folder);
+  const item = document.createElement('div');
+  item.className = 'upload-item' + (className ? ' ' + className : '');
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'upload-name';
+  nameSpan.textContent = name;
+  const statusSpan = document.createElement('span');
+  statusSpan.className = 'upload-status';
+  statusSpan.textContent = status;
+  item.appendChild(nameSpan);
+  item.appendChild(statusSpan);
+  list.appendChild(item);
+  return item;
+}
+
+async function uploadFile(file, folder) {
+  if (!cid) {
+    alert('Missing customer ID. Use your onboarding link from your welcome email.');
+    return;
+  }
+  const uploadId = folder + ':' + file.name + ':' + Date.now() + ':' + Math.random();
+  pendingUploads.add(uploadId);
+  const item = _addListItem(folder, file.name, 'Uploading…');
+
+  try {
+    // Step 1: request a signed upload URL from the API
+    const urlRes = await fetch('/api/get-upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cid: cid,
+        fileName: file.name,
+        mimeType: file.type,
+        fileSize: file.size,
+        folder: folder
+      })
+    });
+    const urlData = await urlRes.json();
+    if (!urlRes.ok) throw new Error(urlData.error || 'Failed to get upload URL');
+
+    // Step 2: PUT the file directly to Supabase Storage via the signed URL
+    const putRes = await fetch(urlData.signedUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type },
+      body: file
+    });
+    if (!putRes.ok) {
+      const txt = await putRes.text();
+      throw new Error('Upload failed: ' + txt);
+    }
+
+    // Success — record the path
+    uploadedPaths[folder].push(urlData.path);
+    item.className = 'upload-item done';
+    item.querySelector('.upload-status').textContent = 'Uploaded';
+  } catch (err) {
+    console.error('Upload error:', err);
+    item.className = 'upload-item error';
+    item.querySelector('.upload-status').textContent = 'Failed';
+  } finally {
+    pendingUploads.delete(uploadId);
+  }
+}
+
+function handleFiles(files, folder) {
+  Array.from(files).forEach(function(file) {
+    if (file.size > MAX_BYTES) {
+      _addListItem(folder, file.name, 'Too large (max 25 MB)', 'error');
+      return;
+    }
+    if (!ALLOWED_MIME.test(file.type)) {
+      _addListItem(folder, file.name, 'Unsupported type', 'error');
+      return;
+    }
+    uploadFile(file, folder);
+  });
+}
+
+function wireUploadZone(folder) {
+  const zone = document.getElementById('upload-' + folder);
+  const input = document.getElementById('file-' + folder);
+  zone.addEventListener('click', function() { input.click(); });
+  zone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    zone.classList.add('dragover');
+  });
+  zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+  zone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files, folder);
+  });
+  input.addEventListener('change', function(e) { handleFiles(e.target.files, folder); });
+}
+
+if (cid) {
+  wireUploadZone('products');
+  wireUploadZone('brand');
+}
+
+// =====================================================================
+// FORM SUBMIT
+// =====================================================================
 document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   if (!cid) return;
+
+  // Block submit while any file is still uploading
+  if (pendingUploads.size > 0) {
+    alert('Photos are still uploading — give them a few seconds and submit again.');
+    return;
+  }
+
   const f = e.target;
+
+  // Encode uploaded paths as JSON arrays (empty string if none uploaded)
+  const productPathsJson = uploadedPaths.products.length > 0
+    ? JSON.stringify(uploadedPaths.products)
+    : '';
+
+  // Brand column stores uploaded paths (JSON) AND optional text notes,
+  // separated by a marker the downstream pipeline can split on.
+  const brandPathsJson = uploadedPaths.brand.length > 0
+    ? JSON.stringify(uploadedPaths.brand)
+    : '';
+  const brandText = (f['brand-asset-text'] && f['brand-asset-text'].value) || '';
+  const brandCombined = [brandPathsJson, brandText].filter(Boolean).join('\n---NOTES---\n');
+
   const { error } = await db.from('griffin_clients').update({
     full_name: f['your-name'].value,
     phone: f['phone'].value,
@@ -371,14 +545,15 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
     phone_display: f['phone-display'].value || f['phone'].value,
     website_display: f['website-display'].value || f['shopify-url'].value,
     booking_link: f['booking-link'].value,
-    // DTC pivot fields (May 27, 2026)
+    // DTC pivot fields
     shopify_url: f['shopify-url'].value,
-    product_image_urls: f['product-image-urls'].value,
-    brand_asset_urls: f['brand-asset-urls'].value,
+    product_image_urls: productPathsJson,
+    brand_asset_urls: brandCombined,
     top_performing_ad_url: f['top-performing-ad-url'].value,
     monthly_ad_spend: f['monthly-ad-spend'].value,
     onboarding_complete: true
   }).eq('stripe_customer_id', cid);
+
   if (error) { alert('Error: ' + error.message); console.error(error); return; }
   document.getElementById('form-wrap').style.display = 'none';
   const ty = document.getElementById('thankyou');
