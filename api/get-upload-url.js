@@ -13,11 +13,25 @@
 
 const { createClient } = require("@supabase/supabase-js");
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } }
-);
+// Lazy initialization — avoid crashing the function at module-load if env vars are missing.
+// Instead, surface a clean JSON error from the handler so the browser can show the real cause.
+let supabase = null;
+function getSupabase() {
+  if (supabase) return supabase;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    const missing = [
+      !url && "SUPABASE_URL",
+      !key && "SUPABASE_SERVICE_ROLE_KEY",
+    ].filter(Boolean).join(", ");
+    const err = new Error("Missing Vercel env var(s): " + missing);
+    err.code = "MISSING_ENV";
+    throw err;
+  }
+  supabase = createClient(url, key, { auth: { persistSession: false } });
+  return supabase;
+}
 
 // Must match the bucket's allowed_mime_types
 const ALLOWED_MIME = new Set([
@@ -54,6 +68,18 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Init Supabase client (returns clean error if env vars missing)
+    let sb;
+    try {
+      sb = getSupabase();
+    } catch (e) {
+      return res.status(500).json({
+        error: e.code === "MISSING_ENV"
+          ? e.message + ". Set them in Vercel → Settings → Environment Variables, then redeploy."
+          : "Supabase init failed: " + e.message
+      });
+    }
+
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const { cid, fileName, mimeType, fileSize, folder } = body;
 
@@ -77,7 +103,7 @@ module.exports = async (req, res) => {
     }
 
     // Resolve internal client UUID from the stripe_customer_id (cid)
-    const { data: client, error: clientErr } = await supabase
+    const { data: client, error: clientErr } = await sb
       .from("griffin_clients")
       .select("id")
       .eq("stripe_customer_id", cid)
@@ -92,7 +118,7 @@ module.exports = async (req, res) => {
     const path = `${client.id}/${folder}/${safeName}`;
 
     // Generate a one-shot signed upload URL the browser can PUT to directly
-    const { data: signed, error: signedErr } = await supabase.storage
+    const { data: signed, error: signedErr } = await sb.storage
       .from("client_assets")
       .createSignedUploadUrl(path);
 
