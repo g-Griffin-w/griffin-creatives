@@ -422,45 +422,67 @@ async function uploadFile(file, folder) {
     alert('Missing customer ID. Use your onboarding link from your welcome email.');
     return;
   }
+  // iOS Safari sometimes provides an empty file.type for camera-roll items.
+  // Fall back to inferring from the extension so PNG/JPG/HEIC pickers still work.
+  const effectiveType = file.type || (function(){
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    return {
+      png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg',
+      webp:'image/webp', heic:'image/heic', heif:'image/heif'
+    }[ext] || '';
+  })();
+
   const uploadId = folder + ':' + file.name + ':' + Date.now() + ':' + Math.random();
   pendingUploads.add(uploadId);
   const item = _addListItem(folder, file.name, 'Uploading…');
 
+  function fail(message) {
+    console.error('Upload error (' + file.name + '):', message);
+    item.className = 'upload-item error';
+    item.querySelector('.upload-status').textContent = (message || 'Failed').slice(0, 80);
+  }
+
   try {
-    // Step 1: request a signed upload URL from the API
+    // Step 1: ask our API for a signed upload URL + token
     const urlRes = await fetch('/api/get-upload-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         cid: cid,
         fileName: file.name,
-        mimeType: file.type,
+        mimeType: effectiveType,
         fileSize: file.size,
         folder: folder
       })
     });
-    const urlData = await urlRes.json();
-    if (!urlRes.ok) throw new Error(urlData.error || 'Failed to get upload URL');
 
-    // Step 2: PUT the file directly to Supabase Storage via the signed URL
-    const putRes = await fetch(urlData.signedUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type },
-      body: file
-    });
-    if (!putRes.ok) {
-      const txt = await putRes.text();
-      throw new Error('Upload failed: ' + txt);
+    // Vercel can return HTML on 500s, so guard against non-JSON responses
+    let urlData;
+    const ct = urlRes.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      urlData = await urlRes.json();
+    } else {
+      const text = await urlRes.text();
+      throw new Error('API ' + urlRes.status + ': ' + text.slice(0, 200));
     }
+    if (!urlRes.ok) throw new Error(urlData.error || ('API ' + urlRes.status));
+
+    // Step 2: use the Supabase SDK's uploadToSignedUrl — more reliable than raw PUT
+    // (handles content-type negotiation + auth tokens correctly across browsers)
+    const { data: uploadData, error: uploadErr } = await db.storage
+      .from('client_assets')
+      .uploadToSignedUrl(urlData.path, urlData.token, file, {
+        contentType: effectiveType || 'application/octet-stream',
+        upsert: false
+      });
+    if (uploadErr) throw new Error(uploadErr.message || 'Upload failed');
 
     // Success — record the path
     uploadedPaths[folder].push(urlData.path);
     item.className = 'upload-item done';
     item.querySelector('.upload-status').textContent = 'Uploaded';
   } catch (err) {
-    console.error('Upload error:', err);
-    item.className = 'upload-item error';
-    item.querySelector('.upload-status').textContent = 'Failed';
+    fail(err && err.message ? err.message : String(err));
   } finally {
     pendingUploads.delete(uploadId);
   }
