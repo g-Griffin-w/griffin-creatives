@@ -15,15 +15,18 @@ const { createClient } = require("@supabase/supabase-js");
 
 // Lazy initialization — avoid crashing the function at module-load if env vars are missing.
 // Instead, surface a clean JSON error from the handler so the browser can show the real cause.
+//
+// Accepts either SUPABASE_SERVICE_KEY (existing project convention) or
+// SUPABASE_SERVICE_ROLE_KEY (Supabase's official name) — whichever is set.
 let supabase = null;
 function getSupabase() {
   if (supabase) return supabase;
   const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
     const missing = [
       !url && "SUPABASE_URL",
-      !key && "SUPABASE_SERVICE_ROLE_KEY",
+      !key && "SUPABASE_SERVICE_KEY (or SUPABASE_SERVICE_ROLE_KEY)",
     ].filter(Boolean).join(", ");
     const err = new Error("Missing Vercel env var(s): " + missing);
     err.code = "MISSING_ENV";
