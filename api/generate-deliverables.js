@@ -1,4 +1,68 @@
 const Anthropic = require('@anthropic-ai/sdk');
+const { createClient: createSupabaseClient } = require('@supabase/supabase-js');
+
+// =============================================================================
+// Signed URL helper — converts stored product_image_urls (JSON array of
+// Supabase Storage paths) into an array of time-limited signed read URLs
+// suitable for handing to fal.ai's Nano Banana /edit endpoint.
+//
+// Handles three input shapes for backward compatibility:
+//   1. JSON array string: '["{cid}/products/foo.png", "{cid}/products/bar.jpg"]'
+//      → returns signed URLs for each path
+//   2. Plain string (legacy Drive folder link or similar URL)
+//      → returns [originalString] as a passthrough
+//   3. null / undefined / empty
+//      → returns []
+//
+// Failures fetching individual signed URLs are dropped silently (filtered out)
+// so a single bad path doesn't tank the whole delivery.
+// =============================================================================
+async function getSignedProductUrls(stored) {
+  if (!stored || typeof stored !== 'string') return [];
+
+  // Try to parse as JSON array of paths first
+  let paths = null;
+  try {
+    const parsed = JSON.parse(stored);
+    if (Array.isArray(parsed) && parsed.every((p) => typeof p === 'string')) {
+      paths = parsed;
+    }
+  } catch (_) {
+    // Not JSON — likely a legacy Drive URL. Pass through as a single-item array.
+    return [stored];
+  }
+
+  if (!paths || paths.length === 0) return [];
+
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    console.warn('[signed-urls] Supabase env vars missing; returning empty array');
+    return [];
+  }
+
+  const sb = createSupabaseClient(url, key, { auth: { persistSession: false } });
+
+  // 24 hours — gives Make + fal.ai a generous fetch window even on big queues
+  const EXPIRES_SECONDS = 86400;
+
+  const results = await Promise.all(
+    paths.map(async (path) => {
+      try {
+        const { data, error } = await sb.storage
+          .from('client_assets')
+          .createSignedUrl(path, EXPIRES_SECONDS);
+        if (error || !data || !data.signedUrl) return null;
+        return data.signedUrl;
+      } catch (err) {
+        console.error('[signed-urls] failed for', path, '-', err.message);
+        return null;
+      }
+    })
+  );
+
+  return results.filter(Boolean);
+}
 
 // =============================================================================
 // GriffinCreative — Deliverable Generator (DTC E-Commerce Pivot, May 27, 2026)
@@ -656,11 +720,17 @@ Output only the formatted content, no preamble.`);
       }
     });
 
+    // Resolve client's uploaded product photos to signed read URLs that
+    // Make.com can hand directly to fal.ai's nano-banana/edit endpoint as
+    // the image_urls input for img2img generation.
+    const signed_product_urls = await getSignedProductUrls(product_image_urls);
+
     return res.status(200).json({
       success: true,
       client: business_name,
       plan,
       voice_name,
+      signed_product_urls,
       deliverables,
     });
   } catch (error) {
