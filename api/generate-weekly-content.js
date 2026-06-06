@@ -24,6 +24,10 @@
 const Anthropic = require("@anthropic-ai/sdk");
 const { createClient: createSupabaseClient } = require("@supabase/supabase-js");
 
+// Allow up to 90 seconds. All Claude calls run in parallel below so this is
+// belt-and-suspenders — the function should finish in ~25-40s.
+module.exports.config = { maxDuration: 90 };
+
 // ----- lazy clients -----
 let _supabase = null;
 function getSupabase() {
@@ -346,16 +350,15 @@ module.exports = async (req, res) => {
         .eq("status", "draft");
     }
 
-    const rowsToInsert = [];
-
-    // --- 1. Five LinkedIn posts ---
-    for (const { day, topic } of plan.linkedin) {
+    // Run all 7 Claude calls in parallel — cuts runtime from ~70s sequential
+    // to ~25-40s. Each task returns a row object ready to insert.
+    const linkedInTasks = plan.linkedin.map(({ day, topic }) => async () => {
       const filled = topic.replace(/\[BRAND\]/g, teardown_brand);
       const text = await callClaude(
         linkedinPostPrompt({ weekNumber: week_number, dayOfWeek: day, topic: filled }),
         { max_tokens: 600 }
       );
-      rowsToInsert.push({
+      return {
         status: "draft",
         platform: "linkedin",
         type: "linkedin_post",
@@ -365,11 +368,10 @@ module.exports = async (req, res) => {
         day_of_week: day,
         scheduled_at: scheduledAtFor(week_start_date, day),
         ai_model: "claude-sonnet-4-5",
-      });
-    }
+      };
+    });
 
-    // --- 2. One Twitter thread ---
-    {
+    const twitterTask = async () => {
       const text = await callClaude(
         twitterThreadPrompt({ weekNumber: week_number, topic: plan.twitter_thread_topic }),
         { max_tokens: 1500 }
@@ -378,7 +380,7 @@ module.exports = async (req, res) => {
       const threadContent = Array.isArray(tweets)
         ? JSON.stringify(tweets)
         : JSON.stringify({ _parse_error: true, _raw: text });
-      rowsToInsert.push({
+      return {
         status: "draft",
         platform: "twitter",
         type: "twitter_thread",
@@ -388,17 +390,16 @@ module.exports = async (req, res) => {
         day_of_week: "wed",
         scheduled_at: scheduledAtFor(week_start_date, "wed"),
         ai_model: "claude-sonnet-4-5",
-      });
-    }
+      };
+    };
 
-    // --- 3. One IG teardown brief ---
-    {
+    const teardownTask = async () => {
       const text = await callClaude(
         teardownBriefPrompt({ brandName: teardown_brand, weekNumber: week_number }),
         { max_tokens: 4000 }
       );
       const brief = parseJsonLoose(text);
-      rowsToInsert.push({
+      return {
         status: "draft",
         platform: "instagram",
         type: "teardown_carousel",
@@ -410,8 +411,12 @@ module.exports = async (req, res) => {
         scheduled_at: scheduledAtFor(week_start_date, plan.teardown_day),
         ai_model: "claude-sonnet-4-5",
         notes: brief._parse_error ? "Parse error on brief: " + brief._parse_error : null,
-      });
-    }
+      };
+    };
+
+    // Fire everything in parallel
+    const allTasks = [...linkedInTasks.map((t) => t()), twitterTask(), teardownTask()];
+    const rowsToInsert = await Promise.all(allTasks);
 
     // --- Insert all into content_queue ---
     const { data: inserted, error: insErr } = await sb
