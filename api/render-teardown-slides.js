@@ -1,18 +1,8 @@
 // Vercel Serverless Function: POST /api/render-teardown-slides
 //
-// PHASE 3 — Renders 6 PNG slides from a teardown_carousel row's brief JSON,
-// uploads them to the content_assets Supabase Storage bucket, and updates the
-// row's media_urls field. The Make.com IG-posting scenario then picks up the
-// row and posts the carousel.
-//
-// Request body:
-//   { "row_id": "<content_queue row UUID>" }
-//
-// Auth:
-//   x-api-key header must match CONTENT_GEN_API_KEY
-//
-// Env vars:
-//   SUPABASE_URL, SUPABASE_SERVICE_KEY, CONTENT_GEN_API_KEY
+// PHASE 3 — Renders 6 PNG slides from a teardown_carousel row's brief JSON.
+// Uses Satori (Vercel's image lib) for JSX → SVG with Buffer-loaded fonts,
+// then resvg for SVG → PNG. Uploads each PNG to Supabase, updates row.
 
 const fs = require("fs");
 const path = require("path");
@@ -20,7 +10,7 @@ const { createClient } = require("@supabase/supabase-js");
 
 module.exports.config = { maxDuration: 60 };
 
-// ===== Lazy clients =====
+// ---------- Lazy clients ----------
 let _sb = null;
 function getSb() {
   if (_sb) return _sb;
@@ -31,17 +21,13 @@ function getSb() {
   return _sb;
 }
 
-// Font files loaded once and reused. Try multiple candidate paths because
-// Vercel's deployment layout differs between project root and function dir.
 function findFontPath(filename) {
   const candidates = [
     path.join(__dirname, "fonts", filename),
     path.join(process.cwd(), "api/fonts", filename),
     path.join(process.cwd(), "fonts", filename),
   ];
-  for (const p of candidates) {
-    if (fs.existsSync(p)) return p;
-  }
+  for (const p of candidates) if (fs.existsSync(p)) return p;
   throw new Error(`Font not found. Tried: ${candidates.join(" | ")}`);
 }
 
@@ -49,30 +35,15 @@ let _fonts = null;
 function getFonts() {
   if (_fonts) return _fonts;
   _fonts = {
-    Black:    fs.readFileSync(findFontPath("Lato-Black.ttf")),
-    Bold:     fs.readFileSync(findFontPath("Lato-Bold.ttf")),
-    Semibold: fs.readFileSync(findFontPath("Lato-Semibold.ttf")),
     Regular:  fs.readFileSync(findFontPath("Lato-Regular.ttf")),
+    Semibold: fs.readFileSync(findFontPath("Lato-Semibold.ttf")),
+    Bold:     fs.readFileSync(findFontPath("Lato-Bold.ttf")),
+    Black:    fs.readFileSync(findFontPath("Lato-Black.ttf")),
   };
   return _fonts;
 }
 
-// Diagnostic helper: report what the function sees on disk
-function fontDiagnostic() {
-  const cwd = process.cwd();
-  const tried = [
-    path.join(__dirname, "fonts"),
-    path.join(cwd, "api/fonts"),
-    path.join(cwd, "fonts"),
-  ];
-  return tried.map((p) => ({
-    path: p,
-    exists: fs.existsSync(p),
-    files: fs.existsSync(p) ? fs.readdirSync(p) : null,
-  }));
-}
-
-// ===== Palette =====
+// ---------- Palette ----------
 const W = 1080;
 const H = 1350;
 const BLACK = "#0E0E0E";
@@ -82,279 +53,334 @@ const CREAM_DIM = "#C8C0B4";
 const ORANGE = "#F4541A";
 const GRAY = "#8A857D";
 
-// ===== SVG helpers =====
-function esc(s) {
-  return String(s ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+// ---------- JSX-without-build helper ----------
+function h(type, props, ...children) {
+  return {
+    type,
+    props: {
+      ...(props || {}),
+      children: children.length === 0 ? undefined : children.length === 1 ? children[0] : children,
+    },
+  };
 }
 
-function svgWrap(bg, inner) {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <rect width="${W}" height="${H}" fill="${bg}"/>
-  ${inner}
-</svg>`;
-}
-
-// Map weight name -> numeric CSS weight (resvg matches font-family="Lato" + weight)
-const WEIGHT_MAP = {
-  Black: 900,
-  Bold: 700,
-  Semibold: 600,
-  Regular: 400,
-};
-
-// Lato fonts may register with these family names depending on metadata.
-// Provide a fallback chain so resvg picks whichever name it matches.
-const FONT_FAMILY_CHAIN = '"Lato","Lato Black","Lato Bold","Arial","sans-serif"';
-
-function text({ x, y, content, weight = "Black", size = 48, fill = CREAM, anchor = "start" }) {
-  const w = WEIGHT_MAP[weight] || 400;
-  // Default SVG baseline is alphabetic — y = baseline, text appears ABOVE y.
-  // Add ~0.78 * size to shift y to be "top of cap-height" instead.
-  const adjustedY = y + size * 0.78;
-  return `<text x="${x}" y="${adjustedY}" font-family='${FONT_FAMILY_CHAIN}' font-weight="${w}" font-size="${size}" fill="${fill}" text-anchor="${anchor}">${esc(content)}</text>`;
-}
-
-function pageMark(num, total, onDark = true) {
-  const color = onDark ? GRAY : BLACK_SOFT;
-  return text({ x: 60, y: H - 60, content: `${num} / ${total}`, weight: "Semibold", size: 20, fill: color });
+// ---------- Layout primitives ----------
+function eyebrow(text, color = ORANGE) {
+  return h("div", {
+    style: { fontSize: 22, fontWeight: 900, color, letterSpacing: 1, marginBottom: 80 },
+  }, `// ${text}`);
 }
 
 function brandMark(onDark = true) {
-  // Two-tone wordmark, right-aligned at bottom right (use text() so it picks up baseline adjustment)
   const griffinColor = onDark ? CREAM : BLACK;
   const creativeColor = onDark ? ORANGE : CREAM;
-  const baseX = W - 60;
-  return (
-    text({ x: baseX - 100, y: H - 60, content: "GRIFFIN", weight: "Black", size: 22, fill: griffinColor, anchor: "end" }) +
-    text({ x: baseX, y: H - 60, content: "CREATIVE", weight: "Black", size: 22, fill: creativeColor, anchor: "end" })
+  return h("div", {
+    style: {
+      position: "absolute",
+      bottom: 56,
+      right: 60,
+      display: "flex",
+      fontSize: 22,
+      fontWeight: 900,
+      letterSpacing: 1,
+    },
+  },
+    h("span", { style: { color: griffinColor } }, "GRIFFIN"),
+    h("span", { style: { color: creativeColor, marginLeft: 6 } }, "CREATIVE"),
   );
 }
 
-function eyebrow(label, color = ORANGE) {
-  return text({ x: 60, y: 80, content: label, weight: "Black", size: 22, fill: color });
+function pageNumber(num, total, onDark = true) {
+  return h("div", {
+    style: {
+      position: "absolute",
+      bottom: 56,
+      left: 60,
+      fontSize: 20,
+      fontWeight: 600,
+      color: onDark ? GRAY : BLACK_SOFT,
+    },
+  }, `${num} / ${total}`);
 }
 
-// ===== Slide builders =====
-function slide1_hook(brief, slideIndex) {
-  const s = (brief.slides && brief.slides.slide_1_hook) || {};
-  const lines = s.headline_lines || [];
-  const accent = s.accent_word || "";
-  const eb = s.eyebrow || `CREATIVE TEARDOWN  N°${String(slideIndex).padStart(2, "0")}`;
+function slideBase(bg, ...children) {
+  return h("div", {
+    style: {
+      width: W,
+      height: H,
+      backgroundColor: bg,
+      display: "flex",
+      flexDirection: "column",
+      padding: 60,
+      position: "relative",
+      color: CREAM,
+    },
+  }, ...children);
+}
+
+// ---------- Slide 1: Hook ----------
+function slide1Hook(brief, idx) {
+  const s = brief.slides?.slide_1_hook || {};
+  const eb = s.eyebrow || `CREATIVE TEARDOWN  N°${String(idx).padStart(2, "0")}`;
+  const lines = (s.headline_lines || []).map((l) => String(l).toUpperCase());
+  const accent = (s.accent_word || "").toUpperCase();
   const sub = s.subhead || "";
-  const ctaA = s.cta_pointer || "";
+  const cta = s.cta_pointer || "";
 
-  const headlineSize = 96;
-  const lineHeight = 110;
-  let inner = eyebrow(`// ${eb}`);
-  let y = 230;
-  for (const line of lines) {
-    const isAccent = accent && line.toUpperCase().includes(accent.toUpperCase());
-    inner += text({
-      x: 60, y, content: line.toUpperCase(),
-      weight: "Black", size: headlineSize,
-      fill: isAccent ? ORANGE : CREAM,
-    });
-    y += lineHeight;
-  }
-  y += 30;
-  inner += text({ x: 60, y, content: sub, weight: "Regular", size: 38, fill: CREAM_DIM });
-
-  // Bottom CTA pointer
-  inner += text({ x: 60, y: H - 200, content: ctaA, weight: "Bold", size: 32, fill: ORANGE });
-
-  inner += brandMark(true);
-  inner += pageMark(slideIndex, 6, true);
-  return svgWrap(BLACK, inner);
+  return slideBase(BLACK,
+    eyebrow(eb, ORANGE),
+    h("div", { style: { display: "flex", flexDirection: "column", marginTop: 80 } },
+      ...lines.map((line) => h("div", {
+        style: {
+          fontSize: 92,
+          fontWeight: 900,
+          color: accent && line.includes(accent) ? ORANGE : CREAM,
+          lineHeight: 1.05,
+          marginBottom: 8,
+        },
+      }, line)),
+    ),
+    h("div", {
+      style: { fontSize: 36, fontWeight: 400, color: CREAM_DIM, marginTop: 40, lineHeight: 1.3 },
+    }, sub),
+    h("div", {
+      style: { position: "absolute", bottom: 180, left: 60, fontSize: 30, fontWeight: 700, color: ORANGE, lineHeight: 1.25 },
+    }, cta),
+    brandMark(true),
+    pageNumber(idx, 6, true),
+  );
 }
 
-function slide2_pattern(brief, slideIndex) {
-  const s = (brief.slides && brief.slides.slide_2_pattern) || {};
-  const lines = s.headline_lines || ["EVERY AD LOOKS", "EXACTLY LIKE THIS:"];
-  const callouts = s.callouts || [];
+// ---------- Slide 2: Pattern ----------
+function slide2Pattern(brief, idx) {
+  const s = brief.slides?.slide_2_pattern || {};
+  const eb = s.eyebrow || "THE PATTERN";
+  const lines = (s.headline_lines || ["EVERY AD LOOKS", "EXACTLY LIKE THIS:"]).map((l) => l.toUpperCase());
+  const callouts = (s.callouts || []).slice(0, 3);
 
-  let inner = eyebrow(`// ${s.eyebrow || "THE PATTERN"}`);
-  let y = 180;
-  for (const line of lines) {
-    inner += text({ x: 60, y, content: line.toUpperCase(), weight: "Black", size: 72, fill: y === 180 ? CREAM : ORANGE });
-    y += 82;
-  }
-
-  // 3 cards
-  const cardY0 = 500;
-  const cardH = 200;
-  const cardGap = 24;
-  callouts.slice(0, 3).forEach((c, i) => {
-    const cy = cardY0 + i * (cardH + cardGap);
-    inner += `<rect x="60" y="${cy}" width="${W - 120}" height="${cardH}" fill="${BLACK_SOFT}"/>`;
-    inner += `<rect x="60" y="${cy}" width="14" height="${cardH}" fill="${ORANGE}"/>`;
-    inner += text({ x: 110, y: cy + 22, content: `0${i + 1}`, weight: "Black", size: 30, fill: ORANGE });
-    inner += text({ x: 110, y: cy + 70, content: (c.head || "").toUpperCase(), weight: "Black", size: 28, fill: CREAM });
-    inner += text({ x: 110, y: cy + 130, content: c.sub || "", weight: "Regular", size: 24, fill: GRAY });
-  });
-
-  inner += brandMark(true);
-  inner += pageMark(slideIndex, 6, true);
-  return svgWrap(BLACK, inner);
+  return slideBase(BLACK,
+    eyebrow(eb, ORANGE),
+    h("div", { style: { display: "flex", flexDirection: "column" } },
+      h("div", { style: { fontSize: 72, fontWeight: 900, color: CREAM, lineHeight: 1.05 } }, lines[0] || ""),
+      h("div", { style: { fontSize: 72, fontWeight: 900, color: ORANGE, lineHeight: 1.05 } }, lines[1] || ""),
+    ),
+    h("div", { style: { display: "flex", flexDirection: "column", marginTop: 80, gap: 20 } },
+      ...callouts.map((c, i) =>
+        h("div", {
+          style: {
+            display: "flex",
+            backgroundColor: BLACK_SOFT,
+            padding: "24px 30px",
+            borderLeft: `12px solid ${ORANGE}`,
+          },
+        },
+          h("div", { style: { display: "flex", flexDirection: "column" } },
+            h("div", { style: { fontSize: 28, fontWeight: 900, color: ORANGE } }, `0${i + 1}`),
+            h("div", { style: { fontSize: 28, fontWeight: 900, color: CREAM, marginTop: 12 } }, (c.head || "").toUpperCase()),
+            h("div", { style: { fontSize: 22, fontWeight: 400, color: GRAY, marginTop: 8 } }, c.sub || ""),
+          ),
+        ),
+      ),
+    ),
+    brandMark(true),
+    pageNumber(idx, 6, true),
+  );
 }
 
-function slide3_diagnosis(brief, slideIndex) {
-  const s = (brief.slides && brief.slides.slide_3_diagnosis) || {};
-  const lines = s.headline_lines || ["WHY THIS", "LEAKS MONEY."];
-  const callouts = s.callouts || [];
+// ---------- Slide 3: Diagnosis (orange BG) ----------
+function slide3Diagnosis(brief, idx) {
+  const s = brief.slides?.slide_3_diagnosis || {};
+  const eb = s.eyebrow || "DIAGNOSIS";
+  const lines = (s.headline_lines || ["WHY THIS", "LEAKS MONEY."]).map((l) => l.toUpperCase());
+  const callouts = (s.callouts || []).slice(0, 3);
 
-  let inner = eyebrow(`// ${s.eyebrow || "DIAGNOSIS"}`, BLACK);
-  let y = 180;
-  inner += text({ x: 60, y, content: (lines[0] || "").toUpperCase(), weight: "Black", size: 84, fill: BLACK });
-  inner += text({ x: 60, y: y + 92, content: (lines[1] || "").toUpperCase(), weight: "Black", size: 84, fill: CREAM });
-
-  const calloutY0 = 540;
-  callouts.slice(0, 3).forEach((c, i) => {
-    const cy = calloutY0 + i * 200;
-    inner += text({ x: 60, y: cy, content: c.num || `0${i + 1}`, weight: "Black", size: 44, fill: CREAM });
-    inner += text({ x: 180, y: cy + 4, content: (c.head || "").toUpperCase(), weight: "Black", size: 32, fill: BLACK });
-    // Body — manual word wrap to ~58 chars/line
-    const body = c.body || "";
-    const wrapped = wordWrap(body, 60);
-    wrapped.forEach((wl, wi) => {
-      inner += text({ x: 180, y: cy + 60 + wi * 32, content: wl, weight: "Regular", size: 22, fill: BLACK_SOFT });
-    });
-  });
-
-  inner += brandMark(false);
-  inner += pageMark(slideIndex, 6, false);
-  return svgWrap(ORANGE, inner);
+  return slideBase(ORANGE,
+    eyebrow(eb, BLACK),
+    h("div", { style: { display: "flex", flexDirection: "column" } },
+      h("div", { style: { fontSize: 80, fontWeight: 900, color: BLACK, lineHeight: 1.05 } }, lines[0] || ""),
+      h("div", { style: { fontSize: 80, fontWeight: 900, color: CREAM, lineHeight: 1.05 } }, lines[1] || ""),
+    ),
+    h("div", { style: { display: "flex", flexDirection: "column", marginTop: 80, gap: 28 } },
+      ...callouts.map((c, i) =>
+        h("div", { style: { display: "flex" } },
+          h("div", { style: { fontSize: 42, fontWeight: 900, color: CREAM, marginRight: 28, width: 80 } }, c.num || `0${i + 1}`),
+          h("div", { style: { display: "flex", flexDirection: "column", flex: 1 } },
+            h("div", { style: { fontSize: 30, fontWeight: 900, color: BLACK } }, (c.head || "").toUpperCase()),
+            h("div", { style: { fontSize: 22, fontWeight: 400, color: BLACK_SOFT, marginTop: 8, lineHeight: 1.35 } }, c.body || ""),
+          ),
+        ),
+      ),
+    ),
+    brandMark(false),
+    pageNumber(idx, 6, false),
+  );
 }
 
-function slide4_fix(brief, slideIndex) {
-  const s = (brief.slides && brief.slides.slide_4_fix) || {};
-  const lines = s.headline_lines || ["4 ANGLES. SAME", "PRODUCT. 48 HOURS."];
-  const angles = s.angles || [];
+// ---------- Slide 4: The Fix (2x2 grid) ----------
+function slide4Fix(brief, idx) {
+  const s = brief.slides?.slide_4_fix || {};
+  const eb = s.eyebrow || "THE FIX";
+  const lines = (s.headline_lines || ["4 ANGLES. SAME", "PRODUCT. 48 HOURS."]).map((l) => l.toUpperCase());
+  const angles = (s.angles || []).slice(0, 4);
 
-  let inner = eyebrow(`// ${s.eyebrow || "THE FIX"}`);
-  let y = 180;
-  inner += text({ x: 60, y, content: (lines[0] || "").toUpperCase(), weight: "Black", size: 72, fill: CREAM });
-  inner += text({ x: 60, y: y + 82, content: (lines[1] || "").toUpperCase(), weight: "Black", size: 72, fill: ORANGE });
-
-  // 2x2 grid of cards
-  const cardW = (W - 60 * 2 - 30) / 2;
-  const cardH = 340;
-  const gridY0 = 500;
-  angles.slice(0, 4).forEach((a, i) => {
-    const col = i % 2, row = Math.floor(i / 2);
-    const x = 60 + col * (cardW + 30);
-    const y2 = gridY0 + row * (cardH + 30);
-    inner += `<rect x="${x}" y="${y2}" width="${cardW}" height="${cardH}" fill="${BLACK_SOFT}"/>`;
-    inner += `<rect x="${x}" y="${y2}" width="${cardW}" height="8" fill="${ORANGE}"/>`;
-    inner += text({ x: x + 28, y: y2 + 40, content: `0${i + 1}`, weight: "Black", size: 34, fill: ORANGE });
-    inner += text({ x: x + 28, y: y2 + 105, content: (a.head || "").toUpperCase(), weight: "Black", size: 28, fill: CREAM });
-    const wrapped = wordWrap(a.body || "", 22);
-    wrapped.forEach((wl, wi) => {
-      inner += text({ x: x + 28, y: y2 + 165 + wi * 28, content: wl, weight: "Regular", size: 19, fill: GRAY });
-    });
-  });
-
-  inner += brandMark(true);
-  inner += pageMark(slideIndex, 6, true);
-  return svgWrap(BLACK, inner);
+  return slideBase(BLACK,
+    eyebrow(eb, ORANGE),
+    h("div", { style: { display: "flex", flexDirection: "column" } },
+      h("div", { style: { fontSize: 68, fontWeight: 900, color: CREAM, lineHeight: 1.05 } }, lines[0] || ""),
+      h("div", { style: { fontSize: 68, fontWeight: 900, color: ORANGE, lineHeight: 1.05 } }, lines[1] || ""),
+    ),
+    h("div", {
+      style: {
+        display: "flex",
+        flexWrap: "wrap",
+        marginTop: 60,
+        gap: 24,
+      },
+    },
+      ...angles.map((a, i) =>
+        h("div", {
+          style: {
+            display: "flex",
+            flexDirection: "column",
+            width: 462,
+            height: 300,
+            backgroundColor: BLACK_SOFT,
+            padding: "28px 28px",
+            borderTop: `6px solid ${ORANGE}`,
+          },
+        },
+          h("div", { style: { fontSize: 30, fontWeight: 900, color: ORANGE } }, `0${i + 1}`),
+          h("div", { style: { fontSize: 26, fontWeight: 900, color: CREAM, marginTop: 18 } }, (a.head || "").toUpperCase()),
+          h("div", { style: { fontSize: 19, fontWeight: 400, color: GRAY, marginTop: 12, lineHeight: 1.4 } }, a.body || ""),
+        ),
+      ),
+    ),
+    brandMark(true),
+    pageNumber(idx, 6, true),
+  );
 }
 
-function slide5_math(brief, slideIndex) {
-  const s = (brief.slides && brief.slides.slide_5_math) || {};
-  const lines = s.headline_lines || ["WHAT THE GAP", "IS COSTING THEM."];
-  const stats = s.stats || [];
+// ---------- Slide 5: The Math ----------
+function slide5Math(brief, idx) {
+  const s = brief.slides?.slide_5_math || {};
+  const eb = s.eyebrow || "THE MATH";
+  const lines = (s.headline_lines || ["WHAT THE GAP", "IS COSTING THEM."]).map((l) => l.toUpperCase());
+  const stats = (s.stats || []).slice(0, 3);
   const rev = s.recovered_revenue_block || {};
 
-  let inner = eyebrow(`// ${s.eyebrow || "THE MATH"}`);
-  let y = 180;
-  inner += text({ x: 60, y, content: (lines[0] || "").toUpperCase(), weight: "Black", size: 72, fill: CREAM });
-  inner += text({ x: 60, y: y + 82, content: (lines[1] || "").toUpperCase(), weight: "Black", size: 72, fill: ORANGE });
-
-  // Stat rows
-  const sY0 = 500;
-  stats.slice(0, 3).forEach((st, i) => {
-    const sy = sY0 + i * 130;
-    inner += text({ x: 60, y: sy, content: (st.label || "").toUpperCase(), weight: "Black", size: 22, fill: ORANGE });
-    inner += text({ x: 60, y: sy + 36, content: st.big || "", weight: "Black", size: 62, fill: CREAM });
-    inner += text({ x: 60, y: sy + 110, content: st.sub || "", weight: "Regular", size: 22, fill: GRAY });
-  });
-
-  // Big orange box at bottom
-  const boxY = 980;
-  inner += `<rect x="60" y="${boxY}" width="${W - 120}" height="200" fill="${ORANGE}"/>`;
-  inner += text({ x: 90, y: boxY + 28, content: (rev.label || "RECOVERED REVENUE").toUpperCase(), weight: "Black", size: 22, fill: BLACK });
-  inner += text({ x: 90, y: boxY + 65, content: rev.big || "", weight: "Black", size: 60, fill: CREAM });
-  inner += text({ x: 90, y: boxY + 145, content: rev.sub || "", weight: "Regular", size: 26, fill: BLACK_SOFT });
-
-  inner += brandMark(true);
-  inner += pageMark(slideIndex, 6, true);
-  return svgWrap(BLACK, inner);
+  return slideBase(BLACK,
+    eyebrow(eb, ORANGE),
+    h("div", { style: { display: "flex", flexDirection: "column" } },
+      h("div", { style: { fontSize: 68, fontWeight: 900, color: CREAM, lineHeight: 1.05 } }, lines[0] || ""),
+      h("div", { style: { fontSize: 68, fontWeight: 900, color: ORANGE, lineHeight: 1.05 } }, lines[1] || ""),
+    ),
+    h("div", { style: { display: "flex", flexDirection: "column", marginTop: 50, gap: 28 } },
+      ...stats.map((st) =>
+        h("div", { style: { display: "flex", flexDirection: "column" } },
+          h("div", { style: { fontSize: 20, fontWeight: 900, color: ORANGE, letterSpacing: 1 } }, (st.label || "").toUpperCase()),
+          h("div", { style: { display: "flex", alignItems: "baseline", marginTop: 6 } },
+            h("div", { style: { fontSize: 58, fontWeight: 900, color: CREAM } }, st.big || ""),
+            h("div", { style: { fontSize: 22, fontWeight: 400, color: GRAY, marginLeft: 18 } }, st.sub || ""),
+          ),
+        ),
+      ),
+    ),
+    h("div", {
+      style: {
+        position: "absolute",
+        bottom: 130, left: 60, right: 60,
+        backgroundColor: ORANGE,
+        padding: "26px 30px",
+        display: "flex",
+        flexDirection: "column",
+      },
+    },
+      h("div", { style: { fontSize: 20, fontWeight: 900, color: BLACK, letterSpacing: 1 } }, (rev.label || "RECOVERED REVENUE").toUpperCase()),
+      h("div", { style: { fontSize: 56, fontWeight: 900, color: CREAM, marginTop: 6 } }, rev.big || ""),
+      h("div", { style: { fontSize: 24, fontWeight: 400, color: BLACK_SOFT, marginTop: 6 } }, rev.sub || ""),
+    ),
+    brandMark(true),
+    pageNumber(idx, 6, true),
+  );
 }
 
-function slide6_cta(brief, slideIndex) {
-  const s = (brief.slides && brief.slides.slide_6_cta) || {};
-  const lines = s.headline_lines || ["WE DO THIS", "FOR DTC BRANDS", "EVERY WEEK."];
+// ---------- Slide 6: CTA ----------
+function slide6CTA(brief, idx) {
+  const s = brief.slides?.slide_6_cta || {};
+  const eb = s.eyebrow || "FREE TEARDOWN";
+  const lines = (s.headline_lines || ["WE DO THIS", "FOR DTC BRANDS", "EVERY WEEK."]).map((l) => l.toUpperCase());
+  const accent = (s.accent_word || "EVERY WEEK.").toUpperCase();
   const subLines = s.sub_lines || [];
   const ctaBox = s.cta_box || { prefix: "DM US", main: '"AUDIT"' };
-  const accent = s.accent_word || "EVERY WEEK.";
 
-  let inner = eyebrow(`// ${s.eyebrow || "FREE TEARDOWN"}`);
-  let y = 200;
-  for (const line of lines) {
-    const isAccent = accent && line.toUpperCase().includes(accent.toUpperCase().split(".")[0]);
-    inner += text({ x: 60, y, content: line.toUpperCase(), weight: "Black", size: 88, fill: isAccent ? ORANGE : CREAM });
-    y += 100;
-  }
-  y += 30;
-  for (const ln of subLines) {
-    inner += text({ x: 60, y, content: ln, weight: "Regular", size: 28, fill: CREAM_DIM });
-    y += 40;
-  }
-
-  // CTA orange box
-  const cBoxY = H - 360;
-  inner += `<rect x="60" y="${cBoxY}" width="${W - 120}" height="180" fill="${ORANGE}"/>`;
-  inner += text({ x: 90, y: cBoxY + 36, content: ctaBox.prefix || "DM US", weight: "Regular", size: 26, fill: BLACK });
-  inner += text({ x: 90, y: cBoxY + 76, content: ctaBox.main || '"AUDIT"', weight: "Black", size: 76, fill: CREAM });
-
-  inner += text({ x: 60, y: H - 130, content: "griffincreativelab.com", weight: "Black", size: 28, fill: CREAM });
-  inner += pageMark(slideIndex, 6, true);
-  return svgWrap(BLACK, inner);
+  return slideBase(BLACK,
+    eyebrow(eb, ORANGE),
+    h("div", { style: { display: "flex", flexDirection: "column", marginTop: 40 } },
+      ...lines.map((line) => h("div", {
+        style: {
+          fontSize: 86,
+          fontWeight: 900,
+          color: accent && line.includes(accent.split(".")[0]) ? ORANGE : CREAM,
+          lineHeight: 1.05,
+          marginBottom: 8,
+        },
+      }, line)),
+    ),
+    h("div", { style: { display: "flex", flexDirection: "column", marginTop: 40, gap: 6 } },
+      ...subLines.map((ln) => h("div", { style: { fontSize: 28, fontWeight: 400, color: CREAM_DIM } }, ln)),
+    ),
+    h("div", {
+      style: {
+        position: "absolute",
+        bottom: 200, left: 60, right: 60,
+        backgroundColor: ORANGE,
+        padding: "30px 30px",
+        display: "flex",
+        flexDirection: "column",
+      },
+    },
+      h("div", { style: { fontSize: 24, fontWeight: 400, color: BLACK, letterSpacing: 1 } }, ctaBox.prefix || "DM US"),
+      h("div", { style: { fontSize: 70, fontWeight: 900, color: CREAM, marginTop: 6 } }, ctaBox.main || '"AUDIT"'),
+    ),
+    h("div", {
+      style: { position: "absolute", bottom: 120, left: 60, fontSize: 28, fontWeight: 900, color: CREAM },
+    }, "griffincreativelab.com"),
+    pageNumber(idx, 6, true),
+  );
 }
 
-// Simple word wrap — splits on spaces and groups into lines of approx N chars
-function wordWrap(text, maxCharsPerLine) {
-  if (!text) return [];
-  const words = String(text).split(/\s+/);
-  const lines = [];
-  let cur = "";
-  for (const w of words) {
-    if ((cur + " " + w).trim().length > maxCharsPerLine) {
-      if (cur) lines.push(cur);
-      cur = w;
-    } else {
-      cur = (cur + " " + w).trim();
-    }
-  }
-  if (cur) lines.push(cur);
-  return lines;
+const SLIDES = [slide1Hook, slide2Pattern, slide3Diagnosis, slide4Fix, slide5Math, slide6CTA];
+
+// ---------- Satori + resvg render ----------
+async function renderSlideToPng(jsxNode) {
+  const satoriMod = await import("satori");
+  const satori = satoriMod.default || satoriMod;
+  const fonts = getFonts();
+
+  const svg = await satori(jsxNode, {
+    width: W,
+    height: H,
+    fonts: [
+      { name: "Lato", data: fonts.Regular,  weight: 400, style: "normal" },
+      { name: "Lato", data: fonts.Semibold, weight: 600, style: "normal" },
+      { name: "Lato", data: fonts.Bold,     weight: 700, style: "normal" },
+      { name: "Lato", data: fonts.Black,    weight: 900, style: "normal" },
+    ],
+  });
+
+  const resvgMod = await import("@resvg/resvg-js");
+  const { Resvg } = resvgMod;
+  const resvg = new Resvg(svg, { background: "transparent" });
+  return resvg.render().asPng();
 }
 
-const SLIDE_BUILDERS = [slide1_hook, slide2_pattern, slide3_diagnosis, slide4_fix, slide5_math, slide6_cta];
-
-// ===== Main handler =====
+// ---------- Main handler ----------
 module.exports = async (req, res) => {
   const expectedKey = process.env.CONTENT_GEN_API_KEY;
   if (expectedKey && req.headers["x-api-key"] !== expectedKey) {
     return res.status(401).json({ error: "Invalid or missing x-api-key" });
   }
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
@@ -362,102 +388,36 @@ module.exports = async (req, res) => {
     if (!row_id) return res.status(400).json({ error: "Missing row_id" });
 
     const sb = getSb();
+    const { data: row, error: fetchErr } = await sb.from("content_queue").select("*").eq("id", row_id).single();
+    if (fetchErr || !row) return res.status(404).json({ error: "Row not found", detail: fetchErr?.message });
+    if (row.type !== "teardown_carousel") return res.status(400).json({ error: "Row is not a teardown_carousel" });
 
-    // Fetch the row
-    const { data: row, error: fetchErr } = await sb
-      .from("content_queue")
-      .select("*")
-      .eq("id", row_id)
-      .single();
-    if (fetchErr || !row) {
-      return res.status(404).json({ error: "Row not found", detail: fetchErr?.message });
-    }
-    if (row.type !== "teardown_carousel") {
-      return res.status(400).json({ error: "Row is not a teardown_carousel" });
-    }
-
-    // Parse the brief
     let brief;
-    try {
-      brief = JSON.parse(row.content);
-    } catch (e) {
-      return res.status(400).json({ error: "Failed to parse brief JSON: " + e.message });
-    }
-    if (brief._parse_error) {
-      return res.status(400).json({ error: "Brief has earlier parse error", detail: brief._parse_error });
-    }
+    try { brief = JSON.parse(row.content); }
+    catch (e) { return res.status(400).json({ error: "Failed to parse brief JSON: " + e.message }); }
+    if (brief._parse_error) return res.status(400).json({ error: "Brief had earlier parse error", detail: brief._parse_error });
 
-    // Lazy-load resvg (ESM module — dynamic import)
-    const resvgMod = await import("@resvg/resvg-js");
-    const { Resvg } = resvgMod;
-
-    // Load fonts with diagnostic on failure
-    let fonts;
-    try {
-      fonts = getFonts();
-    } catch (e) {
-      return res.status(500).json({
-        error: "Font load failed",
-        detail: e.message,
-        diagnostic: fontDiagnostic(),
-      });
-    }
-
-    // Render each slide
     const uploadedUrls = [];
-    for (let i = 0; i < SLIDE_BUILDERS.length; i++) {
-      const builder = SLIDE_BUILDERS[i];
-      const svgString = builder(brief, i + 1);
+    for (let i = 0; i < SLIDES.length; i++) {
+      const builder = SLIDES[i];
+      const jsx = builder(brief, i + 1);
+      const png = await renderSlideToPng(jsx);
 
-      const resvg = new Resvg(svgString, {
-        font: {
-          // Pass both buffers AND file paths to maximize match probability
-          fontBuffers: [fonts.Black, fonts.Bold, fonts.Semibold, fonts.Regular],
-          fontFiles: [
-            findFontPath("Lato-Black.ttf"),
-            findFontPath("Lato-Bold.ttf"),
-            findFontPath("Lato-Semibold.ttf"),
-            findFontPath("Lato-Regular.ttf"),
-          ],
-          defaultFontFamily: "Lato",
-          loadSystemFonts: true, // allow fallback to system fonts as last resort
-        },
-        background: undefined,
-        logLevel: "warn",
-      });
-      const pngData = resvg.render().asPng();
-
-      // Upload to Supabase Storage
       const filename = `${row_id}/slide_${i + 1}.png`;
-      const { error: uploadErr } = await sb.storage
-        .from("content_assets")
-        .upload(filename, pngData, {
-          contentType: "image/png",
-          upsert: true,
-        });
-      if (uploadErr) {
-        return res.status(500).json({
-          error: `Slide ${i + 1} upload failed`,
-          detail: uploadErr.message,
-        });
-      }
+      const { error: uploadErr } = await sb.storage.from("content_assets").upload(filename, png, {
+        contentType: "image/png",
+        upsert: true,
+      });
+      if (uploadErr) return res.status(500).json({ error: `Slide ${i + 1} upload failed`, detail: uploadErr.message });
 
-      // Get public URL (bucket is public)
       const { data: pub } = sb.storage.from("content_assets").getPublicUrl(filename);
       uploadedUrls.push(pub.publicUrl);
     }
 
-    // Update the row with media_urls
-    const { error: updateErr } = await sb
-      .from("content_queue")
-      .update({
-        media_urls: uploadedUrls,
-        notes: `Rendered ${uploadedUrls.length} slides at ${new Date().toISOString()}`,
-      })
-      .eq("id", row_id);
-    if (updateErr) {
-      return res.status(500).json({ error: "Row update failed", detail: updateErr.message });
-    }
+    await sb.from("content_queue").update({
+      media_urls: uploadedUrls,
+      notes: `Rendered ${uploadedUrls.length} slides at ${new Date().toISOString()}`,
+    }).eq("id", row_id);
 
     return res.status(200).json({
       success: true,
@@ -467,6 +427,6 @@ module.exports = async (req, res) => {
     });
   } catch (err) {
     console.error("render-teardown-slides error:", err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message, stack: err.stack?.split("\n").slice(0, 5).join("\n") });
   }
 };
