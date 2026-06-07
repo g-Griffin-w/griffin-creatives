@@ -107,9 +107,13 @@ const WEIGHT_MAP = {
   Regular: 400,
 };
 
+// Lato fonts may register with these family names depending on metadata.
+// Provide a fallback chain so resvg picks whichever name it matches.
+const FONT_FAMILY_CHAIN = '"Lato","Lato Black","Lato Bold","Arial","sans-serif"';
+
 function text({ x, y, content, weight = "Black", size = 48, fill = CREAM, anchor = "start" }) {
   const w = WEIGHT_MAP[weight] || 400;
-  return `<text x="${x}" y="${y}" font-family="Lato" font-weight="${w}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" dominant-baseline="text-before-edge">${esc(content)}</text>`;
+  return `<text x="${x}" y="${y}" font-family='${FONT_FAMILY_CHAIN}' font-weight="${w}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" dominant-baseline="text-before-edge">${esc(content)}</text>`;
 }
 
 function pageMark(num, total, onDark = true) {
@@ -123,8 +127,8 @@ function brandMark(onDark = true) {
   const creativeColor = onDark ? ORANGE : CREAM;
   const baseX = W - 60;
   return `
-    <text x="${baseX - 100}" y="${H - 60}" font-family="Lato" font-weight="900" font-size="22" fill="${griffinColor}" text-anchor="end" dominant-baseline="text-before-edge">GRIFFIN</text>
-    <text x="${baseX}" y="${H - 60}" font-family="Lato" font-weight="900" font-size="22" fill="${creativeColor}" text-anchor="end" dominant-baseline="text-before-edge">CREATIVE</text>`;
+    <text x="${baseX - 100}" y="${H - 60}" font-family='${FONT_FAMILY_CHAIN}' font-weight="900" font-size="22" fill="${griffinColor}" text-anchor="end" dominant-baseline="text-before-edge">GRIFFIN</text>
+    <text x="${baseX}" y="${H - 60}" font-family='${FONT_FAMILY_CHAIN}' font-weight="900" font-size="22" fill="${creativeColor}" text-anchor="end" dominant-baseline="text-before-edge">CREATIVE</text>`;
 }
 
 function eyebrow(label, color = ORANGE) {
@@ -403,11 +407,19 @@ module.exports = async (req, res) => {
 
       const resvg = new Resvg(svgString, {
         font: {
+          // Pass both buffers AND file paths to maximize match probability
           fontBuffers: [fonts.Black, fonts.Bold, fonts.Semibold, fonts.Regular],
+          fontFiles: [
+            findFontPath("Lato-Black.ttf"),
+            findFontPath("Lato-Bold.ttf"),
+            findFontPath("Lato-Semibold.ttf"),
+            findFontPath("Lato-Regular.ttf"),
+          ],
           defaultFontFamily: "Lato",
-          loadSystemFonts: false,
+          loadSystemFonts: true, // allow fallback to system fonts as last resort
         },
         background: undefined,
+        logLevel: "warn",
       });
       const pngData = resvg.render().asPng();
 
