@@ -113,7 +113,10 @@ const FONT_FAMILY_CHAIN = '"Lato","Lato Black","Lato Bold","Arial","sans-serif"'
 
 function text({ x, y, content, weight = "Black", size = 48, fill = CREAM, anchor = "start" }) {
   const w = WEIGHT_MAP[weight] || 400;
-  return `<text x="${x}" y="${y}" font-family='${FONT_FAMILY_CHAIN}' font-weight="${w}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" dominant-baseline="text-before-edge">${esc(content)}</text>`;
+  // Default SVG baseline is alphabetic — y = baseline, text appears ABOVE y.
+  // Add ~0.78 * size to shift y to be "top of cap-height" instead.
+  const adjustedY = y + size * 0.78;
+  return `<text x="${x}" y="${adjustedY}" font-family='${FONT_FAMILY_CHAIN}' font-weight="${w}" font-size="${size}" fill="${fill}" text-anchor="${anchor}">${esc(content)}</text>`;
 }
 
 function pageMark(num, total, onDark = true) {
@@ -122,13 +125,14 @@ function pageMark(num, total, onDark = true) {
 }
 
 function brandMark(onDark = true) {
-  // Two-tone wordmark, right-aligned at bottom right
+  // Two-tone wordmark, right-aligned at bottom right (use text() so it picks up baseline adjustment)
   const griffinColor = onDark ? CREAM : BLACK;
   const creativeColor = onDark ? ORANGE : CREAM;
   const baseX = W - 60;
-  return `
-    <text x="${baseX - 100}" y="${H - 60}" font-family='${FONT_FAMILY_CHAIN}' font-weight="900" font-size="22" fill="${griffinColor}" text-anchor="end" dominant-baseline="text-before-edge">GRIFFIN</text>
-    <text x="${baseX}" y="${H - 60}" font-family='${FONT_FAMILY_CHAIN}' font-weight="900" font-size="22" fill="${creativeColor}" text-anchor="end" dominant-baseline="text-before-edge">CREATIVE</text>`;
+  return (
+    text({ x: baseX - 100, y: H - 60, content: "GRIFFIN", weight: "Black", size: 22, fill: griffinColor, anchor: "end" }) +
+    text({ x: baseX, y: H - 60, content: "CREATIVE", weight: "Black", size: 22, fill: creativeColor, anchor: "end" })
+  );
 }
 
 function eyebrow(label, color = ORANGE) {
