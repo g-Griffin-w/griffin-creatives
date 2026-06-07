@@ -72,8 +72,17 @@ function svgWrap(bg, inner) {
 </svg>`;
 }
 
+// Map weight name -> numeric CSS weight (resvg matches font-family="Lato" + weight)
+const WEIGHT_MAP = {
+  Black: 900,
+  Bold: 700,
+  Semibold: 600,
+  Regular: 400,
+};
+
 function text({ x, y, content, weight = "Black", size = 48, fill = CREAM, anchor = "start" }) {
-  return `<text x="${x}" y="${y}" font-family="Lato ${weight}" font-weight="900" font-size="${size}" fill="${fill}" text-anchor="${anchor}" dominant-baseline="text-before-edge">${esc(content)}</text>`;
+  const w = WEIGHT_MAP[weight] || 400;
+  return `<text x="${x}" y="${y}" font-family="Lato" font-weight="${w}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" dominant-baseline="text-before-edge">${esc(content)}</text>`;
 }
 
 function pageMark(num, total, onDark = true) {
@@ -86,10 +95,9 @@ function brandMark(onDark = true) {
   const griffinColor = onDark ? CREAM : BLACK;
   const creativeColor = onDark ? ORANGE : CREAM;
   const baseX = W - 60;
-  // text-anchor="end" so we right-align easily
   return `
-    <text x="${baseX - 100}" y="${H - 60}" font-family="Lato Black" font-weight="900" font-size="22" fill="${griffinColor}" text-anchor="end" dominant-baseline="text-before-edge">GRIFFIN</text>
-    <text x="${baseX}" y="${H - 60}" font-family="Lato Black" font-weight="900" font-size="22" fill="${creativeColor}" text-anchor="end" dominant-baseline="text-before-edge">CREATIVE</text>`;
+    <text x="${baseX - 100}" y="${H - 60}" font-family="Lato" font-weight="900" font-size="22" fill="${griffinColor}" text-anchor="end" dominant-baseline="text-before-edge">GRIFFIN</text>
+    <text x="${baseX}" y="${H - 60}" font-family="Lato" font-weight="900" font-size="22" fill="${creativeColor}" text-anchor="end" dominant-baseline="text-before-edge">CREATIVE</text>`;
 }
 
 function eyebrow(label, color = ORANGE) {
@@ -358,7 +366,7 @@ module.exports = async (req, res) => {
       const resvg = new Resvg(svgString, {
         font: {
           fontBuffers: [fonts.Black, fonts.Bold, fonts.Semibold, fonts.Regular],
-          defaultFontFamily: "Lato Black",
+          defaultFontFamily: "Lato",
           loadSystemFonts: false,
         },
         background: undefined,
