@@ -31,18 +31,45 @@ function getSb() {
   return _sb;
 }
 
-// Font buffers loaded once and reused.
+// Font files loaded once and reused. Try multiple candidate paths because
+// Vercel's deployment layout differs between project root and function dir.
+function findFontPath(filename) {
+  const candidates = [
+    path.join(__dirname, "fonts", filename),
+    path.join(process.cwd(), "api/fonts", filename),
+    path.join(process.cwd(), "fonts", filename),
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
+  }
+  throw new Error(`Font not found. Tried: ${candidates.join(" | ")}`);
+}
+
 let _fonts = null;
 function getFonts() {
   if (_fonts) return _fonts;
-  const dir = path.join(process.cwd(), "api/fonts");
   _fonts = {
-    Black:    fs.readFileSync(path.join(dir, "Lato-Black.ttf")),
-    Bold:     fs.readFileSync(path.join(dir, "Lato-Bold.ttf")),
-    Semibold: fs.readFileSync(path.join(dir, "Lato-Semibold.ttf")),
-    Regular:  fs.readFileSync(path.join(dir, "Lato-Regular.ttf")),
+    Black:    fs.readFileSync(findFontPath("Lato-Black.ttf")),
+    Bold:     fs.readFileSync(findFontPath("Lato-Bold.ttf")),
+    Semibold: fs.readFileSync(findFontPath("Lato-Semibold.ttf")),
+    Regular:  fs.readFileSync(findFontPath("Lato-Regular.ttf")),
   };
   return _fonts;
+}
+
+// Diagnostic helper: report what the function sees on disk
+function fontDiagnostic() {
+  const cwd = process.cwd();
+  const tried = [
+    path.join(__dirname, "fonts"),
+    path.join(cwd, "api/fonts"),
+    path.join(cwd, "fonts"),
+  ];
+  return tried.map((p) => ({
+    path: p,
+    exists: fs.existsSync(p),
+    files: fs.existsSync(p) ? fs.readdirSync(p) : null,
+  }));
 }
 
 // ===== Palette =====
@@ -355,7 +382,18 @@ module.exports = async (req, res) => {
     // Lazy-load resvg (ESM module — dynamic import)
     const resvgMod = await import("@resvg/resvg-js");
     const { Resvg } = resvgMod;
-    const fonts = getFonts();
+
+    // Load fonts with diagnostic on failure
+    let fonts;
+    try {
+      fonts = getFonts();
+    } catch (e) {
+      return res.status(500).json({
+        error: "Font load failed",
+        detail: e.message,
+        diagnostic: fontDiagnostic(),
+      });
+    }
 
     // Render each slide
     const uploadedUrls = [];
