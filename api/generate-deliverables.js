@@ -477,6 +477,51 @@ End with a 1-paragraph note on how to brief paid UGC actors if the client doesn'
 
 Output only the formatted content, no preamble.`);
 
+  // -------------------- PROMPT 3B: AI VIDEO SCRIPTS (structured, for Kling) --------------------
+  // Returns a JSON array so Make.com can iterate ONE Kling job per script.
+  // Each scene carries a Kling-ready visual prompt AND the exact on-screen
+  // caption text for that scene. Captions carry the message because ~97% of
+  // mobile feed views are sound-off — voiceover is optional/secondary.
+  const videoScriptsPrompt = fill(`You are a short-form video creative director for GriffinCreative. Generate exactly ${counts.ugc} AI-video ad scripts for {{business_name}}, each built to be produced as a finished 15-30 second in-feed video: AI-generated visuals (Kling), burned-in captions, optional voiceover, and a CTA end card.
+
+Brand: {{business_name}}
+Category: {{business_type}}
+Audience: {{target_audience}}
+Primary offer: {{ad_goals}}
+Active promos: {{promos}}
+Voice: {{brand_voice}}
+Product photo URLs (reference in scene visuals when provided): {{product_image_urls}}
+Shopify: {{shopify_url}}
+Notes: {{notes}}
+
+CRITICAL: ~97% of mobile feed views are watched SOUND-OFF. The on-screen CAPTIONS must carry the entire message on their own. Voiceover is optional and secondary — never rely on it.
+
+RULES:
+- Spread scripts across angles: problem-solution, before/after, listicle ("3 reasons"), testimonial-style, unboxing/demo, founder POV, comparison, "you're using it wrong".
+- The hook is the first 3 seconds, written as the opening on-screen caption. It must stop the scroll.
+- 3-5 scenes per script. Each scene needs a Kling-ready text-to-video visual prompt AND the exact on-screen caption for that scene.
+- Captions must stand alone with sound off and tell the full story. Keep each caption <= 10 words.
+- Total runtime 15-30 seconds. Reference the brand's real product/category — no generic filler.
+
+Return ONLY a valid JSON array with exactly ${counts.ugc} objects:
+{
+  "concept": "short name (2-5 words)",
+  "angle": "which angle this attacks (e.g., 'before/after', 'listicle', 'problem-solution')",
+  "hook": "opening 3-second on-screen caption (<= 10 words)",
+  "scenes": [
+    {
+      "visual": "Kling-ready text-to-video prompt: subject, action, setting, camera move, lighting, mood. Reference the product photo when provided.",
+      "caption": "exact on-screen caption text for this scene (<= 10 words)",
+      "duration_sec": 5
+    }
+  ],
+  "cta_text": "end-card CTA (<= 4 words)",
+  "music_mood": "music/SFX direction (e.g., 'upbeat lo-fi', 'energetic trap')",
+  "voiceover_optional": "a single optional VO line if the client wants voiceover; empty string for caption-only"
+}
+
+Output the JSON array and nothing else.`);
+
   // -------------------- PROMPT 4: EMAIL FLOWS --------------------
   const emailFlowsPrompt = fill(`You are an elite DTC email copywriter for GriffinCreative (think Klaviyo Master Class instructor energy). Write exactly ${counts.emails} complete email flows for:
 
@@ -691,6 +736,7 @@ Output only the formatted content, no preamble.`);
       { key: 'ad_hooks',         text: adHooksPrompt,     parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 5000 },
       { key: 'static_ads',       text: staticAdsPrompt,   parseJson: true,  model: 'claude-haiku-4-5-20251001', max_tokens: 6000 },
       { key: 'ugc_briefs',       text: ugcBriefsPrompt,   parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 5000 },
+      { key: 'video_scripts',    text: videoScriptsPrompt, parseJson: true, model: 'claude-haiku-4-5-20251001', max_tokens: 8000 },
       { key: 'email_flows',      text: emailFlowsPrompt,  parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 5000 },
       { key: 'content_calendar', text: calendarPrompt,    parseJson: false, model: 'claude-haiku-4-5-20251001', max_tokens: 7000 },
     ];
