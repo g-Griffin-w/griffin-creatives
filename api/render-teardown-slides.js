@@ -424,6 +424,9 @@ module.exports = async (req, res) => {
       row_id,
       slide_count: uploadedUrls.length,
       media_urls: uploadedUrls,
+      // Pre-shaped for Make.com's Instagram for Business module which expects
+      // each file as an object with a url field, not a bare URL string.
+      files: uploadedUrls.map((u) => ({ url: u })),
     });
   } catch (err) {
     console.error("render-teardown-slides error:", err);
