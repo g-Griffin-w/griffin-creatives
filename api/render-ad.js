@@ -80,7 +80,7 @@ function h(type, props, ...children) {
 // ---------- Build one ad layout ----------
 // Full-bleed scene image, a bottom gradient scrim for legibility, then
 // headline + subheadline + CTA pill anchored bottom-left.
-function buildAdJsx({ w, h: H, imageDataUri, headline, subheadline, cta }) {
+function buildAdJsx({ w, h: H, imageDataUri, headline, subheadline, cta, accent = ORANGE }) {
   const scale = Math.min(w, H);
   const pad = Math.round(w * 0.065);
   const hlSize = Math.round(scale * 0.084);
@@ -152,7 +152,7 @@ function buildAdJsx({ w, h: H, imageDataUri, headline, subheadline, cta }) {
         style: {
           display: "flex",
           alignSelf: "flex-start",
-          backgroundColor: ORANGE,
+          backgroundColor: accent,
           color: "#FFFFFF",
           fontSize: ctaSize,
           fontWeight: 700,
@@ -216,9 +216,17 @@ async function renderJsxToPng(jsxNode, w, h) {
 
 // Render a single ratio to a PNG buffer (no upload) — used by the handler and
 // by local QA harnesses.
-async function renderOneRatio({ ratio, imageDataUri, headline, subheadline, cta }) {
-  const jsx = buildAdJsx({ w: ratio.w, h: ratio.h, imageDataUri, headline, subheadline, cta });
+async function renderOneRatio({ ratio, imageDataUri, headline, subheadline, cta, accent }) {
+  const jsx = buildAdJsx({ w: ratio.w, h: ratio.h, imageDataUri, headline, subheadline, cta, accent });
   return renderJsxToPng(jsx, ratio.w, ratio.h);
+}
+
+// Validate a hex color (#RGB or #RRGGBB); fall back to brand orange.
+function sanitizeHex(c) {
+  if (typeof c === "string" && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(c.trim())) {
+    return c.trim();
+  }
+  return ORANGE;
 }
 
 // ---------- Helpers ----------
@@ -255,12 +263,14 @@ const handler = async (req, res) => {
       cta_button = "",
       concept = "ad",
       client_id = "shared", // used only for the storage path
+      accent_color,         // client brand accent for the CTA button (hex)
     } = body;
 
     if (!image_url || !headline) {
       return res.status(400).json({ error: "Missing image_url or headline" });
     }
 
+    const accent = sanitizeHex(accent_color);
     const bucket = process.env.AD_ASSETS_BUCKET || "content_assets";
     const sb = getSb();
     const imageDataUri = await fetchAsDataUri(image_url);
@@ -268,7 +278,7 @@ const handler = async (req, res) => {
 
     const files = [];
     for (const ratio of RATIOS) {
-      const png = await renderOneRatio({ ratio, imageDataUri, headline, subheadline, cta: cta_button });
+      const png = await renderOneRatio({ ratio, imageDataUri, headline, subheadline, cta: cta_button, accent });
       const filename = `static-ads/${slugify(client_id)}/${conceptSlug}-${ratio.key}.png`;
       const { error: upErr } = await sb.storage.from(bucket).upload(filename, png, {
         contentType: "image/png",

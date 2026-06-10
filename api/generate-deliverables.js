@@ -97,6 +97,25 @@ function planCounts(plan) {
   return { staticAds: 12, ugc: 8, hooks: 15, emails: 1, landing: 0 };
 }
 
+// Pull the client's brand ACCENT color from their brand assets / voice notes so
+// finished ads carry the client's brand, not ours. Picks the first hex that
+// isn't near-black or near-white (those are usually background/text, not accent).
+// Falls back to GriffinCreative orange when nothing usable is provided.
+function extractBrandAccent(...sources) {
+  const text = sources.filter(Boolean).join(' ');
+  const hexes = text.match(/#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})/g) || [];
+  for (const hx of hexes) {
+    let h = hx.slice(1);
+    if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b; // 0 (black) .. 255 (white)
+    if (lum > 28 && lum < 225) return '#' + h.toUpperCase();
+  }
+  return '#FF4D00';
+}
+
 // Email flow names per plan — used to brief Claude on which flows to produce.
 function emailFlowsList(plan) {
   if (plan === 'dominate') {
@@ -419,6 +438,7 @@ RULES:
 - HEADLINE must be 8 words or fewer. Sub-headlines max 12 words. CTAs max 4 words.
 - Designed for native feeds — slightly imperfect, lifestyle-real, NOT glossy/corporate. UGC-native energy.
 - Vary across the active promos when promos are listed.
+- NEVER ask the image to ADD marketing text, headlines, captions, or graphic typography — our system overlays the copy afterward, so every image_prompt must forbid added text and leave clean negative space for it. EXCEPTION: the product's OWN real label/logo from the source photo must be preserved exactly as-is — that is part of the product, not added text.
 
 Return ONLY a valid JSON array with exactly ${counts.staticAds} objects:
 {
@@ -427,7 +447,7 @@ Return ONLY a valid JSON array with exactly ${counts.staticAds} objects:
   "headline": "main on-image headline (≤8 words)",
   "subheadline": "supporting line (≤12 words)",
   "cta_button": "CTA text (≤4 words)",
-  "image_prompt": "ready-to-paste prompt for Midjourney/nano-banana. Describe: scene, composition, lighting, mood, color palette, the product (reference photo URLs above if provided), and instructions to render the headline text cleanly. 1:1 or 4:5 aspect ratio. UGC-native vibe unless brand voice suggests luxury/premium.",
+  "image_prompt": "ready-to-paste prompt for nano-banana image-to-image. Describe ONLY: scene, composition, lighting, mood, color palette, and the product (reference photo URLs above if provided). CRITICAL — do NOT ADD any marketing text, words, headlines, captions, watermarks, or graphic typography to the scene; our system overlays the copy afterward. KEEP the product exactly as it appears in the provided photo, INCLUDING its real packaging, label, and any brand logo printed on the product itself — preserve those faithfully (they are part of the product, not added text). Never add NEW text or graphics on or around the product. Compose with clean, uncluttered negative space (lower third or one side) reserved for the copy. End the prompt with: 'preserve the product label exactly; add no additional text or graphics'. UGC-native vibe unless brand voice suggests luxury/premium.",
   "production_note": "1-sentence guidance to the client — e.g., 'Use product photo URL #2', 'pair with customer testimonial in caption', 'good for cold audience cohort A'"
 }
 
@@ -776,6 +796,7 @@ Output only the formatted content, no preamble.`);
       client: business_name,
       plan,
       voice_name,
+      brand_accent: extractBrandAccent(brand_asset_urls, brand_voice),
       signed_product_urls,
       deliverables,
     });
