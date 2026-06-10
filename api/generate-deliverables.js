@@ -502,7 +502,11 @@ Output only the formatted content, no preamble.`);
   // Each scene carries a Kling-ready visual prompt AND the exact on-screen
   // caption text for that scene. Captions carry the message because ~97% of
   // mobile feed views are sound-off — voiceover is optional/secondary.
-  const videoScriptsPrompt = fill(`You are a short-form video creative director for GriffinCreative. Generate exactly ${counts.ugc} AI-video ad scripts for {{business_name}}, each built to be produced as a finished 15-30 second in-feed video: AI-generated visuals (Kling), burned-in captions, optional voiceover, and a CTA end card.
+  const videoScriptsPrompt = fill(`You are a short-form video creative director for GriffinCreative. Generate exactly ${counts.ugc} AI-video ad scripts for {{business_name}}, each produced as a finished 15-30 second in-feed video that drives sales.
+
+HOW THESE ARE PRODUCED (critical to how you write the prompt):
+- Each video is made with Kling IMAGE-TO-VIDEO. The FIRST FRAME is the client's REAL product photo (provided below). Kling animates motion outward from that real photo — so the actual product is on screen the whole time. This is what makes the ad convert: real product, not a hallucinated one.
+- Burned-in captions carry the message (97% of mobile feed views are SOUND-OFF). A CTA end card closes it. Voiceover is optional and secondary — never rely on it.
 
 Brand: {{business_name}}
 Category: {{business_type}}
@@ -510,31 +514,23 @@ Audience: {{target_audience}}
 Primary offer: {{ad_goals}}
 Active promos: {{promos}}
 Voice: {{brand_voice}}
-Product photo URLs (reference in scene visuals when provided): {{product_image_urls}}
+Client product photo URLs (these are the literal first frame of the video): {{product_image_urls}}
 Shopify: {{shopify_url}}
 Notes: {{notes}}
 
-CRITICAL: ~97% of mobile feed views are watched SOUND-OFF. The on-screen CAPTIONS must carry the entire message on their own. Voiceover is optional and secondary — never rely on it.
-
 RULES:
-- Spread scripts across angles: problem-solution, before/after, listicle ("3 reasons"), testimonial-style, unboxing/demo, founder POV, comparison, "you're using it wrong".
-- The hook is the first 3 seconds, written as the opening on-screen caption. It must stop the scroll.
-- 3-5 scenes per script. Each scene needs a Kling-ready text-to-video visual prompt AND the exact on-screen caption for that scene.
-- Captions must stand alone with sound off and tell the full story. Keep each caption <= 10 words.
-- Total runtime 15-30 seconds. Reference the brand's real product/category — no generic filler.
+- Spread scripts across high-converting angles: problem-solution, before/after, listicle ("3 reasons"), testimonial-style, unboxing/demo, founder POV, comparison, "you're using it wrong".
+- motion_prompt describes ONLY camera/product MOTION and atmosphere applied to the real product photo (e.g., "slow push-in on the bottle as soft morning light sweeps across it, gentle condensation, shallow depth of field"). Do NOT describe a different or new product — the real product photo is the starting frame. No text, words, or captions in the video itself (we overlay those).
+- captions: 3-5 short on-screen lines that play in sequence and tell the full story sound-off. First caption IS the 3-second hook and must stop the scroll. Keep each <= 8 words.
+- Reference the brand's real product/offer — no generic filler. Make the viewer want to buy.
 
 Return ONLY a valid JSON array with exactly ${counts.ugc} objects:
 {
   "concept": "short name (2-5 words)",
   "angle": "which angle this attacks (e.g., 'before/after', 'listicle', 'problem-solution')",
-  "hook": "opening 3-second on-screen caption (<= 10 words)",
-  "scenes": [
-    {
-      "visual": "Kling-ready text-to-video prompt: subject, action, setting, camera move, lighting, mood. Reference the product photo when provided.",
-      "caption": "exact on-screen caption text for this scene (<= 10 words)",
-      "duration_sec": 5
-    }
-  ],
+  "hook": "opening 3-second on-screen caption (<= 8 words)",
+  "motion_prompt": "Kling image-to-video MOTION prompt applied to the client's real product photo: camera move, product/scene motion, lighting, mood, pacing. Never describe a new product; animate the real one. No on-screen text.",
+  "captions": ["caption 1 = the hook (<= 8 words)", "caption 2", "caption 3"],
   "cta_text": "end-card CTA (<= 4 words)",
   "music_mood": "music/SFX direction (e.g., 'upbeat lo-fi', 'energetic trap')",
   "voiceover_optional": "a single optional VO line if the client wants voiceover; empty string for caption-only"
