@@ -520,7 +520,7 @@ Notes: {{notes}}
 
 RULES:
 - Spread scripts across high-converting angles: problem-solution, before/after, listicle ("3 reasons"), testimonial-style, unboxing/demo, founder POV, comparison, "you're using it wrong".
-- motion_prompt describes ONLY camera/product MOTION and atmosphere applied to the real product photo (e.g., "slow push-in on the bottle as soft morning light sweeps across it, gentle condensation, shallow depth of field"). Do NOT describe a different or new product — the real product photo is the starting frame. No text, words, or captions in the video itself (we overlay those).
+- motion_prompt describes ONLY camera/product MOTION and atmosphere applied to the real product photo. Favor SUBTLE, slow, gentle motion that keeps the product label crisp and legible — e.g., "slow gentle push-in on the bottle, soft morning light drifting across it, faint condensation, shallow depth of field, product stays sharp and centered." AVOID fast moves, big zooms, rotations, spins, or warping camera moves — those smear the product's printed label into garbled text. Do NOT describe a different or new product — the real product photo is the starting frame. No NEW text, words, or captions in the video itself (we overlay those), and keep the product's own label undistorted.
 - captions: 3-5 short on-screen lines that play in sequence and tell the full story sound-off. First caption IS the 3-second hook and must stop the scroll. Keep each <= 8 words.
 - Reference the brand's real product/offer — no generic filler. Make the viewer want to buy.
 
@@ -529,7 +529,7 @@ Return ONLY a valid JSON array with exactly ${counts.ugc} objects:
   "concept": "short name (2-5 words)",
   "angle": "which angle this attacks (e.g., 'before/after', 'listicle', 'problem-solution')",
   "hook": "opening 3-second on-screen caption (<= 8 words)",
-  "motion_prompt": "Kling image-to-video MOTION prompt applied to the client's real product photo: camera move, product/scene motion, lighting, mood, pacing. Never describe a new product; animate the real one. No on-screen text.",
+  "motion_prompt": "Kling image-to-video MOTION prompt applied to the client's real product photo. Use SUBTLE, slow, gentle motion (soft push-in, drifting light, faint particles) that keeps the product and its printed label crisp and undistorted. Avoid fast moves, zooms, rotations, or warping. Never describe a new product; animate the real one. No new on-screen text.",
   "captions": ["caption 1 = the hook (<= 8 words)", "caption 2", "caption 3"],
   "cta_text": "end-card CTA (<= 4 words)",
   "music_mood": "music/SFX direction (e.g., 'upbeat lo-fi', 'energetic trap')",
