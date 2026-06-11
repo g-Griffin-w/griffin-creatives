@@ -332,10 +332,15 @@ module.exports = async (req, res) => {
     if (!text) return [];
     let cleaned = text.trim();
     cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
-    const first = cleaned.indexOf('[');
-    const last = cleaned.lastIndexOf(']');
-    if (first !== -1 && last !== -1 && last > first) {
-      cleaned = cleaned.slice(first, last + 1);
+    // Support both JSON arrays ([...]) and single objects ({...}).
+    const ai = cleaned.indexOf('[');
+    const oi = cleaned.indexOf('{');
+    let start = -1, endCh = ']';
+    if (oi === -1 || (ai !== -1 && ai < oi)) { start = ai; endCh = ']'; }
+    else { start = oi; endCh = '}'; }
+    if (start !== -1) {
+      const last = cleaned.lastIndexOf(endCh);
+      if (last > start) cleaned = cleaned.slice(start, last + 1);
     }
     try {
       return JSON.parse(cleaned);
@@ -742,6 +747,45 @@ A: [answer]
 
 Output only the formatted content, no preamble.`);
 
+  // -------------------- PROMPT 7B: STRUCTURED LANDING PAGE (for hosted page build) --------------------
+  // Returns ONE structured landing page object that /api/render-landing turns
+  // into a finished, hosted page on griffincreativelab.com — not copy homework.
+  const landingPageStructuredPrompt = fill(`You are a high-converting DTC landing page copywriter for GriffinCreative. Produce ONE complete, ready-to-publish landing page for {{business_name}} as a structured JSON object (this becomes a REAL hosted page).
+
+Brand: {{business_name}}
+Category: {{business_type}}
+Audience: {{target_audience}}
+Primary offer: {{ad_goals}}
+Active promos: {{promos}}
+Voice: {{brand_voice}}
+Shopify: {{shopify_url}}
+Notes: {{notes}}
+
+Conversion-focused, specific copy — no generic filler. Match the brand voice. Make the visitor want to buy.
+
+Return ONLY a valid JSON object:
+{
+  "hero_headline": "punchy hero headline (<= 10 words)",
+  "hero_subhead": "supporting subhead (1 sentence)",
+  "hero_cta": "CTA button text (<= 4 words)",
+  "value_props": [
+    { "title": "benefit (<= 5 words)", "body": "1-sentence support" },
+    { "title": "benefit", "body": "1-sentence support" },
+    { "title": "benefit", "body": "1-sentence support" }
+  ],
+  "social_proof": "one strong customer-quote-style line of social proof",
+  "faq": [
+    { "q": "common question", "a": "clear answer" },
+    { "q": "question", "a": "answer" },
+    { "q": "question", "a": "answer" },
+    { "q": "question", "a": "answer" }
+  ],
+  "closing_headline": "final pitch headline",
+  "closing_cta": "final CTA button text (<= 4 words)"
+}
+
+Output the JSON object and nothing else.`);
+
   // For Make.com Scenario C compatibility — DTC clients use "DTC" marker.
   // Scenario C should be PAUSED for any voice_name === "DTC" to skip AI voiceover.
   const voice_name = 'DTC';
@@ -759,6 +803,7 @@ Output only the formatted content, no preamble.`);
 
     if (plan === 'scale' || plan === 'dominate') {
       prompts.push({ key: 'landing_page_copy', text: landingPagePrompt, parseJson: false, model: 'claude-sonnet-4-5', max_tokens: 4000 });
+      prompts.push({ key: 'landing_page', text: landingPageStructuredPrompt, parseJson: true, model: 'claude-sonnet-4-5', max_tokens: 2500 });
     }
 
     const results = await Promise.all(
