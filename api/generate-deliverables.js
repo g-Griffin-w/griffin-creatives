@@ -792,7 +792,6 @@ Output the JSON object and nothing else.`);
 
   try {
     const prompts = [
-      { key: 'action_plan',      text: actionPlanPrompt,  parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 3500 },
       { key: 'ad_hooks',         text: adHooksPrompt,     parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 5000 },
       { key: 'static_ads',       text: staticAdsPrompt,   parseJson: true,  model: 'claude-haiku-4-5-20251001', max_tokens: 6000 },
       { key: 'ugc_briefs',       text: ugcBriefsPrompt,   parseJson: false, model: 'claude-sonnet-4-5',         max_tokens: 5000 },
