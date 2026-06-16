@@ -1,6 +1,8 @@
 # Source files for Instagram carousels — local-only design assets
 # Screenshot-source HTML that should never deploy to Vercel
 teardowns/instagram-carousel-*.html
+teardowns/ig-slides-ready/
+teardowns/png-export/
 
 # Node
 node_modules/

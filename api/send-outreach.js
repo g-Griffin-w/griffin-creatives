@@ -31,9 +31,9 @@ const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 // ============================================================
 // Cold email prompt (Phase 4 design)
 // ============================================================
-const COLD_EMAIL_PROMPT = `You are a cold email copywriter for GriffinCreative, a done-for-you AI ad creative agency for small businesses.
+const COLD_EMAIL_PROMPT = `You are a cold email copywriter for GriffinCreative, a done-for-you creative studio that turns DTC e-commerce brands' own product photos into finished, ready-to-upload ads.
 
-Your job: write a personalized cold email using the EXACT structure below, with a NICHE-SPECIFIC hook in the second paragraph. Casual lowercase, direct, no fluff.
+Your job: write a FRIENDLY, SHORT, personalized cold email using the EXACT structure below, with a NICHE-SPECIFIC hook in the second paragraph. Casual lowercase, warm, direct, no fluff. The whole point is to feel like a real person offering something genuinely useful for free.
 
 LEAD INFO:
 - First name: {{first_name}}
@@ -44,58 +44,49 @@ LEAD INFO:
 - Niche: {{niche}}
 
 SUBJECT (all niches):
-{{company_name}} + testing velocity
+a couple free ads for {{company_name}}?
 
-EMAIL STRUCTURE (all niches — write the body in exactly this order):
+EMAIL STRUCTURE (write the body in exactly this order):
 
 Paragraph 1 (greeting):
 hi {{first_name}},
 
-Paragraph 2 (niche-specific empathy hook — pick the one matching the lead's niche from NICHE HOOKS below)
+Paragraph 2 (niche-specific hook — pick the one matching the lead's niche from NICHE HOOKS below)
 
 Paragraph 3 (shared pitch — write this exactly, do not change wording):
-we built an automated creative pipeline at griffincreative that delivers ad scripts, email sequences, social content, and visual content — all tailored to your business and dropped in a google drive within 48 hours. tiers run $700–$3,500/mo depending on volume. no contracts, month-to-month.
+here's the idea: we turn your existing product photos into finished, ready-to-upload static ads — designed with the copy right on the image, in every placement ratio. not concepts or briefs — actual files in your google drive within 48 hours, ready to test before your current winners burn out.
 
-Paragraph 4 (shared close — write this exactly, do not change wording — this is the FINAL paragraph of the body):
-happy to record a free 5-min video auditing your site and outreach with 3-4 specific things i'd change if you were a client. want one?
+Paragraph 4 (shared free-sample offer — write this exactly, do not change wording — this is the FINAL paragraph of the body):
+want me to make you 2 free samples? you send nothing — i'll pull a product from your site, design 2 finished static ads, and they're yours to run whether or not we ever work together.
 
-DO NOT include a signature, sign-off, name, brand name, or anything else after "want one?". The body MUST end with the question "want one?". A canonical signature is appended automatically by the system.
+CLOSE (write exactly, on its own line as the last line of the body):
+sound good?
+
+DO NOT include a signature, sign-off, name, brand name, or anything else after "sound good?". The body MUST end with "sound good?". A canonical signature is appended automatically by the system.
 
 NICHE HOOKS (use the one matching {{niche}}):
 
-- If niche is "ecommerce_dtc" OR "dtc" OR "ecommerce":
-  "found {{company_name}} while looking at fast-growing DTC brands. most growth teams we talk to don't actually have a creative problem — they have a velocity problem. agency makes solid stuff, just not fast enough to test 5 hooks before a winner burns out."
-
-- If niche is "insurance" OR "insurance_independent":
-  "found {{company_name}} while looking at independent agencies in {{city}}. competing for local business against State Farm and Allstate's national ad budgets with no in-house marketing team is brutal."
-
-- If niche is "mortgage_broker" OR "mortgage":
-  "found {{company_name}} while looking at independent brokers in {{city}}. rates move and deal flow swings hard — most brokers are still leaning on realtor referrals to bridge the gap, and that well dries up fast when the market shifts."
-
-- If niche is "roofing":
-  "found {{company_name}} while looking at roofing contractors in {{city}}. between storm-chaser competition and rising lead costs from angi and home advisor, most roofers are paying way too much for leads they don't even own."
-
-- If niche is "plumbing":
-  "found {{company_name}} while looking at plumbing contractors in {{city}}. paying $50–150 per shared lead from angi or home advisor — on a service call that might only pay $200 — is brutal margin and an unstable pipeline."
+- If niche mentions DTC or ecommerce (e.g. "DTC E-commerce", "DTC", "ecommerce_dtc", "dtc", "ecommerce"):
+  "found {{company_name}} while looking at fast-growing DTC brands — and your product photos are honestly too good to only be running a few ad variations."
 
 - If niche is missing, empty, or anything else:
-  "found {{company_name}} while looking at small business owners in {{city}}. most owners we work with are either overpaying a marketing agency or trying to do creative themselves between jobs — neither scales."
+  "found {{company_name}} while looking at fast-growing e-commerce brands — and your product photos are honestly too good to only be running a few ad variations."
 
 DATA HANDLING RULES:
 - If first_name is missing or empty → use "there"
-- If company_city is missing or empty → drop the "in {{city}}" phrase entirely from the hook (keep the rest of the sentence intact)
 - If company_name ends in " LLC", " Inc", " Inc.", " Corp", " Corporation" — drop the suffix in the body (keep full legal name in subject)
 - Keep the company name in the subject EXACTLY as provided
 
 STYLE RULES:
 - Casual lowercase throughout — never capitalize a sentence-start "i" or any line opener
-- "i'd" stays lowercase
-- Total email body under 140 words
+- "i'd" / "i'll" stay lowercase
+- Friendly and warm, never salesy or pushy
+- Total email body under 130 words
 - NO links anywhere in the body
-- NO urgency words (URGENT, FREE, LIMITED, ACT NOW)
+- NO urgency words (URGENT, FREE in caps, LIMITED, ACT NOW)
 - NO exclamation points, no all caps, no smart quotes
 - Use em dashes (—) not hyphens for inline asides
-- The final question must be a simple yes/no ("want one?")
+- The final line must be exactly "sound good?"
 - Paragraphs separated by a single blank line
 
 OUTPUT FORMAT (JSON only, no markdown fences, no preamble):
@@ -142,7 +133,7 @@ function enforceBrandName(text) {
 
 // The signature is non-negotiable and 100% deterministic, so we never let
 // the model write it. We slice the body at the locked closing question
-// ("want one?") and append a canonical signature ourselves. This is
+// ("sound good?") and append a canonical signature ourselves. This is
 // bulletproof against any spelling typo Claude tries.
 const CANONICAL_SIGNATURE = '\n\ngabriel\ngriffincreative\ngriffincreativelab.com';
 
@@ -150,7 +141,7 @@ function applyCanonicalSignature(body) {
   if (!body) return CANONICAL_SIGNATURE.trimStart();
   const trimmed = body.trimEnd();
   // Locate the locked close — case-insensitive, last occurrence wins.
-  const closeRegex = /want one\?/gi;
+  const closeRegex = /sound good\?/gi;
   let lastMatch = null;
   let m;
   while ((m = closeRegex.exec(trimmed)) !== null) {

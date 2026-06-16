@@ -39,40 +39,51 @@ Also at the top level: `{{3.data.signed_product_urls}}` — array of signed URLs
 
 ---
 
-## PART A — Finished statics (nano-banana → Bannerbear → Drive)
+## PART A — Finished statics (nano-banana → /api/render-ad → Drive)
 
-**Why two tools:** nano-banana generates the scene/background image; it CANNOT render clean headline text or guarantee exact crops. Bannerbear lays your headline/subhead/CTA over the image as real text and exports the 4 exact ratios. nano-banana = picture, Bannerbear = finished ad.
+**No Bannerbear, no monthly cost.** We render statics on the existing Vercel/Node stack via `api/render-ad.js` (Satori + resvg — same engine as the teardown slides). nano-banana makes the scene image; `/api/render-ad` overlays the headline/subhead/CTA as real text and exports all 4 ratios. Verified live in production.
 
-### A1. Set up Bannerbear (one-time, ~15 min)
+### The endpoint
+`POST https://www.griffincreativelab.com/api/render-ad` (use **www** — the apex domain redirects and drops the POST body)
+Header: `x-api-key: <CONTENT_GEN_API_KEY>`
+Body:
+```json
+{
+  "image_url": "<nano-banana scene image URL>",
+  "headline": "...",
+  "subheadline": "...",
+  "cta_button": "...",
+  "concept": "concept name (used in filename)",
+  "client_id": "client id (namespaces the storage path)"
+}
+```
+Returns `{ success, files: [{ ratio, url } x4], urls: [...] }` — 4 finished PNGs already uploaded to Supabase public storage. No new env vars; reuses `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `CONTENT_GEN_API_KEY`, and the `content_assets` bucket.
 
-1. Sign up at **bannerbear.com** → create a **Project**.
-2. Create a **Template** at **1080×1080**. Add these layers and name them EXACTLY:
-   - `bg_image` — image layer, full-bleed (this receives the nano-banana output)
-   - `headline` — text layer
-   - `subheadline` — text layer
-   - `cta_button` — text layer (or a shape with a text layer on top)
-   Style to brand: orange `#FF4D00`, black `#080808`, cream `#F0ECE3`; fonts Bebas Neue (headline) + DM Sans (body). Keep text inside safe zones.
-3. **Duplicate** that template into 3 more sizes, keeping the **same layer names** in each:
-   - `1080×1350` (4:5 — Meta mobile feed, highest CTR)
-   - `1080×1920` (9:16 — Stories / Reels / TikTok)
-   - `1200×628` (16:9 — Google Display / FB desktop)
-4. Group all four into a **Template Set** (Bannerbear → Template Sets). One API call to the set renders all 4 sizes from one data payload. Note the **Template Set UID**.
-5. Bannerbear → **Account → API Key**. Copy it.
+### Wire it into Scenario B (after the HTTP module #3)
 
-### A2. Wire it into Scenario B (after the HTTP module #3)
-
-1. **Iterator** module → Array: `{{3.data.deliverables.static_ads}}`
+1. **Iterator** → Array: `{{3.data.deliverables.static_ads}}`
 2. **nano-banana** (your existing fal.ai HTTP call) *inside the loop*:
-   - `image_urls` = `{{3.signed_product_urls}}` (or the first element if it needs a single URL)
+   - `image_urls` = `{{3.signed_product_urls}}` (or its first element if it wants one)
    - `prompt` = `{{Iterator.image_prompt}}`
    - Output = generated scene image URL (note the field name it returns)
-3. **Bannerbear → Create Image from a Template Set** (add the Bannerbear connection with your API key):
-   - Template Set UID = the one from A4
-   - Modifications: `bg_image` (image_url) = nano-banana output URL; `headline` (text) = `{{Iterator.headline}}`; `subheadline` (text) = `{{Iterator.subheadline}}`; `cta_button` (text) = `{{Iterator.cta_button}}`
-   - Bannerbear is async — add a small delay or use its "wait for completion" option / a webhook so you get the finished URLs.
-4. **Google Drive → Upload a File** (×4, or loop the set's image array) into a `Static Ads` subfolder. Name them `{{Iterator.concept}}-1x1.png`, `-4x5.png`, `-9x16.png`, `-16x9.png`.
+3. **HTTP → Make a request** to the render endpoint:
+   - Method `POST`, URL `https://www.griffincreativelab.com/api/render-ad`
+   - Header `x-api-key: <CONTENT_GEN_API_KEY>`
+   - Body type Raw / JSON:
+     ```
+     {
+       "image_url": "{{<nano-banana output URL>}}",
+       "headline": "{{Iterator.headline}}",
+       "subheadline": "{{Iterator.subheadline}}",
+       "cta_button": "{{Iterator.cta_button}}",
+       "concept": "{{Iterator.concept}}",
+       "client_id": "{{3.data.client}}"
+     }
+     ```
+   - Parse response = Yes → you now have `files[].url` (4 finished PNG URLs)
+4. **Iterator** over the response `files` (or `urls`) → **Google Drive → Upload a File** into a `Static Ads` subfolder. Drive can take the URL, or add an HTTP "Get a file" before it to fetch the binary.
 
-### A3. REMOVE
+### REMOVE
 - The old **"Static Product Ad Concepts" Google Doc** module — it prints `image_prompt` to the client (homework). Keep `static_ads` ONLY as the Iterator's input; never deliver the prompt doc.
 
 ---
