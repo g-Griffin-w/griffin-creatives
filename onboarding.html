@@ -305,9 +305,53 @@ footer p { font-size: 13px; color: #2e2e2e; }
         </div>
 
         <div class="field-group">
+          <label class="field-label">Logo for Ad Overlays</label>
+          <div class="upload-zone" id="upload-logo">
+            <input type="file" id="file-logo" accept="image/png,image/svg+xml,image/webp" style="display:none;">
+            <div class="upload-cta">
+              <span class="upload-icon">+</span>
+              <p>Drop your logo here or <span class="upload-link">click to upload</span></p>
+              <p class="upload-hint">The exact logo we'll place on your ads. Transparent PNG or SVG, highest quality you have.</p>
+            </div>
+          </div>
+          <div class="upload-list" id="list-logo"></div>
+        </div>
+
+        <div class="field-group">
           <label class="field-label" for="brand-asset-text">Brand Notes (optional)</label>
           <textarea id="brand-asset-text" name="brand-asset-text" placeholder="Hex colors: #FF4D00, #080808, #F0ECE3&#10;Fonts: Bebas Neue, DM Sans&#10;Tone notes, visual references, anything that doesn't fit as an upload."></textarea>
           <p class="field-hint">Paste hex codes, font names, or any text-only brand context. Stays alongside the uploaded assets.</p>
+        </div>
+
+        <hr class="form-divider">
+        <div class="form-section-label">Creative Direction</div>
+
+        <div class="upload-note">
+          Powers our <strong>out-of-the-box concept ads</strong> — bold, brand-world backgrounds generated from your vibe (not just product shots). The more specific, the wilder and more on-brand they get.
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="brand-colors">Brand Colors (hex)</label>
+          <input type="text" id="brand-colors" name="brand-colors" placeholder="#FF4D00, #080808, #F0ECE3">
+          <p class="field-hint">Your exact hex codes, primary first. Used for accents + type on your ads.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="product-world">Your Product's World</label>
+          <textarea id="product-world" name="product-world" placeholder="e.g. morning coffee + matcha rituals, cozy kitchens, iced drinks, dessert moments, on-the-go pockets"></textarea>
+          <p class="field-hint">The settings, objects, and moments your product lives in. This is what our text-to-image backgrounds get built from.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="visual-vibe">Visual Vibe</label>
+          <input type="text" id="visual-vibe" name="visual-vibe" placeholder="e.g. clean, playful, pastel, premium, high-contrast, editorial">
+          <p class="field-hint">3–6 adjectives for the look and feel. Steers the mood of the generated art.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="inspo-refs">Concept Inspiration (optional)</label>
+          <textarea id="inspo-refs" name="inspo-refs" placeholder="Links or descriptions of out-of-the-box ads you love — yours or anyone's."></textarea>
+          <p class="field-hint">Reference ads or campaigns whose energy you want. Paste links or describe them.</p>
         </div>
 
         <hr class="form-divider">
@@ -396,9 +440,9 @@ if (!cid) {
 // and written to the griffin_clients row on form submit.
 // =====================================================================
 const MAX_BYTES = 26214400; // 25 MB — matches bucket file_size_limit
-const ALLOWED_MIME = /^image\/(jpeg|jpg|png|webp|heic|heif)$/;
+const ALLOWED_MIME = /^image\/(jpeg|jpg|png|webp|heic|heif|svg\+xml)$/;
 
-const uploadedPaths = { products: [], brand: [] };
+const uploadedPaths = { products: [], brand: [], logo: [] };
 const pendingUploads = new Set();
 
 function _addListItem(folder, name, status, className) {
@@ -522,6 +566,7 @@ function wireUploadZone(folder) {
 if (cid) {
   wireUploadZone('products');
   wireUploadZone('brand');
+  wireUploadZone('logo');
 }
 
 // =====================================================================
@@ -573,6 +618,12 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
     brand_asset_urls: brandCombined,
     top_performing_ad_url: f['top-performing-ad-url'].value,
     monthly_ad_spend: f['monthly-ad-spend'].value,
+    // Creative-direction fields (Phase 1: txt2img brand-world backgrounds)
+    logo_url: uploadedPaths.logo[0] || '',
+    brand_colors: f['brand-colors'].value,
+    product_world: f['product-world'].value,
+    visual_vibe: f['visual-vibe'].value,
+    inspo_refs: f['inspo-refs'].value,
     onboarding_complete: true
   }).eq('stripe_customer_id', cid);
 

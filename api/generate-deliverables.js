@@ -303,6 +303,12 @@ module.exports = async (req, res) => {
     brand_asset_urls,
     top_performing_ad_url,
     monthly_ad_spend,
+    // Creative-direction fields (Phase 1: txt2img brand-world backgrounds)
+    brand_colors,
+    product_world,
+    visual_vibe,
+    inspo_refs,
+    logo_url,
   } = req.body;
   let { plan } = req.body;
 
@@ -368,6 +374,10 @@ module.exports = async (req, res) => {
       .replace(/{{brand_asset_urls}}/g,      brand_asset_urls || '(not provided)')
       .replace(/{{top_performing_ad_url}}/g, top_performing_ad_url || '(none provided)')
       .replace(/{{monthly_ad_spend}}/g,      monthly_ad_spend || 'undisclosed')
+      .replace(/{{brand_colors}}/g,          brand_colors || '(not provided)')
+      .replace(/{{product_world}}/g,         product_world || '(not provided)')
+      .replace(/{{visual_vibe}}/g,           visual_vibe || '(not provided)')
+      .replace(/{{inspo_refs}}/g,            inspo_refs || '(none)')
       .replace(/{{email_flows_list}}/g,      emailFlows.map((f) => '- ' + f).join('\n'));
   }
 
@@ -434,26 +444,38 @@ Active promos: {{promos}}
 Voice: {{brand_voice}}
 Product photo URLs the client provided: {{product_image_urls}}
 Brand asset URLs (logo, hex colors): {{brand_asset_urls}}
+Brand colors (hex): {{brand_colors}}
+Product's world / setting: {{product_world}}
+Visual vibe: {{visual_vibe}}
+Concept inspiration: {{inspo_refs}}
 Shopify: {{shopify_url}}
 Notes: {{notes}}
 
+WE GENERATE ADS TWO WAYS. Tag EACH concept with a "mode":
+- "img2img" -> a real PRODUCT SHOT. The brand's actual product/packaging must appear accurately. The image_prompt transforms the client's product photo into a scene. Most concepts are this.
+- "txt2img" -> a creative BRAND-WORLD BACKGROUND (out-of-the-box, scroll-stopping). The product does NOT appear in the image at all — it's a striking scene from the product's world (e.g., a macro of iced coffee with star-shaped ice cubes for a coffee syrup). Our system overlays the brand logo + copy afterward. Drive these from the product's world / visual vibe / inspiration above.
+
+Generate a MIX: roughly 70% img2img product shots and 30% txt2img creative backgrounds, with AT LEAST 1 txt2img concept. Make the txt2img concepts genuinely bold and distinct.
+
 RULES:
-- Each concept attacks a different angle: hero product shot, lifestyle scene, comparison ad, before/after, social-proof, "what's inside", limited-time urgency, problem/solution, founder story, customer testimonial framing, ingredient/feature deep-dive, etc.
-- Each image_prompt must reference the brand's actual product photo (when product_image_urls are provided — see below). If not provided, describe the product photographically.
+- Each concept attacks a different angle: hero product shot, lifestyle scene, comparison, before/after, social-proof, "what's inside", urgency, problem/solution, ingredient deep-dive, abstract brand-world, etc.
+- img2img image_prompt references the brand's actual product photo and preserves its real label exactly.
+- txt2img image_prompt describes ONLY the scene/background — absolutely NO product, packaging, logo, words, or typography (the model would hallucinate/garble them). Leave clean negative space for the overlaid logo + copy.
 - HEADLINE must be 8 words or fewer. Sub-headlines max 12 words. CTAs max 4 words.
-- Designed for native feeds — slightly imperfect, lifestyle-real, NOT glossy/corporate. UGC-native energy.
-- Vary across the active promos when promos are listed.
-- NEVER ask the image to ADD marketing text, headlines, captions, or graphic typography — our system overlays the copy afterward, so every image_prompt must forbid added text and leave clean negative space for it. EXCEPTION: the product's OWN real label/logo from the source photo must be preserved exactly as-is — that is part of the product, not added text.
+- Designed for native feeds. Vary across the active promos when listed.
+- NEVER ask any image to ADD marketing text, headlines, captions, or graphic typography — our system overlays the copy afterward. EXCEPTION (img2img only): the product's OWN real printed label/logo must be preserved exactly as-is.
 
 Return ONLY a valid JSON array with exactly ${counts.staticAds} objects:
 {
   "concept": "short name (2-5 words)",
-  "angle": "which angle this attacks (e.g., 'before/after', 'social proof', 'urgency')",
+  "mode": "img2img" or "txt2img",
+  "layout": "product" for img2img product shots; "center" or "poster-bottom" for txt2img brand-world concepts",
+  "angle": "which angle this attacks (e.g., 'before/after', 'social proof', 'brand-world')",
   "headline": "main on-image headline (≤8 words)",
   "subheadline": "supporting line (≤12 words)",
   "cta_button": "CTA text (≤4 words)",
-  "image_prompt": "ready-to-paste prompt for nano-banana image-to-image. Describe ONLY: scene, composition, lighting, mood, color palette, and the product (reference photo URLs above if provided). CRITICAL — do NOT ADD any marketing text, words, headlines, captions, watermarks, or graphic typography to the scene; our system overlays the copy afterward. KEEP the product exactly as it appears in the provided photo, INCLUDING its real packaging, label, and any brand logo printed on the product itself — preserve those faithfully (they are part of the product, not added text). Never add NEW text or graphics on or around the product. Compose with clean, uncluttered negative space (lower third or one side) reserved for the copy. End the prompt with: 'preserve the product label exactly; add no additional text or graphics'. UGC-native vibe unless brand voice suggests luxury/premium.",
-  "production_note": "1-sentence guidance to the client — e.g., 'Use product photo URL #2', 'pair with customer testimonial in caption', 'good for cold audience cohort A'"
+  "image_prompt": "IF mode is img2img: ready-to-paste nano-banana image-to-image prompt describing scene, composition, lighting, mood, color palette + the product (reference photo URLs above). KEEP the product and its real packaging/label exactly; never add text/graphics; leave clean negative space for copy; end with 'preserve the product label exactly; add no additional text or graphics'. IF mode is txt2img: a scene-only brand-world background prompt built from the product's world + visual vibe — describe a bold, edge-to-edge scene with clean negative space for overlaid copy, and explicitly forbid product, packaging, logo, words, and typography (e.g., end with 'no product, no packaging, no logos, no text, no typography').",
+  "production_note": "1-sentence client guidance — e.g., 'Use product photo #2' or 'txt2img brand-world background; logo + copy overlaid'"
 }
 
 Output the JSON array and nothing else.`);
@@ -837,6 +859,8 @@ Output the JSON object and nothing else.`);
       plan,
       voice_name,
       brand_accent: extractBrandAccent(brand_asset_urls, brand_voice),
+      brand_colors: brand_colors || '',
+      logo_url: logo_url || '',
       signed_product_urls,
       deliverables,
     });
