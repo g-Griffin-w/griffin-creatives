@@ -33,7 +33,7 @@ const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 // ============================================================
 const COLD_EMAIL_PROMPT = `You are a cold email copywriter for GriffinCreative, a done-for-you creative studio that turns DTC e-commerce brands' own product photos into finished, ready-to-upload ads.
 
-Your job: write a FRIENDLY, SHORT, personalized cold email using the EXACT structure below, with a NICHE-SPECIFIC hook in the second paragraph. Casual lowercase, warm, direct, no fluff. The whole point is to feel like a real person offering something genuinely useful for free.
+Your job: write a FRIENDLY, SHORT, personalized cold email using the EXACT structure below. The SECOND paragraph must feel hand-written for THIS specific brand — grounded in what they actually sell. Casual lowercase, warm, direct, no fluff. The whole point is to feel like a real person offering something genuinely useful for free.
 
 LEAD INFO:
 - First name: {{first_name}}
@@ -43,6 +43,9 @@ LEAD INFO:
 - State: {{company_state}}
 - Niche: {{niche}}
 
+PRODUCT CONTEXT (scraped live from their website — may be empty):
+{{product_context}}
+
 SUBJECT (all niches):
 a couple free ads for {{company_name}}?
 
@@ -51,7 +54,10 @@ EMAIL STRUCTURE (write the body in exactly this order):
 Paragraph 1 (greeting):
 hi {{first_name}},
 
-Paragraph 2 (niche-specific hook — pick the one matching the lead's niche from NICHE HOOKS below)
+Paragraph 2 (personalized hook — ONE natural, human line, max two sentences):
+- IF PRODUCT CONTEXT is present and specific enough to tell what they sell: open by naming the SPECIFIC product or product category {{company_name}} actually sells (from PRODUCT CONTEXT), then say their product photos are too good to only be running a handful of ad variations. Reference the REAL product only — never a generic category example, never a product they don't sell.
+- IF PRODUCT CONTEXT is empty or too thin to tell what they sell: use the NICHE HOOK below that matches {{niche}}.
+Do not list products or sound like a database — write it like a person who actually looked at their site.
 
 Paragraph 3 (shared pitch — write this exactly, do not change wording):
 here's the idea: we turn your existing product photos into finished, ready-to-upload static ads — designed with the copy right on the image, in every placement ratio. not concepts or briefs — actual files in your google drive within 48 hours, ready to test before your current winners burn out.
@@ -64,18 +70,25 @@ sound good?
 
 DO NOT include a signature, sign-off, name, brand name, or anything else after "sound good?". The body MUST end with "sound good?". A canonical signature is appended automatically by the system.
 
-NICHE HOOKS (use the one matching {{niche}}):
+NICHE HOOKS (fallback for paragraph 2 ONLY when PRODUCT CONTEXT is empty — use the one matching {{niche}}):
 
-- If niche mentions DTC or ecommerce (e.g. "DTC E-commerce", "DTC", "ecommerce_dtc", "dtc", "ecommerce"):
-  "found {{company_name}} while looking at fast-growing DTC brands — and your product photos are honestly too good to only be running a few ad variations."
+- fishing_outdoor:
+  "found {{company_name}} while looking at standout fishing and outdoor brands — and your gear shots are honestly too good to only be running a handful of ad variations."
 
-- If niche is missing, empty, or anything else:
-  "found {{company_name}} while looking at fast-growing e-commerce brands — and your product photos are honestly too good to only be running a few ad variations."
+- food_beverage:
+  "found {{company_name}} while looking at fast-growing food and beverage brands — and your product shots are honestly too good to only be running a handful of ad variations."
+
+- supplements:
+  "found {{company_name}} while looking at standout supplement brands — and your product shots are honestly too good to only be running a handful of ad variations."
+
+- anything else, missing, or "dtc_general":
+  "found {{company_name}} while looking at fast-growing e-commerce brands — and your product photos are honestly too good to only be running a handful of ad variations."
 
 DATA HANDLING RULES:
 - If first_name is missing or empty → use "there"
 - If company_name ends in " LLC", " Inc", " Inc.", " Corp", " Corporation" — drop the suffix in the body (keep full legal name in subject)
 - Keep the company name in the subject EXACTLY as provided
+- Never invent or assume a product. Only reference products that appear in PRODUCT CONTEXT. If it is empty, use the niche hook instead.
 
 STYLE RULES:
 - Casual lowercase throughout — never capitalize a sentence-start "i" or any line opener
@@ -119,6 +132,123 @@ function sanitizeCompanyName(raw) {
   return name;
 }
 
+// Decode the handful of HTML entities that commonly show up in <title>/meta tags.
+function unescapeHtml(s) {
+  if (!s) return '';
+  return s
+    .replace(/&amp;/g, '&')
+    .replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ');
+}
+
+// Normalize a raw website value into a fetchable absolute URL, or '' if junk.
+function normalizeUrl(raw) {
+  if (!raw) return '';
+  let u = String(raw).trim();
+  if (!u || /^(n\/a|none|null)$/i.test(u)) return '';
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  try {
+    return new URL(u).href;
+  } catch {
+    return '';
+  }
+}
+
+// Pull a short, human-readable "what does this brand sell" snippet from raw HTML.
+// Uses title + meta/og description + first H1. Dependency-free (regex only) so we
+// don't add cheerio to the deploy. Returns '' if nothing usable is found.
+function extractContext(html) {
+  if (!html) return '';
+  const pick = (re) => {
+    const m = html.match(re);
+    return m ? unescapeHtml(m[1]).replace(/\s+/g, ' ').trim() : '';
+  };
+  const title = pick(/<title[^>]*>([^<]{1,200})<\/title>/i);
+  const ogTitle = pick(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']{1,200})["']/i);
+  const metaDesc =
+    pick(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']{1,300})["']/i) ||
+    pick(/<meta[^>]+content=["']([^"']{1,300})["'][^>]+name=["']description["']/i);
+  const ogDesc = pick(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']{1,300})["']/i);
+  const h1 = pick(/<h1[^>]*>([\s\S]{1,160}?)<\/h1>/i).replace(/<[^>]+>/g, ' ').trim();
+
+  const parts = [ogTitle || title, metaDesc || ogDesc, h1].filter(Boolean);
+  const seen = new Set();
+  const out = [];
+  for (const p of parts) {
+    const key = p.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push(p);
+    }
+  }
+  return out.join(' — ').slice(0, 400);
+}
+
+// Fetch the lead's homepage and extract product context. Hard 6s timeout,
+// HTML-only, and every failure path returns '' so a bad site can NEVER block a send.
+async function fetchProductContext(lead) {
+  const url = normalizeUrl(lead.company_website);
+  if (!url) return '';
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+    const resp = await fetch(url, {
+      signal: controller.signal,
+      redirect: 'follow',
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (compatible; GriffinCreativeBot/1.0; +https://griffincreativelab.com)',
+      },
+    });
+    clearTimeout(timer);
+    if (!resp.ok) return '';
+    const ct = resp.headers.get('content-type') || '';
+    if (!/text\/html/i.test(ct)) return '';
+    const html = (await resp.text()).slice(0, 250000);
+    return extractContext(html);
+  } catch {
+    return '';
+  }
+}
+
+// Keyword sets for send-time niche classification. Order of evaluation matters:
+// fishing first (very distinct), then supplements (so "protein"/"nutrition" land
+// here, not in food), then food/beverage. Everything else -> dtc_general.
+const NICHE_KEYWORDS = {
+  fishing_outdoor: [
+    'fishing', 'tackle', 'lure', 'rod', 'reel', 'angler', 'bait', 'fly fishing',
+    'outdoor', 'hunting', 'camping', 'hiking', 'kayak', 'archery', 'tactical',
+    'trail', 'backpack', 'fishing gear', 'outdoor gear',
+  ],
+  supplements: [
+    'supplement', 'vitamin', 'protein', 'collagen', 'creatine', 'nootropic',
+    'probiotic', 'electrolyte', 'adaptogen', 'greens powder', 'pre-workout',
+    'preworkout', 'capsule', 'gummies', 'amino', 'omega', 'nutrition',
+  ],
+  food_beverage: [
+    'snack', 'beverage', 'coffee', 'tea', 'drink', 'soda', 'juice', 'kombucha',
+    'hot sauce', 'sauce', 'seasoning', 'spice', 'chocolate', 'candy', 'jerky',
+    'granola', 'cookie', 'condiment', 'cpg', 'functional beverage', 'energy drink',
+    'sparkling', 'snacks', 'foods',
+  ],
+};
+
+// Classify a lead into one of the three target niches (or dtc_general) using the
+// company name, Apollo industry, existing niche tag, and live product context.
+function inferNiche(lead, productContext) {
+  const hay = [lead.company_name, lead.company_industry, lead.niche, productContext]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  for (const niche of ['fishing_outdoor', 'supplements', 'food_beverage']) {
+    if (NICHE_KEYWORDS[niche].some((kw) => hay.includes(kw))) return niche;
+  }
+  return 'dtc_general';
+}
+
 // Hard-correct any near-miss of "griffincreative" that Claude might emit
 // inside the body (e.g. in the pitch paragraph). Backstop for the verbatim
 // pitch — the signature is handled by applyCanonicalSignature() and never
@@ -155,8 +285,9 @@ function applyCanonicalSignature(body) {
   return trimmed.slice(0, cutoff) + CANONICAL_SIGNATURE;
 }
 
-// Build the Claude prompt with lead data filled in
-function buildPrompt(lead) {
+// Build the Claude prompt with lead data filled in. resolvedNiche drives the
+// fallback hook; productContext drives the product-specific paragraph 2.
+function buildPrompt(lead, { productContext = '', resolvedNiche = '' } = {}) {
   const cleanCompany = sanitizeCompanyName(lead.company_name);
   return COLD_EMAIL_PROMPT
     .replace(/{{first_name}}/g, lead.first_name || '')
@@ -164,7 +295,8 @@ function buildPrompt(lead) {
     .replace(/{{company_name}}/g, cleanCompany)
     .replace(/{{company_city}}/g, lead.company_city || '')
     .replace(/{{company_state}}/g, lead.company_state || '')
-    .replace(/{{niche}}/g, lead.niche || '');
+    .replace(/{{niche}}/g, resolvedNiche || lead.niche || '')
+    .replace(/{{product_context}}/g, productContext || '(none found — use the niche hook)');
 }
 
 // Parse Claude's JSON response (strip any markdown fences if Claude adds them)
@@ -180,9 +312,13 @@ function parseClaudeJson(text) {
   return JSON.parse(cleaned);
 }
 
-// Generate the personalized email via Claude
+// Generate the personalized email via Claude. Scrapes the brand's site for
+// product context and classifies its niche first, then returns both alongside
+// the email so the caller can write the resolved niche back to Supabase.
 async function generateEmail(lead) {
-  const prompt = buildPrompt(lead);
+  const productContext = await fetchProductContext(lead);
+  const resolvedNiche = inferNiche(lead, productContext);
+  const prompt = buildPrompt(lead, { productContext, resolvedNiche });
   const msg = await claude.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 500,
@@ -199,6 +335,8 @@ async function generateEmail(lead) {
   parsed.subject = enforceBrandName(parsed.subject);
   parsed.body = enforceBrandName(parsed.body);
   parsed.body = applyCanonicalSignature(parsed.body);
+  parsed.resolvedNiche = resolvedNiche;
+  parsed.productContext = productContext;
   return parsed;
 }
 
@@ -298,14 +436,17 @@ module.exports = async (req, res) => {
 
     for (const lead of leads) {
       try {
-        // Generate personalized email
-        const { subject, body } = await generateEmail(lead);
+        // Generate personalized email (also scrapes site + classifies niche)
+        const { subject, body, resolvedNiche, productContext } = await generateEmail(lead);
 
         if (dryRun) {
           // Don't actually send — just capture the draft for inspection
           results.drafts.push({
             lead_id: lead.id,
             email: lead.email,
+            company_name: lead.company_name,
+            resolved_niche: resolvedNiche,
+            product_context: productContext || '(none found)',
             subject,
             body,
           });
@@ -313,7 +454,8 @@ module.exports = async (req, res) => {
           // Send the email
           await sendEmail({ to: lead.email, subject, body });
 
-          // Update Supabase: mark as sent, save the content
+          // Update Supabase: mark as sent, save the content, and write back the
+          // niche we resolved from the live site so per-niche reporting is real.
           const { error: updateError } = await supabase
             .from('outreach_leads')
             .update({
@@ -321,6 +463,7 @@ module.exports = async (req, res) => {
               sent_at: new Date().toISOString(),
               email_subject: subject,
               email_body: body,
+              niche: resolvedNiche,
             })
             .eq('id', lead.id);
 
