@@ -349,18 +349,30 @@ function encodeMimeHeader(value) {
   return `=?utf-8?B?${base64}?=`;
 }
 
-// Build raw RFC 2822 email and send via Gmail API
+// Generate a deterministic RFC 2822 Message-ID we control, so follow-ups can
+// thread against it via In-Reply-To / References without an extra API fetch.
+function generateMessageId(fromEmail) {
+  const domain = (fromEmail && fromEmail.split('@')[1]) || 'griffincreativelab.com';
+  const rand = Math.random().toString(36).slice(2);
+  return `<${Date.now()}.${rand}@${domain}>`;
+}
+
+// Build raw RFC 2822 email and send via Gmail API.
+// Returns { id, threadId, rfcMessageId } so the caller can persist the thread
+// + message id for later in-thread follow-ups.
 async function sendEmail({ to, subject, body }) {
   const fromEmail = process.env.GMAIL_FROM_EMAIL;
   const fromName = process.env.GMAIL_FROM_NAME;
 
   const fromHeader = `${encodeMimeHeader(fromName)} <${fromEmail}>`;
   const subjectHeader = encodeMimeHeader(subject);
+  const rfcMessageId = generateMessageId(fromEmail);
 
   const headers = [
     `From: ${fromHeader}`,
     `To: ${to}`,
     `Subject: ${subjectHeader}`,
+    `Message-ID: ${rfcMessageId}`,
     'MIME-Version: 1.0',
     'Content-Type: text/plain; charset=utf-8',
     'Content-Transfer-Encoding: base64',
@@ -382,7 +394,7 @@ async function sendEmail({ to, subject, body }) {
     requestBody: { raw: encoded },
   });
 
-  return result.data;
+  return { ...result.data, rfcMessageId };
 }
 
 // Sleep helper
@@ -451,8 +463,12 @@ module.exports = async (req, res) => {
             body,
           });
         } else {
-          // Send the email
-          await sendEmail({ to: lead.email, subject, body });
+          // Send the email (returns Gmail thread id + the Message-ID we set)
+          const sendResult = await sendEmail({ to: lead.email, subject, body });
+
+          // Schedule the first follow-up 3 days out. The follow-up job threads
+          // against gmail_thread_id + rfc_message_id and auto-stops on reply.
+          const nextFollowup = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
 
           // Update Supabase: mark as sent, save the content, and write back the
           // niche we resolved from the live site so per-niche reporting is real.
@@ -464,6 +480,10 @@ module.exports = async (req, res) => {
               email_subject: subject,
               email_body: body,
               niche: resolvedNiche,
+              gmail_thread_id: sendResult.threadId || null,
+              rfc_message_id: sendResult.rfcMessageId || null,
+              followup_stage: 0,
+              next_followup_at: nextFollowup.toISOString(),
             })
             .eq('id', lead.id);
 
