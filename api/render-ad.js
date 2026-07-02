@@ -79,13 +79,13 @@ function h(type, props, ...children) {
 
 // ---------- Build one ad layout ----------
 // Full-bleed scene image, a bottom gradient scrim for legibility, then
-// headline + subheadline + CTA pill anchored bottom-left.
+// headline + subheadline anchored bottom-left. (No baked-in CTA button — the
+// platform supplies the real CTA on paid placements.)
 function buildAdJsx({ w, h: H, imageDataUri, headline, subheadline, cta, accent = ORANGE }) {
   const scale = Math.min(w, H);
   const pad = Math.round(w * 0.065);
   const hlSize = Math.round(scale * 0.084);
   const subSize = Math.round(scale * 0.034);
-  const ctaSize = Math.round(scale * 0.030);
   const textMaxWidth = w - pad * 2;
 
   const children = [];
@@ -146,24 +146,11 @@ function buildAdJsx({ w, h: H, imageDataUri, headline, subheadline, cta, accent 
     );
   }
 
-  if (cta) {
-    copyChildren.push(
-      h("div", {
-        style: {
-          display: "flex",
-          alignSelf: "flex-start",
-          backgroundColor: accent,
-          color: "#FFFFFF",
-          fontSize: ctaSize,
-          fontWeight: 700,
-          letterSpacing: 0.5,
-          padding: `${Math.round(scale * 0.018)}px ${Math.round(scale * 0.034)}px`,
-          borderRadius: Math.round(scale * 0.012),
-          marginTop: Math.round(scale * 0.028),
-        },
-      }, String(cta).toUpperCase())
-    );
-  }
+  // CTA button intentionally removed (2026-07): a baked-in pill isn't clickable,
+  // is redundant with the platform's native CTA on paid placements, adds text
+  // density (delivery risk), and lands in the IG Stories safe zone on 9:16.
+  // The `cta`/`accent` params are still accepted so existing callers don't break,
+  // but nothing is rendered. Re-add this block to bring the button back.
 
   children.push(
     h("div", {
