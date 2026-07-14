@@ -71,6 +71,60 @@ async function classifyIntent(text) {
   }
 }
 
+// ============================================================
+// Hot-lead alert
+// Sends Gabriel one digest email per run when replies were matched, with
+// positive-intent leads flagged at the top. Uses gmail.send (already scoped).
+// Override recipient with ALERT_EMAIL; defaults to the sending inbox.
+// ============================================================
+function encodeMimeHeader(value) {
+  // eslint-disable-next-line no-control-regex
+  if (/^[\x00-\x7F]*$/.test(value)) return value;
+  return `=?utf-8?B?${Buffer.from(value, 'utf-8').toString('base64')}?=`;
+}
+
+async function sendAlertEmail(hits) {
+  const to = process.env.ALERT_EMAIL || process.env.GMAIL_FROM_EMAIL;
+  if (!to) return;
+
+  const hot = hits.filter((h) => h.intent === 'positive');
+  const rest = hits.filter((h) => h.intent !== 'positive');
+  const subject = hot.length
+    ? `🔥 ${hot.length} hot lead${hot.length > 1 ? 's' : ''} replied — act today`
+    : `Outreach: ${hits.length} new repl${hits.length > 1 ? 'ies' : 'y'}`;
+
+  const fmt = (h) =>
+    `• ${h.company || 'Unknown'}${h.name ? ` (${h.name})` : ''} — ${h.email} [${h.niche || 'n/a'}] (${h.intent})\n` +
+    `  "${h.snippet}"\n`;
+
+  const body =
+    (hot.length
+      ? `HOT — reply to these first:\n\n${hot.map(fmt).join('\n')}\n`
+      : '') +
+    (rest.length ? `Other replies:\n\n${rest.map(fmt).join('\n')}` : '') +
+    `\n—\nGriffin outreach agent · griffincreativelab.com/api/check-replies`;
+
+  const headers = [
+    `From: ${encodeMimeHeader(process.env.GMAIL_FROM_NAME || 'GriffinCreative')} <${process.env.GMAIL_FROM_EMAIL}>`,
+    `To: ${to}`,
+    `Subject: ${encodeMimeHeader(subject)}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset=utf-8',
+    'Content-Transfer-Encoding: base64',
+  ];
+  const bodyEncoded = Buffer.from(body, 'utf-8')
+    .toString('base64')
+    .match(/.{1,76}/g)
+    .join('\r\n');
+  const raw = Buffer.from(headers.join('\r\n') + '\r\n\r\n' + bodyEncoded)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+
+  await gmail.users.messages.send({ userId: 'me', requestBody: { raw } });
+}
+
 module.exports = async (req, res) => {
   const authHeader = req.headers.authorization || '';
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -83,7 +137,7 @@ module.exports = async (req, res) => {
     // 1. Pull sent leads that haven't been marked as replied yet.
     const { data: leads, error: fetchError } = await supabase
       .from('outreach_leads')
-      .select('id,email,company_name,niche')
+      .select('id,email,first_name,job_title,company_name,niche')
       .eq('status', 'sent')
       .eq('reply_received', false);
 
@@ -147,6 +201,7 @@ module.exports = async (req, res) => {
         results.hits.push({
           lead_id: lead.id,
           email: fromAddr,
+          name: [lead.first_name, lead.job_title].filter(Boolean).join(', '),
           company: lead.company_name,
           niche: lead.niche,
           intent,
@@ -172,6 +227,16 @@ module.exports = async (req, res) => {
         }
       } catch (err) {
         results.errors.push({ message_id: ref.id, error: err.message });
+      }
+    }
+
+    // 4. Hot-lead alert: one digest per run when anything matched (live runs only).
+    if (!dryRun && results.hits.length > 0) {
+      try {
+        await sendAlertEmail(results.hits);
+        results.alert_sent = true;
+      } catch (err) {
+        results.errors.push({ stage: 'alert_email', error: err.message });
       }
     }
 

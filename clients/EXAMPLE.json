@@ -1,0 +1,29 @@
+{
+  "_comment": "Template for make-samples.js. Copy to clients/<brand>.json. Concepts get written IN a Claude session (creative direction), Gabriel approves them BEFORE running this. Every URL must be the client's real asset (their domain or Shopify CDN) — the script enforces this.",
+  "client": "poca",
+  "domain": "pickpoca.com",
+  "logo_url": "https://pickpoca.com/cdn/shop/files/logo.png",
+  "accent": "#E84393",
+  "concepts": [
+    {
+      "name": "people-with-taste",
+      "framework": "identity_badge",
+      "big_idea": "Buying POCA isn't a diet choice, it's a taste signal — treat the sweetener like a status object, shot like a fragrance ad, not a grocery item.",
+      "image_prompt": "Extreme macro top-down shot of a vibrant green iced matcha latte, the surface filled edge-to-edge with star-shaped ice cubes, glossy and luminous, rich texture, high contrast studio lighting, surreal and graphic, art-directed like a premium fragrance campaign. add no text or graphics",
+      "source_product_image_url": "https://cdn.shopify.com/s/files/1/0786/6581/0159/files/vanilla_3x4_1.jpg",
+      "tagline": "Sweetener for people with taste.",
+      "bullets": ["0 Sugar", "3g Fiber", "Plant-Based"],
+      "layout": "center"
+    },
+    {
+      "name": "second-concept-here",
+      "framework": "problem_agitation",
+      "big_idea": "Write the actual idea here — what tension does the viewer feel, why do they stop scrolling, what does the image DO that a product photo cannot. Minimum 40 characters, enforced.",
+      "image_prompt": "Describe a scene that expresses the idea. Banned: flat-lays, product-beside-beverage, marble counters, 'editorial product photography'. The script rejects those phrases.",
+      "source_product_image_url": "https://cdn.shopify.com/...",
+      "tagline": "Second tagline.",
+      "bullets": [],
+      "layout": "bottom"
+    }
+  ]
+}

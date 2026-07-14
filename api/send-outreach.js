@@ -5,7 +5,13 @@ const { createClient } = require('@supabase/supabase-js');
 // ============================================================
 // Configuration
 // ============================================================
-const BATCH_SIZE = 25;
+// Daily send volume. Override via Vercel env OUTREACH_BATCH_SIZE (no redeploy
+// needed after env change — just redeploy once to pick up this code).
+// Ramp plan: 25 → 40 → 50/day, one bump per week, watch bounce/spam signals.
+const BATCH_SIZE = Math.max(
+  1,
+  Math.min(100, parseInt(process.env.OUTREACH_BATCH_SIZE, 10) || 25),
+);
 const DELAY_MS_MIN = 5000;
 const DELAY_MS_MAX = 15000;
 
