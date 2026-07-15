@@ -18,9 +18,17 @@ const { createClient } = require('@supabase/supabase-js');
 // 2 free ads), so nothing here claims work that wasn't done.
 // ============================================================
 
-const BATCH_SIZE = 40;
-const DELAY_MS_MIN = 5000;
-const DELAY_MS_MAX = 15000;
+// Vercel kills the function at ~300s (FUNCTION_INVOCATION_TIMEOUT — happened
+// July 14 2026 at follow-up #30 of a 40 batch). Budget ≈ delay + send ≈ 7-9s
+// per lead, so keep batch × 9s comfortably under 300s. Override via
+// FOLLOWUP_BATCH_SIZE env (clamped 1-30). Progress is saved per-send, so a
+// timeout mid-batch loses nothing — the next run picks up the rest.
+const BATCH_SIZE = Math.max(
+  1,
+  Math.min(30, parseInt(process.env.FOLLOWUP_BATCH_SIZE, 10) || 20),
+);
+const DELAY_MS_MIN = 3000;
+const DELAY_MS_MAX = 7000;
 
 // Days between touches. Initial send schedules stage-0 at +3d (in send-outreach).
 // After follow-up #1 we schedule follow-up #2 four days later (~day 7 overall).

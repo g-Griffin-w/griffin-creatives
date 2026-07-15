@@ -174,6 +174,131 @@ function buildConceptJsx({ w, h: H, imageDataUri, logo, tagline, bullets = [], a
   }, ...children);
 }
 
+// ---------- Layout A2: "top" — type stacked at the TOP, product owns the lower frame ----------
+// HARD RULE (Gabriel, July 15 2026): rendered text must NEVER cover the product.
+// Pair this layout with image prompts that keep the product in the lower
+// two-thirds and leave the top third visually quiet.
+function buildConceptTopJsx({ w, h: H, imageDataUri, logo, tagline, bullets = [], accent = ACCENT_DEFAULT }) {
+  const scale = Math.min(w, H);
+  const pad = Math.round(w * 0.08);
+  const tagSize = Math.round(scale * 0.068);
+  const bulletSize = Math.round(scale * 0.030);
+  const shadow = "0 2px 16px rgba(0,0,0,0.55)";
+
+  const children = [];
+
+  if (imageDataUri) {
+    children.push(
+      h("img", {
+        src: imageDataUri,
+        width: w,
+        height: H,
+        style: { position: "absolute", top: 0, left: 0, width: w, height: H, objectFit: "cover" },
+      })
+    );
+  }
+
+  // Top scrim: dark at the very top, gone by ~45% down — keeps type legible
+  // without touching the product zone below.
+  children.push(
+    h("div", {
+      style: {
+        position: "absolute",
+        left: 0, right: 0, top: 0, bottom: 0,
+        backgroundImage:
+          "linear-gradient(to bottom, rgba(8,8,8,0.62) 0%, rgba(8,8,8,0.34) 26%, rgba(8,8,8,0) 46%)",
+      },
+    })
+  );
+
+  const stack = [];
+
+  if (logo && logo.dataUri) {
+    stack.push(
+      h("img", {
+        src: logo.dataUri,
+        width: logo.w,
+        height: logo.h,
+        style: { width: logo.w, height: logo.h, objectFit: "contain" },
+      })
+    );
+  }
+
+  if (tagline) {
+    stack.push(
+      h("div", {
+        style: {
+          fontSize: tagSize,
+          fontWeight: 900,
+          color: WHITE,
+          textAlign: "center",
+          lineHeight: 1.04,
+          letterSpacing: -0.5,
+          marginTop: Math.round(scale * 0.035),
+          maxWidth: w - pad * 2,
+          textShadow: shadow,
+        },
+      }, String(tagline))
+    );
+  }
+
+  if (bullets.length) {
+    const row = [];
+    bullets.forEach((b, i) => {
+      if (i > 0) {
+        row.push(
+          h("div", {
+            style: {
+              width: Math.round(bulletSize * 0.42),
+              height: Math.round(bulletSize * 0.42),
+              borderRadius: 999,
+              backgroundColor: accent,
+              marginLeft: Math.round(bulletSize * 0.6),
+              marginRight: Math.round(bulletSize * 0.6),
+            },
+          })
+        );
+      }
+      row.push(
+        h("div", { style: { fontSize: bulletSize, fontWeight: 700, color: WHITE, textShadow: shadow } }, String(b))
+      );
+    });
+    stack.push(
+      h("div", {
+        style: {
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          marginTop: Math.round(scale * 0.03),
+        },
+      }, ...row)
+    );
+  }
+
+  children.push(
+    h("div", {
+      style: {
+        position: "absolute",
+        left: 0, right: 0, top: 0, bottom: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        paddingTop: Math.round(scale * 0.055),
+        paddingLeft: pad,
+        paddingRight: pad,
+      },
+    }, ...stack)
+  );
+
+  return h("div", {
+    style: {
+      width: w, height: H, display: "flex", position: "relative",
+      backgroundColor: "#080808", fontFamily: "Lato", overflow: "hidden",
+    },
+  }, ...children);
+}
+
 // ---------- Layout B: "split" — product on a color field (left), type block (right) ----------
 // The nano-banana background already places the product on the left over a solid
 // color field with the right side empty. We overlay logo + a two-line headline
@@ -321,8 +446,14 @@ async function renderConceptRatio({ ratio, imageDataUri, logo, layout = "center"
     jsx = buildConceptSplitJsx({ w: ratio.w, h: ratio.h, imageDataUri, logo, headline, accentLine, accent });
   } else if (layout === "poster-bottom") {
     jsx = buildConceptBottomJsx({ w: ratio.w, h: ratio.h, imageDataUri, logo, headline, accentLine, accent });
-  } else {
+  } else if (layout === "top") {
+    jsx = buildConceptTopJsx({ w: ratio.w, h: ratio.h, imageDataUri, logo, tagline, bullets, accent });
+  } else if (layout === "center") {
     jsx = buildConceptJsx({ w: ratio.w, h: ratio.h, imageDataUri, logo, tagline, bullets, accent });
+  } else {
+    // No silent fallbacks — an unknown layout name means someone made a typo
+    // and would otherwise get center text over the product without noticing.
+    throw new Error(`Unknown layout "${layout}". Valid: top, center, split, poster-bottom`);
   }
   return renderJsxToPng(jsx, ratio.w, ratio.h);
 }
@@ -343,4 +474,4 @@ async function prepareLogo({ buf, contentType, targetW }) {
   return { dataUri: `data:${ct};base64,${buf.toString("base64")}`, w: targetW, h: Math.round(targetW / 3.4) };
 }
 
-module.exports = { renderConceptRatio, buildConceptJsx, buildConceptSplitJsx, buildConceptBottomJsx, prepareLogo, RATIOS };
+module.exports = { renderConceptRatio, buildConceptJsx, buildConceptTopJsx, buildConceptSplitJsx, buildConceptBottomJsx, prepareLogo, RATIOS };

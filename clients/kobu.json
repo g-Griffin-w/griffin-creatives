@@ -1,0 +1,41 @@
+{
+  "client": "kobu",
+  "domain": "enjoykobu.com",
+  "logo_url": "https://enjoykobu.com/cdn/shop/files/Logo_0ca256aa-be07-446a-a25d-cbd2bc4e8d6b.png?width=1600",
+  "accent": "#E8434B",
+  "concepts": [
+    {
+      "name": "breakup-with-the-bottle",
+      "framework": "us_vs_them",
+      "big_idea": "The enemy is bottled kombucha: vinegar bite, carbonation, refrigeration, $4 bottles going flat. Kobu is the clean exit — all the benefits, none of the ritual. Visual drama of the old way abandoned in shadow while the stick pack takes the spotlight.",
+      "image_prompt": "Dramatic dark studio scene: a single Kobu kombucha powder stick packet stands upright LARGE in the LOWER TWO-THIRDS of the frame, horizontally centered, lit by a clean warm spotlight like a hero product reveal, its label crisp and completely legible with no distorted or garbled text. Flanking it low in the background, plain dark green glass bottles with absolutely NO labels, stickers, or markings of any kind lie flat and abandoned, receding into deep shadow. The TOP THIRD of the frame is empty dark atmosphere with a faint light beam. Keep the Kobu packet and its label EXACTLY as in the reference photo — do not redesign, recolor, or blur it. Rich cinematic contrast, deep teal-black palette with one warm light source. add no text or graphics",
+      "source_product_image_url": "https://enjoykobu.com/cdn/shop/files/LEMON_COMBO.jpg",
+      "tagline": "All the kombucha. None of the bite.",
+      "bullets": ["No vinegar sting", "No fridge", "$2.50 a serving"],
+      "layout": "top",
+      "accent": "#F2B705"
+    },
+    {
+      "name": "made-in-your-gut",
+      "framework": "ingredient_hero",
+      "big_idea": "Their own homepage stat is the ad: 90% of serotonin is produced in the gut. Make the feeling visible — the packet standing in a glowing watermelon-pink pool with ripples radiating outward like a nervous system lighting up. Mood as biology.",
+      "image_prompt": "Surreal macro scene: the Kobu watermelon citrus stick packet stands PERFECTLY VERTICAL like a monolith, tall and LARGE, filling most of the lower two-thirds of the frame height, horizontally centered, its base submerged in a luminous watermelon-pink liquid pool, its label crisp, completely legible, and facing the camera straight-on. Concentric glowing ripples radiate outward from its base like neural signals, tiny points of light along the ripple lines. The TOP THIRD of the frame is near-black empty darkness above the glow. Keep the Kobu packet and its label EXACTLY as in the reference photo — do not redesign, recolor, rotate, or blur it, and do not lay it down. Vibrant pink and coral palette against near-black, dreamlike and graphic. add no text or graphics",
+      "source_product_image_url": "https://enjoykobu.com/cdn/shop/files/WATER_COMBO.jpg",
+      "tagline": "90% of your serotonin is made in your gut.",
+      "bullets": ["Pre + Pro + Postbiotics", "1B CFU", "Low sugar"],
+      "layout": "top",
+      "accent": "#E8434B"
+    },
+    {
+      "name": "pocket-kombucha",
+      "framework": "unexpected_context",
+      "big_idea": "Kombucha reframed as gear, not groceries — shot like an outdoor equipment ad. The stick pack cinched under a backpack strap with a carabiner in trail dust and hard sunlight says portability without a single word of copy.",
+      "image_prompt": "Outdoor adventure gear close-up in hard golden sunlight: the Kobu kombucha stick packet LARGE in the LOWER TWO-THIRDS of the frame, secured under the webbing strap of a weathered hiking backpack alongside a metal carabiner, label crisp and completely legible, fine trail dust in the air, rugged texture, shot like a premium outdoor equipment campaign. The TOP THIRD of the frame is soft-focus golden landscape and open sky. Keep the Kobu packet and its label EXACTLY as in the reference photo — do not redesign, recolor, or blur it. Warm earthy palette, crisp detail, energetic and utilitarian. add no text or graphics",
+      "source_product_image_url": "https://enjoykobu.com/cdn/shop/files/LEMON_COMBO.jpg",
+      "tagline": "Kombucha that fits in your pocket.",
+      "bullets": ["No bottle", "No fridge", "Mixes in 10 seconds"],
+      "layout": "top",
+      "accent": "#C97B2D"
+    }
+  ]
+}

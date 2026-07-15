@@ -16,6 +16,12 @@
 //
 // Output: ./sample-ads/<client>-<engine>/<concept>-<ratio>.png (+ raw scene/cutout/background)
 
+//
+// HARD RULE (Gabriel, July 15 2026): rendered text must NEVER cover the product.
+// render-ad.js puts copy in the LOWER THIRD -> scene prompts must keep the product
+// in the UPPER TWO-THIRDS. render-concept-ad.js: prefer layout "top" when the
+// product is in frame; "center" only for product-free brand-world backgrounds.
+
 const fs = require("fs");
 const path = require("path");
 const { renderOneRatio, RATIOS } = require("../api/render-ad.js");

@@ -94,13 +94,18 @@ function assertClientUrl(url, domain, label) {
   }
 }
 
-async function fetchImage(url, label) {
+// minKB: product photos must be substantial (20 KB floor catches thumbnails);
+// logos are legitimately small vector-ish PNGs, so they get a 2 KB floor with
+// a visibility warning instead of a hard fail.
+async function fetchImage(url, label, minKB = 20) {
   const resp = await fetch(url);
   if (!resp.ok) die(`${label} fetch failed (${resp.status}) for ${url}`);
   const ct = resp.headers.get("content-type") || "";
   if (!ct.startsWith("image/")) die(`${label} is not an image (content-type: ${ct})`);
   const buf = Buffer.from(await resp.arrayBuffer());
-  if (buf.length < 20 * 1024) die(`${label} is suspiciously small (${(buf.length / 1024).toFixed(0)} KB) — probably a thumbnail. Get the full-res asset.`);
+  const kb = buf.length / 1024;
+  if (kb < minKB) die(`${label} is suspiciously small (${kb.toFixed(0)} KB, floor ${minKB} KB) — probably a thumbnail. Get the full-res asset.`);
+  if (kb < 15) console.log(`   NOTE: ${label} is only ${kb.toFixed(0)} KB — check it renders sharp in review.`);
   return { buf, contentType: ct, dataUri: `data:${ct};base64,${buf.toString("base64")}` };
 }
 
@@ -151,10 +156,18 @@ async function main() {
     assertClientUrl(c.source_product_image_url, cfg.domain, `${c.name} source_product_image_url`);
   }
   console.log("Asset gates passed. Fetching logo...");
-  const logoRaw = await fetchImage(cfg.logo_url, "logo");
-  const logo = await prepareLogo({ buf: logoRaw.buf, contentType: logoRaw.contentType, targetW: 900 });
+  const logoRaw = await fetchImage(cfg.logo_url, "logo", 2);
+  // 560 not 900: a huge centered logo buries any product that sits mid-frame
+  // (July 15 Kobu QA — all three scenes had the packet hidden under the logo).
+  const logo = await prepareLogo({ buf: logoRaw.buf, contentType: logoRaw.contentType, targetW: 560 });
 
-  fs.rmSync(pendingDir, { recursive: true, force: true });
+  // --only=name1,name2 regenerates specific concepts without wiping the rest.
+  const onlyArg = args.find((a) => a.startsWith("--only="));
+  const only = onlyArg ? onlyArg.slice(7).split(",").map((s) => s.trim()) : null;
+  const concepts = only ? cfg.concepts.filter((c) => only.includes(c.name)) : cfg.concepts;
+  if (only && concepts.length !== only.length) die(`--only names not found in config: ${only.join(",")}`);
+
+  if (!only) fs.rmSync(pendingDir, { recursive: true, force: true });
   fs.mkdirSync(pendingDir, { recursive: true });
 
   const reviewLines = [
@@ -165,13 +178,14 @@ async function main() {
     "2. Does it look like their own Instagram feed? (must be NO)",
     "3. Is the product/label rendered correctly? (must be YES)",
     "4. Does the visual express the big idea, not just show the product? (must be YES)",
+    "5. Is ANY text or logo covering the product? (must be NO — hard rule)",
     "",
     "If ANY answer fails: delete the image, fix the concept, re-run. Then:",
     "  node scripts/make-samples.js clients/" + path.basename(configFile) + " --approve",
     "",
   ];
 
-  for (const c of cfg.concepts) {
+  for (const c of concepts) {
     console.log(`\n== ${c.name} [${c.framework}] ==`);
     console.log(`   big idea: ${c.big_idea}`);
     const source = await fetchImage(c.source_product_image_url, `${c.name} product photo`);
@@ -191,7 +205,10 @@ async function main() {
         ratio,
         imageDataUri: scene.dataUri,
         logo,
-        layout: c.layout || "center",
+        // Default "top": text above, product below — Gabriel's hard rule is
+        // that rendered text never covers the product. "center" must be opted
+        // into deliberately and only for scenes with no product in frame.
+        layout: c.layout || "top",
         tagline: c.tagline,
         bullets: c.bullets || [],
         accent: c.accent || cfg.accent,

@@ -19,6 +19,12 @@
 //
 // Output: ./sample-ads/poca-concept/<name>-<ratio>.png  (+ raw background)
 
+//
+// HARD RULE (Gabriel, July 15 2026): rendered text must NEVER cover the product.
+// render-ad.js puts copy in the LOWER THIRD -> scene prompts must keep the product
+// in the UPPER TWO-THIRDS. render-concept-ad.js: prefer layout "top" when the
+// product is in frame; "center" only for product-free brand-world backgrounds.
+
 const fs = require("fs");
 const path = require("path");
 const { renderConceptRatio, prepareLogo, RATIOS } = require("../api/render-concept-ad.js");

@@ -460,6 +460,7 @@ Generate a MIX: roughly 70% img2img product shots and 30% txt2img creative backg
 RULES:
 - Each concept attacks a different angle: hero product shot, lifestyle scene, comparison, before/after, social-proof, "what's inside", urgency, problem/solution, ingredient deep-dive, abstract brand-world, etc.
 - img2img image_prompt references the brand's actual product photo and preserves its real label exactly.
+- HARD RULE — text never covers the product: the renderer overlays copy in the LOWER THIRD of the frame, so every img2img image_prompt MUST place the product in the UPPER TWO-THIRDS and explicitly state that the lower third of the frame stays clean and empty.
 - txt2img image_prompt describes ONLY the scene/background — absolutely NO product, packaging, logo, words, or typography (the model would hallucinate/garble them). Leave clean negative space for the overlaid logo + copy.
 - HEADLINE must be 8 words or fewer. Sub-headlines max 12 words. CTAs max 4 words.
 - Designed for native feeds. Vary across the active promos when listed.
@@ -474,7 +475,7 @@ Return ONLY a valid JSON array with exactly ${counts.staticAds} objects:
   "headline": "main on-image headline (≤8 words)",
   "subheadline": "supporting line (≤12 words)",
   "cta_button": "CTA text (≤4 words)",
-  "image_prompt": "IF mode is img2img: ready-to-paste nano-banana image-to-image prompt describing scene, composition, lighting, mood, color palette + the product (reference photo URLs above). KEEP the product and its real packaging/label exactly; never add text/graphics; leave clean negative space for copy; end with 'preserve the product label exactly; add no additional text or graphics'. IF mode is txt2img: a scene-only brand-world background prompt built from the product's world + visual vibe — describe a bold, edge-to-edge scene with clean negative space for overlaid copy, and explicitly forbid product, packaging, logo, words, and typography (e.g., end with 'no product, no packaging, no logos, no text, no typography').",
+  "image_prompt": "IF mode is img2img: ready-to-paste nano-banana image-to-image prompt describing scene, composition, lighting, mood, color palette + the product (reference photo URLs above). KEEP the product and its real packaging/label exactly; never add text/graphics; position the product in the UPPER TWO-THIRDS of the frame and keep the LOWER THIRD clean and empty for the overlaid copy (it must never cover the product); end with 'preserve the product label exactly; add no additional text or graphics'. IF mode is txt2img: a scene-only brand-world background prompt built from the product's world + visual vibe — describe a bold, edge-to-edge scene with clean negative space for overlaid copy, and explicitly forbid product, packaging, logo, words, and typography (e.g., end with 'no product, no packaging, no logos, no text, no typography').",
   "production_note": "1-sentence client guidance — e.g., 'Use product photo #2' or 'txt2img brand-world background; logo + copy overlaid'"
 }
 
