@@ -137,7 +137,7 @@ module.exports = async (req, res) => {
     // 1. Pull sent leads that haven't been marked as replied yet.
     const { data: leads, error: fetchError } = await supabase
       .from('outreach_leads')
-      .select('id,email,first_name,job_title,company_name,niche')
+      .select('id,email,first_name,job_title,company_name,niche,gmail_thread_id')
       .eq('status', 'sent')
       .eq('reply_received', false);
 
@@ -145,12 +145,20 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: 'Supabase fetch failed', detail: fetchError.message });
     }
 
+    // Prospects often reply from a different address than the one we emailed
+    // (personal Gmail, a colleague CC'd in, etc.), so from-address matching
+    // alone misses real replies. gmail_thread_id is stored at send time and is
+    // stable regardless of who replies from where — match on that first, and
+    // fall back to from-address only for older leads sent before thread IDs
+    // were captured.
+    const byThreadId = new Map();
     const byEmail = new Map();
     for (const lead of leads || []) {
+      if (lead.gmail_thread_id) byThreadId.set(lead.gmail_thread_id, lead);
       if (lead.email) byEmail.set(lead.email.toLowerCase(), lead);
     }
 
-    if (byEmail.size === 0) {
+    if (byThreadId.size === 0 && byEmail.size === 0) {
       return res.status(200).json({
         success: true,
         message: 'No sent leads awaiting a reply',
@@ -190,7 +198,7 @@ module.exports = async (req, res) => {
         const fromHeader = (headers.find((h) => h.name === 'From') || {}).value || '';
         const fromAddr = parseFromAddress(fromHeader);
 
-        const lead = byEmail.get(fromAddr);
+        const lead = byThreadId.get(full.data.threadId) || byEmail.get(fromAddr);
         if (!lead || handledLeadIds.has(lead.id)) continue;
         handledLeadIds.add(lead.id);
         results.matched++;
