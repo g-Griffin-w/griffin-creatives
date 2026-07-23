@@ -16,13 +16,37 @@
 
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const {
   renderConceptRatio,
   prepareLogo,
   RATIOS,
 } = require("../api/render-concept-ad.js");
 
-const FAL_URL = "https://fal.run/fal-ai/nano-banana/edit";
+// Two img2img engines. Seedream 4.5 preserves label text noticeably better than
+// nano-banana — prefer it when the client has flagged product fidelity (Kobu, July 16).
+const FAL_MODELS = {
+  "nano-banana": "https://fal.run/fal-ai/nano-banana/edit",
+  "seedream": "https://fal.run/fal-ai/bytedance/seedream/v4.5/edit",
+};
+// Cutout engine endpoints (config: "engine": "cutout"). The ONLY route that copies
+// the client's label pixel-for-pixel — use whenever a client flags product fidelity.
+const FAL_BIREFNET = "https://fal.run/fal-ai/birefnet/v2";
+const FAL_BG_T2I = "https://fal.run/fal-ai/bytedance/seedream/v4.5/text-to-image";
+
+// Short content hash so cutout/background cache files are keyed by what
+// actually produced them, not just the concept name. Without this, editing
+// a client config to point at a corrected source photo silently kept
+// serving the stale cutout on disk (the July 2026 Kobu bug) — the file
+// existed under the old name and nothing noticed the input had changed.
+function shortHash(input) {
+  return crypto.createHash("sha1").update(input).digest("hex").slice(0, 10);
+}
+
+function getSharp() {
+  try { return require("sharp"); }
+  catch { die("cutout engine needs 'sharp'. Run once:  npm install sharp"); }
+}
 
 const FRAMEWORKS = [
   "problem_agitation",     // name the pain, twist the knife, product resolves
@@ -62,8 +86,11 @@ function validateConfig(cfg) {
   }
   cfg.concepts.forEach((c, i) => {
     const label = `concepts[${i}] (${c.name || "unnamed"})`;
-    for (const k of ["name", "framework", "big_idea", "image_prompt", "source_product_image_url", "tagline"]) {
+    for (const k of ["name", "framework", "big_idea", "image_prompt", "tagline"]) {
       if (!c[k]) die(`${label} missing "${k}"`);
+    }
+    if (!c.source_product_image_url && !c.source_product_image_file) {
+      die(`${label} needs source_product_image_url (client domain/Shopify) or source_product_image_file (photo the client sent us directly)`);
     }
     if (!FRAMEWORKS.includes(c.framework)) {
       die(`${label} framework "${c.framework}" not in: ${FRAMEWORKS.join(", ")}`);
@@ -71,10 +98,14 @@ function validateConfig(cfg) {
     if (c.big_idea.trim().length < 40) {
       die(`${label} big_idea is ${c.big_idea.trim().length} chars. If the idea can't fill 40 characters, there is no idea.`);
     }
-    const lower = c.image_prompt.toLowerCase();
-    for (const cliche of BEAUTY_SHOT_CLICHES) {
-      if (lower.includes(cliche)) {
-        die(`${label} image_prompt contains beauty-shot cliché "${cliche}". That's the route that lost POCA and Southern Scholar. Transform, don't decorate.`);
+    if ((cfg.engine || "img2img") === "cutout") {
+      if (!c.bg_prompt) die(`${label}: engine "cutout" requires a bg_prompt (product-free background scene)`);
+    } else {
+      const lower = c.image_prompt.toLowerCase();
+      for (const cliche of BEAUTY_SHOT_CLICHES) {
+        if (lower.includes(cliche)) {
+          die(`${label} image_prompt contains beauty-shot cliché "${cliche}". That's the route that lost POCA and Southern Scholar. Transform, don't decorate.`);
+        }
       }
     }
   });
@@ -110,17 +141,102 @@ async function fetchImage(url, label, minKB = 20) {
 }
 
 // ---------- Gate 3: scene generation must actually happen ----------
-async function falEdit({ prompt, image_url }, FAL_KEY) {
-  const resp = await fetch(FAL_URL, {
+async function falEdit({ prompt, image_url, model }, FAL_KEY) {
+  const endpoint = FAL_MODELS[model || "nano-banana"];
+  if (!endpoint) die(`unknown fal_model "${model}". Valid: ${Object.keys(FAL_MODELS).join(", ")}`);
+  const body = { prompt, image_urls: [image_url], num_images: 1 };
+  if ((model || "nano-banana") === "nano-banana") body.output_format = "png";
+  const resp = await fetch(endpoint, {
     method: "POST",
     headers: { Authorization: `Key ${FAL_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, image_urls: [image_url], num_images: 1, output_format: "png" }),
+    body: JSON.stringify(body),
   });
   if (!resp.ok) die(`nano-banana failed (${resp.status}): ${(await resp.text()).slice(0, 300)}\nDO NOT fall back to the raw product photo. Fix the call or stop.`);
   const data = await resp.json();
   const url = data?.images?.[0]?.url;
   if (!url) die(`nano-banana returned no image: ${JSON.stringify(data).slice(0, 300)}`);
   return url;
+}
+
+// ---------- cutout engine helpers ----------
+async function falPostJson(url, body, FAL_KEY) {
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Key ${FAL_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) die(`fal ${resp.status} @ ${url}: ${(await resp.text()).slice(0, 300)}`);
+  return resp.json();
+}
+
+// BiRefNet cutout of the client's real product photo (cached — pixels never change).
+async function makeCutout({ sourceDataUri, rotate, cacheFile }, FAL_KEY) {
+  const sharp = getSharp();
+  if (fs.existsSync(cacheFile)) return fs.readFileSync(cacheFile);
+  console.log("   birefnet cutout...");
+  const d = await falPostJson(FAL_BIREFNET, { image_url: sourceDataUri, output_format: "png" }, FAL_KEY);
+  const u = d?.image?.url || d?.images?.[0]?.url;
+  if (!u) die(`BiRefNet returned no image: ${JSON.stringify(d).slice(0, 200)}`);
+  const raw = Buffer.from(await (await fetch(u)).arrayBuffer());
+  let p = sharp(raw);
+  if (rotate) p = p.rotate(rotate, { background: { r: 0, g: 0, b: 0, alpha: 0 } });
+  const out = await p.trim({ threshold: 10 }).png().toBuffer();
+  fs.writeFileSync(cacheFile, out);
+  return out;
+}
+
+// Product-free background, cached so approved scenes survive re-runs.
+async function getBackground({ prompt, cacheFile }, FAL_KEY) {
+  if (fs.existsSync(cacheFile)) {
+    console.log("   reusing background (delete file to re-roll)...");
+    return fs.readFileSync(cacheFile);
+  }
+  console.log("   generating background...");
+  const safe = /no product/i.test(prompt) ? prompt : prompt + " No product, no packaging, no text, no logos.";
+  const d = await falPostJson(FAL_BG_T2I, { prompt: safe, image_size: "portrait_16_9", num_images: 1 }, FAL_KEY);
+  const u = d?.images?.[0]?.url;
+  if (!u) die(`background t2i returned no image: ${JSON.stringify(d).slice(0, 200)}`);
+  const buf = Buffer.from(await (await fetch(u)).arrayBuffer());
+  fs.writeFileSync(cacheFile, buf);
+  return buf;
+}
+
+// Seat the product per ratio so it can NEVER collide with the top text block.
+// [productHeightFrac, baselineFrac] — the "top" layout's text stack ends ~48% down
+// on square, ~38% on 4x5, ~27% on 9x16; product top must start below that.
+const SEATING = {
+  "1x1": [0.38, 0.88],
+  "4x5": [0.46, 0.88],
+  "9x16": [0.56, 0.88],
+  "16x9": [0.36, 0.90],
+};
+
+// Compose: cover-fit background + soft grounding shadow + centered real product.
+async function composeScene({ bgBuf, cutBuf, w, h, key }) {
+  const sharp = getSharp();
+  const [hFrac, baseFrac] = SEATING[key] || [0.44, 0.88];
+  const bg = await sharp(bgBuf).resize(w, h, { fit: "cover" }).toBuffer();
+  const meta = await sharp(cutBuf).metadata();
+  let prodH = Math.round(h * hFrac);
+  let prodW = Math.round(prodH * (meta.width / meta.height));
+  const maxW = Math.round(w * 0.8);
+  if (prodW > maxW) { prodW = maxW; prodH = Math.round(prodW * (meta.height / meta.width)); }
+  const baseline = Math.round(h * baseFrac);
+  const left = Math.round((w - prodW) / 2);
+  const top = baseline - prodH;
+  const rx = Math.round(prodW * 0.65), ry = Math.max(14, Math.round(prodW * 0.17));
+  const shadowSvg = Buffer.from(
+    `<svg width="${w}" height="${h}"><ellipse cx="${w / 2}" cy="${baseline}" rx="${rx}" ry="${ry}" fill="black" fill-opacity="0.45"/></svg>`
+  );
+  const shadow = await sharp(shadowSvg).blur(14).png().toBuffer();
+  const product = await sharp(cutBuf).resize(prodW, prodH).png().toBuffer();
+  return sharp(bg)
+    .composite([
+      { input: shadow, top: 0, left: 0 },
+      { input: product, top, left },
+    ])
+    .png()
+    .toBuffer();
 }
 
 // ---------- main ----------
@@ -139,6 +255,26 @@ async function main() {
   // ---- approval mode: promote a reviewed batch ----
   if (approve) {
     if (!fs.existsSync(pendingDir)) die(`nothing to approve — ${pendingDir} does not exist`);
+
+    // Gate: REVIEW.md must exist and every checklist box must actually be
+    // checked. Previously --approve just renamed the folder regardless of
+    // the checklist's contents, so an unreviewed (or failed-review) batch
+    // could still get promoted and attached to outreach — which is how a
+    // fidelity miss shipped to a real client twice.
+    const reviewFile = path.join(pendingDir, "REVIEW.md");
+    if (!fs.existsSync(reviewFile)) die(`no REVIEW.md in ${pendingDir} — can't approve a batch with no review checklist`);
+    const reviewText = fs.readFileSync(reviewFile, "utf8");
+    const items = reviewText.match(/^- \[[ x]\].+$/gm) || [];
+    if (items.length === 0) die(`REVIEW.md has no checklist items — nothing to approve`);
+    const unchecked = items.filter((line) => line.startsWith("- [ ]"));
+    if (unchecked.length > 0) {
+      die(
+        `${unchecked.length} of ${items.length} REVIEW.md item(s) still unchecked. ` +
+        `Open every PNG, check each box in ${reviewFile}, THEN re-run --approve.\n` +
+        unchecked.map((l) => `  ${l}`).join("\n"),
+      );
+    }
+
     const stamp = new Date().toISOString().slice(0, 10);
     const approvedDir = path.join(baseDir, `APPROVED-${stamp}`);
     fs.renameSync(pendingDir, approvedDir);
@@ -150,10 +286,16 @@ async function main() {
   const FAL_KEY = process.env.FAL_KEY;
   if (!FAL_KEY) die("missing FAL_KEY env var");
 
-  // Gates 2: verify every asset before spending a cent on generation
+  // Gates 2: verify every asset before spending a cent on generation.
+  // Local files are allowed only because they came from the client directly (email).
   assertClientUrl(cfg.logo_url, cfg.domain, "logo_url");
   for (const c of cfg.concepts) {
-    assertClientUrl(c.source_product_image_url, cfg.domain, `${c.name} source_product_image_url`);
+    if (c.source_product_image_file) {
+      const abs = path.resolve(__dirname, "..", c.source_product_image_file);
+      if (!fs.existsSync(abs)) die(`${c.name} source_product_image_file not found: ${abs}`);
+    } else {
+      assertClientUrl(c.source_product_image_url, cfg.domain, `${c.name} source_product_image_url`);
+    }
   }
   console.log("Asset gates passed. Fetching logo...");
   const logoRaw = await fetchImage(cfg.logo_url, "logo", 2);
@@ -188,10 +330,55 @@ async function main() {
   for (const c of concepts) {
     console.log(`\n== ${c.name} [${c.framework}] ==`);
     console.log(`   big idea: ${c.big_idea}`);
-    const source = await fetchImage(c.source_product_image_url, `${c.name} product photo`);
+    let source, sourceRef;
+    if (c.source_product_image_file) {
+      const abs = path.resolve(__dirname, "..", c.source_product_image_file);
+      const buf = fs.readFileSync(abs);
+      const ct = abs.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+      source = { buf, contentType: ct, dataUri: `data:${ct};base64,${buf.toString("base64")}` };
+      sourceRef = source.dataUri; // fal accepts data URIs
+    } else {
+      source = await fetchImage(c.source_product_image_url, `${c.name} product photo`);
+      sourceRef = c.source_product_image_url;
+    }
 
-    console.log("   nano-banana img2img...");
-    const sceneUrl = await falEdit({ prompt: c.image_prompt, image_url: c.source_product_image_url }, FAL_KEY);
+    if ((cfg.engine || "img2img") === "cutout") {
+      // CUTOUT ENGINE: the client's real pixels seated into OUR generated scene.
+      // Label fidelity by construction; composition controlled by code, not dice.
+      const assetsDir = path.join(baseDir, "assets");
+      fs.mkdirSync(assetsDir, { recursive: true });
+      const cutoutHash = shortHash(source.dataUri + "|" + (c.rotate || 0));
+      const cutBuf = await makeCutout(
+        { sourceDataUri: source.dataUri, rotate: c.rotate, cacheFile: path.join(assetsDir, `${c.name}-${cutoutHash}-cutout.png`) },
+        FAL_KEY,
+      );
+      const bgHash = shortHash(c.bg_prompt);
+      const bgBuf = await getBackground(
+        { prompt: c.bg_prompt, cacheFile: path.join(assetsDir, `${c.name}-${bgHash}-background.png`) },
+        FAL_KEY,
+      );
+      fs.writeFileSync(path.join(pendingDir, `${c.name}-SOURCE.png`), source.buf);
+      for (const ratio of RATIOS) {
+        const composed = await composeScene({ bgBuf, cutBuf, w: ratio.w, h: ratio.h, key: ratio.key });
+        const png = await renderConceptRatio({
+          ratio,
+          imageDataUri: `data:image/png;base64,${composed.toString("base64")}`,
+          logo,
+          layout: c.layout || "top",
+          tagline: c.tagline,
+          bullets: c.bullets || [],
+          accent: c.accent || cfg.accent,
+        });
+        fs.writeFileSync(path.join(pendingDir, `${c.name}-${ratio.key}.png`), png);
+        console.log(`   ${ratio.key} rendered (cutout)`);
+      }
+      reviewLines.push(`- [ ] ${c.name} (${c.framework}): ${c.big_idea}`);
+      continue;
+    }
+
+    const model = cfg.fal_model || "nano-banana";
+    console.log(`   ${model} img2img...`);
+    const sceneUrl = await falEdit({ prompt: c.image_prompt, image_url: sourceRef, model }, FAL_KEY);
     const scene = await fetchImage(sceneUrl, `${c.name} generated scene`);
 
     // Gate 3b: output must differ from input (identical bytes = generation was skipped)

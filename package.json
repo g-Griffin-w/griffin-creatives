@@ -23,6 +23,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@supabase/supabase-js": "^2.106.1",
     "googleapis": "^172.0.0",
-    "satori": "^0.12.1"
+    "satori": "^0.12.1",
+    "sharp": "^0.35.3"
   }
 }
