@@ -1,4 +1,4 @@
-# kobu sample review — 2026-07-15T18:40:09.472Z
+# kobu sample review — 2026-07-16T18:41:56.121Z
 
 For EVERY image below, answer honestly:
 1. Could this brand have made this themselves in 10 minutes? (must be NO)

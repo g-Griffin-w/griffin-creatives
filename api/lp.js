@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
     const sb = getSb();
     const { data, error } = await sb
       .from("landing_pages")
-      .select("html")
+      .select("html, concept_id")
       .eq("slug", slug)
       .single();
 
@@ -35,6 +35,14 @@ module.exports = async (req, res) => {
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       return res.status(404).send("<h1>Page not found</h1>");
     }
+
+    // First-party engagement signal, independent of any ad platform access.
+    // Best-effort: a logging failure should never break the page for a visitor.
+    sb.from("landing_page_events")
+      .insert({ slug, concept_id: data.concept_id, event_type: "view" })
+      .then(({ error: logErr }) => {
+        if (logErr) console.error("lp view log error:", logErr.message);
+      });
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Cache-Control", "public, max-age=300");

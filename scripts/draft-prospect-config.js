@@ -39,6 +39,14 @@ function die(msg) {
   process.exit(1);
 }
 
+// Thrown by the reusable core logic instead of calling die() (which exits the
+// whole process) — draft-prospect-batch.js needs one bad prospect to fail
+// without killing the run for the other 80.
+class DraftError extends Error {}
+function fail(msg) {
+  throw new DraftError(msg);
+}
+
 function normalizeUrl(raw) {
   if (!raw) return '';
   let u = String(raw).trim();
@@ -234,49 +242,42 @@ Return EXACTLY 2 concepts as a JSON array (no markdown fences, no preamble), eac
   try {
     concepts = JSON.parse(cleaned);
   } catch (e) {
-    die(`Claude returned malformed concepts JSON: ${e.message}\n${text.slice(0, 500)}`);
+    fail(`Claude returned malformed concepts JSON: ${e.message}\n${text.slice(0, 500)}`);
   }
   if (!Array.isArray(concepts) || concepts.length < 2) {
-    die(`Claude returned ${concepts?.length || 0} concept(s), need at least 2`);
+    fail(`Claude returned ${concepts?.length || 0} concept(s), need at least 2`);
   }
   return concepts;
 }
 
-// ---------- main ----------
+// ---------- reusable core (used by both the CLI below and draft-prospect-batch.js) ----------
+//
+// Scrapes one prospect's site, drafts 2 concepts, writes clients/<slug>.json.
+// Throws DraftError on any expected failure (site down, no products found,
+// bad Claude output) — never calls process.exit, so a caller looping over
+// many prospects can catch-and-continue per item.
+async function draftProspectConfig({ website, niche = '', slug: slugArg = '', product: productArg = '', force = false, apiKey, log = () => {} }) {
+  if (!apiKey) fail('missing apiKey (pass ANTHROPIC_API_KEY)');
 
-async function main() {
-  const args = process.argv.slice(2);
-  const websiteArg = args.find((a) => !a.startsWith('--'));
-  if (!websiteArg) {
-    die('usage: node scripts/draft-prospect-config.js <website> [--niche=food_beverage|supplements|fishing_outdoor|dtc_general] [--slug=name] [--product=keyword] [--force]');
-  }
-  const nicheArg = args.find((a) => a.startsWith('--niche='))?.slice(8) || '';
-  const slugArg = args.find((a) => a.startsWith('--slug='))?.slice(7) || '';
-  const productArg = args.find((a) => a.startsWith('--product='))?.slice(10) || '';
-  const force = args.includes('--force');
-
-  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-  if (!ANTHROPIC_API_KEY) die('missing ANTHROPIC_API_KEY env var');
-
-  const url = normalizeUrl(websiteArg);
-  if (!url) die(`not a valid website: ${websiteArg}`);
+  const url = normalizeUrl(website);
+  if (!url) fail(`not a valid website: ${website}`);
   const origin = new URL(url).origin;
   const domain = new URL(url).hostname.replace(/^www\./, '');
   const slug = (slugArg || domain.split('.')[0]).toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (!slug) die(`could not derive a client slug from ${domain} — pass --slug=name`);
+  if (!slug) fail(`could not derive a client slug from ${domain} — pass slug explicitly`);
 
   const outFile = path.join(__dirname, '..', 'clients', `${slug}.json`);
-  if (fs.existsSync(outFile) && !force) die(`${outFile} already exists — pass --force to overwrite`);
+  if (fs.existsSync(outFile) && !force) fail(`${outFile} already exists — pass force:true to overwrite`);
 
-  console.log(`Scraping ${origin} ...`);
+  log(`Scraping ${origin} ...`);
   const homepageHtml = await fetchText(origin);
-  if (!homepageHtml) die(`could not fetch ${origin} (site down, blocking bots, or not reachable over https)`);
+  if (!homepageHtml) fail(`could not fetch ${origin} (site down, blocking bots, or not reachable over https)`);
 
   const brandContext = extractBrandContext(homepageHtml);
   const accent = extractAccent(homepageHtml);
   const logoUrl = extractLogo(homepageHtml, origin);
 
-  console.log('Looking for real product photos...');
+  log('Looking for real product photos...');
   let products = await tryShopifyProducts(origin);
   let source = 'shopify /products.json';
   if (products.length === 0) {
@@ -289,29 +290,27 @@ async function main() {
     source = '/collections/all <img> scan';
   }
   if (products.length === 0) {
-    die(`no usable product photos found on ${origin} — not Shopify, or the scan found nothing real. Build this one by hand instead of forcing it.`);
+    fail(`no usable product photos found on ${origin} — not Shopify, or the scan found nothing real.`);
   }
 
   products = rankProducts(products);
   if (productArg) {
     const filtered = products.filter((p) => (p.title || '').toLowerCase().includes(productArg.toLowerCase()));
     if (filtered.length === 0) {
-      die(`--product="${productArg}" matched nothing in ${products.length} candidate(s). Titles found: ${products.map((p) => p.title || '(untitled)').slice(0, 15).join(', ')}`);
+      fail(`product filter "${productArg}" matched nothing in ${products.length} candidate(s). Titles found: ${products.map((p) => p.title || '(untitled)').slice(0, 15).join(', ')}`);
     }
     products = filtered;
   }
   const picked = products.slice(0, 2);
-  console.log(`Found ${products.length} candidate photo(s) via ${source}. Using:`);
-  picked.forEach((p) => console.log(`  - ${p.title || '(untitled)'}: ${p.image_url}`));
-  console.log('SANITY-CHECK these URLs in a browser before running generation — scraping reliably picks the right HOST, not always the right IMAGE.');
+  log(`Found ${products.length} candidate photo(s) via ${source}. Using: ${picked.map((p) => p.title || '(untitled)').join(', ')}`);
 
-  console.log('Drafting creative concepts with Claude...');
+  log('Drafting creative concepts with Claude...');
   const concepts = await draftConcepts({
-    apiKey: ANTHROPIC_API_KEY,
+    apiKey,
     brandName: slug,
     domain,
     brandContext,
-    niche: nicheArg,
+    niche,
     products: picked,
   });
 
@@ -330,14 +329,61 @@ async function main() {
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
   fs.writeFileSync(outFile, JSON.stringify(cfg, null, 2));
 
-  console.log(`\nWrote ${outFile}`);
-  if (!logoUrl) console.log('WARNING: no logo found automatically — replace logo_url before running generation (make-samples.js will hard-fail on the placeholder otherwise).');
-  if (!accent) console.log('WARNING: no brand color found automatically — replace accent (#FF00FF placeholder) before running generation.');
+  return {
+    slug,
+    outFile,
+    logoFound: !!logoUrl,
+    accentFound: !!accent,
+    productSource: source,
+    picked,
+  };
+}
+
+// ---------- CLI ----------
+
+async function main() {
+  const args = process.argv.slice(2);
+  const websiteArg = args.find((a) => !a.startsWith('--'));
+  if (!websiteArg) {
+    die('usage: node scripts/draft-prospect-config.js <website> [--niche=food_beverage|supplements|fishing_outdoor|dtc_general] [--slug=name] [--product=keyword] [--force]');
+  }
+  const nicheArg = args.find((a) => a.startsWith('--niche='))?.slice(8) || '';
+  const slugArg = args.find((a) => a.startsWith('--slug='))?.slice(7) || '';
+  const productArg = args.find((a) => a.startsWith('--product='))?.slice(10) || '';
+  const force = args.includes('--force');
+
+  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+  if (!ANTHROPIC_API_KEY) die('missing ANTHROPIC_API_KEY env var');
+
+  let result;
+  try {
+    result = await draftProspectConfig({
+      website: websiteArg,
+      niche: nicheArg,
+      slug: slugArg,
+      product: productArg,
+      force,
+      apiKey: ANTHROPIC_API_KEY,
+      log: (m) => console.log(m),
+    });
+  } catch (e) {
+    die(e.message);
+  }
+
+  console.log(`\nWrote ${result.outFile}`);
+  console.log('SANITY-CHECK these URLs in a browser before running generation — scraping reliably picks the right HOST, not always the right IMAGE.');
+  result.picked.forEach((p) => console.log(`  - ${p.title || '(untitled)'}: ${p.image_url}`));
+  if (!result.logoFound) console.log('WARNING: no logo found automatically — replace logo_url before running generation (make-samples.js will hard-fail on the placeholder otherwise).');
+  if (!result.accentFound) console.log('WARNING: no brand color found automatically — replace accent (#FF00FF placeholder) before running generation.');
   console.log('\nNEXT STEPS:');
   console.log('  1. Open the file. Read both concepts — Claude drafted the angle, you have not approved it yet.');
   console.log('  2. Open each source_product_image_url in a browser, confirm it is actually a real product photo.');
-  console.log(`  3. FAL_KEY='...' node scripts/make-samples.js ${path.relative(process.cwd(), outFile)}`);
+  console.log(`  3. FAL_KEY='...' node scripts/make-samples.js ${path.relative(process.cwd(), result.outFile)}`);
   console.log('  4. Eyeball every PNG in PENDING-REVIEW/, check every REVIEW.md box honestly, then --approve.');
 }
 
-main().catch((e) => die(e.message));
+module.exports = { draftProspectConfig, DraftError };
+
+if (require.main === module) {
+  main().catch((e) => die(e.message));
+}

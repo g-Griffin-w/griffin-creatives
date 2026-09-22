@@ -240,6 +240,147 @@ async function composeScene({ bgBuf, cutBuf, w, h, key }) {
 }
 
 // ---------- main ----------
+function slugifyLocal(s) {
+  return (String(s || "x")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 40) || "x");
+}
+
+function escHtml(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// Deliberately its own small template, not render-landing.js's — that one
+// assumes a real marketing page (hero copy, value props, FAQ) written for a
+// client who's already signed. A cold sample has none of that; it's just
+// "here's the ad we made you," with a CTA that routes through /api/lp-click
+// so a click is measurable before the prospect has committed to anything.
+function buildSampleHtml({ imageUrl, tagline, bigIdea, accent, clickUrl, clientLabel }) {
+  const color = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(String(accent || "")) ? accent : "#111";
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A free ad we made for ${escHtml(clientLabel)}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#fafafa;color:#111;line-height:1.5}
+  .wrap{max-width:560px;margin:0 auto;padding:48px 24px;text-align:center}
+  img{max-width:100%;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,0.18);margin-bottom:28px}
+  h1{font-size:26px;margin-bottom:12px}
+  p{color:#555;font-size:16px;margin-bottom:28px}
+  a.cta{display:inline-block;background:${color};color:#fff;text-decoration:none;font-weight:600;font-size:17px;padding:16px 40px;border-radius:8px}
+  footer{margin-top:40px;color:#999;font-size:12px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <img src="${escHtml(imageUrl)}" alt="${escHtml(tagline || "Sample ad")}">
+    <h1>${escHtml(tagline || "")}</h1>
+    <p>${escHtml(bigIdea || "")}</p>
+    <a class="cta" href="${escHtml(clickUrl)}">Yours to run — no strings</a>
+    <footer>Made free by Griffin Creative Lab. No commitment.</footer>
+  </div>
+</body>
+</html>`;
+}
+
+// Uploads the concept's square render to the same public bucket render-ad.js
+// already uses, builds a tiny tracked preview page for it, and stores it as a
+// landing_pages row linked to the concept — so a click on the sample itself
+// (before any reply, before any signed client) becomes measurable the same
+// way a post-signup deliverable's page already is.
+async function createTrackedSamplePage({ sb, cfg, concept, conceptId, approvedDir }) {
+  const localPng = path.join(approvedDir, `${concept.name}-1x1.png`);
+  if (!fs.existsSync(localPng)) throw new Error(`no 1x1 render found at ${localPng}`);
+  const buf = fs.readFileSync(localPng);
+
+  const bucket = "content_assets";
+  const filename = `free-samples/${slugifyLocal(cfg.client)}/${slugifyLocal(concept.name)}.png`;
+  const { error: upErr } = await sb.storage.from(bucket).upload(filename, buf, {
+    contentType: "image/png",
+    upsert: true,
+  });
+  if (upErr) throw new Error(`upload failed: ${upErr.message}`);
+  const { data: pub } = sb.storage.from(bucket).getPublicUrl(filename);
+
+  const destUrl = /^https?:\/\//i.test(cfg.domain || "") ? cfg.domain : `https://${cfg.domain}`;
+  const slug = `${slugifyLocal(cfg.client)}-${slugifyLocal(concept.name)}-sample-${Date.now().toString(36)}`;
+  const clickUrl = `https://www.griffincreativelab.com/api/lp-click?c=${slug}`;
+
+  const html = buildSampleHtml({
+    imageUrl: pub.publicUrl,
+    tagline: concept.tagline,
+    bigIdea: concept.big_idea,
+    accent: concept.accent || cfg.accent,
+    clickUrl,
+    clientLabel: cfg.client,
+  });
+
+  const { error: insErr } = await sb
+    .from("landing_pages")
+    .insert({ slug, client: cfg.client, html, cta_url: destUrl, concept_id: conceptId });
+  if (insErr) throw new Error(`landing_pages insert failed: ${insErr.message}`);
+
+  return `https://www.griffincreativelab.com/api/lp?c=${slug}`;
+}
+
+// Logs each approved concept's metadata (framework, tagline, engine) so it can
+// later be joined against real click/performance data, then builds a tracked
+// preview page per concept — the whole point being to eventually know which
+// framework/style actually converts, not just which one looked good, and to
+// get that signal starting with the free sample itself, before any reply.
+// Runs only at --approve time (not every generation attempt) so iteration
+// noise never pollutes the dataset, and is deliberately best-effort: missing
+// local Supabase creds should never block shipping an approved batch.
+async function logApprovedConcepts(cfg, approvedDir) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    console.log("(SUPABASE_URL/SUPABASE_SERVICE_KEY not set — skipping ad_concepts log and tracked sample links; this batch won't be trackable for performance correlation later.)");
+    return;
+  }
+  const { createClient } = require("@supabase/supabase-js");
+  const sb = createClient(url, key, { auth: { persistSession: false } });
+
+  for (const c of cfg.concepts) {
+    let conceptId = null;
+    try {
+      const { data, error } = await sb
+        .from("ad_concepts")
+        .insert({
+          client: cfg.client,
+          concept_name: c.name,
+          framework: c.framework || null,
+          tagline: c.tagline || null,
+          engine: cfg.engine || null,
+          fal_model: cfg.fal_model || null,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      conceptId = data.id;
+    } catch (err) {
+      console.error(`ad_concepts log error for ${c.name} (non-fatal):`, err.message);
+      continue; // no concept row -> nothing to link a sample page to
+    }
+
+    try {
+      const sampleUrl = await createTrackedSamplePage({ sb, cfg, concept: c, conceptId, approvedDir });
+      console.log(`   ${c.name} tracked link -> ${sampleUrl}`);
+    } catch (err) {
+      console.error(`sample page error for ${c.name} (non-fatal):`, err.message);
+    }
+  }
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const configFile = args.find((a) => !a.startsWith("--"));
@@ -278,6 +419,7 @@ async function main() {
     const stamp = new Date().toISOString().slice(0, 10);
     const approvedDir = path.join(baseDir, `APPROVED-${stamp}`);
     fs.renameSync(pendingDir, approvedDir);
+    await logApprovedConcepts(cfg, approvedDir);
     console.log(`\nApproved -> ${approvedDir}`);
     console.log("These files may now be attached to outreach. You looked at every one, right?");
     return;

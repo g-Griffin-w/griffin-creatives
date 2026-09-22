@@ -145,6 +145,7 @@ module.exports = async (req, res) => {
       product_image_url = "",
       cta_url = "#",
       landing_page,
+      concept_id = null,
     } = body;
 
     const lp = typeof landing_page === "string" ? JSON.parse(landing_page) : landing_page;
@@ -152,12 +153,19 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: "Missing landing_page data (need at least hero_headline)" });
     }
 
-    const accent = sanitizeHex(accent_color, "#FF4D00");
-    const html = buildLandingHtml({ business_name, accent, product_image_url, cta_url, lp });
     const slug = `${slugify(client_id)}-${Date.now().toString(36)}`;
+    // Buttons point at our own tracked redirect, not the client's site directly,
+    // so a click is captured as a first-party signal before handing off. This is
+    // what lets a concept's real engagement be measured without needing access
+    // to anyone's ad account.
+    const clickUrl = `https://www.griffincreativelab.com/api/lp-click?c=${slug}`;
+    const accent = sanitizeHex(accent_color, "#FF4D00");
+    const html = buildLandingHtml({ business_name, accent, product_image_url, cta_url: clickUrl, lp });
 
     const sb = getSb();
-    const { error } = await sb.from("landing_pages").insert({ slug, client: business_name, html });
+    const { error } = await sb
+      .from("landing_pages")
+      .insert({ slug, client: business_name, html, cta_url, concept_id });
     if (error) return res.status(500).json({ error: "Failed to store landing page", detail: error.message });
 
     const url = `https://www.griffincreativelab.com/api/lp?c=${slug}`;

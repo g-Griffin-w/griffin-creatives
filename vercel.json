@@ -19,5 +19,11 @@
       "src": "/(.*)",
       "dest": "/$1"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/pull-leads",
+      "schedule": "0 8 * * 1"
+    }
   ]
 }

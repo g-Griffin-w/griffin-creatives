@@ -178,6 +178,57 @@ const CONFIG = {
       accent: "#C98A3B",
     },
   ],
+  // Kobu Kombucha (George @ enjoykobu.com) — REVISION July 16 2026.
+  // George: "the stick looks a bit off" on nano-banana img2img versions → these use
+  // HIS emailed photos (raw-photos/kobu-*.jpeg): cutout = real packet pixels, zero
+  // AI redraw; composite = his real lakeside photo untouched. Save his attachments
+  // as raw-photos/kobu-lake.jpeg + raw-photos/kobu-watermelon-packet.jpeg before running.
+  kobu: [
+    {
+      // ENGINE=cutout — real watermelon packet standing in the bottle graveyard spotlight.
+      name: "breakup-with-the-bottle",
+      product_url:    "raw-photos/kobu-watermelon-packet.jpeg",
+      real_photo_url: "raw-photos/kobu-watermelon-packet.jpeg",
+      rotate: -90, // packet photographed horizontal, band on the right → stand it upright
+      scene_prompt: "",
+      bg_prompt: "Dramatic dark studio scene: plain dark green glass bottles with absolutely no labels, stickers, or markings, lying flat and abandoned, receding into deep shadow on the left and right edges. A clean warm theatrical spotlight illuminates an empty circle of smooth dark floor at the center of the frame. Rich cinematic contrast, deep teal-black palette, one warm light source, premium moody product-stage photography. Completely empty space in the center. No product, no packet, no text, no logos.",
+      headline: "All the kombucha. None of the bite.",
+      subheadline: "No vinegar sting, no fridge, ~$2.50 a serving.",
+      poster_headline: "All the kombucha. None of the bite.",
+      poster_accent: "No sting. No fridge. $2.50 a serving.",
+      accent: "#E8434B",
+    },
+    {
+      // ENGINE=cutout — real watermelon packet standing in the neon serotonin ripple pool.
+      name: "made-in-your-gut",
+      product_url:    "raw-photos/kobu-watermelon-packet.jpeg",
+      real_photo_url: "raw-photos/kobu-watermelon-packet.jpeg",
+      rotate: -90,
+      scene_prompt: "",
+      bg_prompt: "Surreal glowing scene viewed straight on: a luminous watermelon-pink liquid pool filling the lower half of the frame, concentric neon ripples radiating outward from an empty center point like neural signals, tiny points of light scattered along the ripple lines, near-black empty darkness in the upper half. Vibrant pink and coral palette against near-black, dreamlike, electric, graphic. Completely empty space in the center. No product, no packaging, no text, no logos.",
+      headline: "90% of your serotonin is made in your gut.",
+      subheadline: "Pre + pro + postbiotics, 1B CFU, low sugar.",
+      poster_headline: "90% of your serotonin is made in your gut.",
+      poster_accent: "Pre + pro + postbiotics. 1B CFU.",
+      accent: "#E8434B",
+    },
+    {
+      // ENGINE=cutout — real packet standing hero in OUR generated golden-hour gear scene.
+      // (Per Gabriel July 16: never reuse the client's own photo as the ad background —
+      // the product is theirs, the world is ours. That's what they'd pay us for.)
+      name: "pocket-kombucha",
+      product_url:    "raw-photos/kobu-watermelon-packet.jpeg",
+      real_photo_url: "raw-photos/kobu-watermelon-packet.jpeg",
+      rotate: -90,
+      scene_prompt: "",
+      bg_prompt: "Outdoor adventure gear scene in hard golden-hour sunlight: a weathered olive-green hiking backpack with webbing straps and a metal carabiner fills the soft-focus lower half of the frame, fine trail dust glowing in the air, sunlit mountain landscape softly blurred in the upper half. Warm earthy palette, rugged texture, premium outdoor equipment campaign photography. Completely empty space in the center of the frame. No product, no packet, no bottle, no text, no logos.",
+      headline: "Kombucha that fits in your pocket.",
+      subheadline: "No bottle, no fridge — mixes in 10 seconds, anywhere.",
+      poster_headline: "Kombucha that fits in your pocket.",
+      poster_accent: "No bottle. No fridge.",
+      accent: "#C97B2D",
+    },
+  ],
 };
 
 // ---------- fal helpers ----------
@@ -282,21 +333,34 @@ async function runCutout(c, outDir) {
   const { buf: rawCut } = await fetchBuf(cutoutUrl);
   fs.writeFileSync(path.join(outDir, `${c.name}-cutout-raw.png`), rawCut);
   // Trim the transparent margins so the product fills its box (fixes "tiny floating product").
-  const trimmed = await sharp(rawCut).trim({ threshold: 10 }).png().toBuffer({ resolveWithObject: true });
+  // Optional c.rotate (degrees) stands a horizontally-photographed product upright first.
+  let cutPipeline = sharp(rawCut);
+  if (c.rotate) cutPipeline = cutPipeline.rotate(c.rotate, { background: { r: 0, g: 0, b: 0, alpha: 0 } });
+  const trimmed = await cutPipeline.trim({ threshold: 10 }).png().toBuffer({ resolveWithObject: true });
   const cutBuf = trimmed.data, cw = trimmed.info.width, ch = trimmed.info.height;
   fs.writeFileSync(path.join(outDir, `${c.name}-cutout.png`), cutBuf);
-  console.log("  seedream background...");
-  const bgUrl = await seedreamT2I({ prompt: c.bg_prompt });
-  const { buf: bgBuf, ct: bgCt } = await fetchBuf(bgUrl);
-  fs.writeFileSync(path.join(outDir, `${c.name}-background.png`), bgBuf);
+  // Reuse an existing background (delete <name>-background.png to force a re-roll).
+  const bgPath = path.join(outDir, `${c.name}-background.png`);
+  let bgBuf, bgCt;
+  if (fs.existsSync(bgPath)) {
+    console.log("  reusing existing background (delete it to re-roll)...");
+    bgBuf = fs.readFileSync(bgPath); bgCt = "image/png";
+  } else {
+    console.log("  seedream background...");
+    const bgUrl = await seedreamT2I({ prompt: c.bg_prompt });
+    ({ buf: bgBuf, ct: bgCt } = await fetchBuf(bgUrl));
+    fs.writeFileSync(bgPath, bgBuf);
+  }
   const bgDataUri = toDataUri(bgBuf, bgCt);
   for (const ratio of RATIOS) {
     // Seat the product as a real hero: ~56% of frame height, capped at 88% of frame width.
     let targetH = Math.round(ratio.h * 0.56);
     let targetW = Math.round(targetH * (cw / ch));
     const maxW = Math.round(ratio.w * 0.88);
-    if (targetW > maxW) targetW = maxW;
-    const product = await prepareLogo({ buf: cutBuf, contentType: "image/png", targetW });
+    if (targetW > maxW) { targetW = maxW; targetH = Math.round(targetW * (ch / cw)); }
+    // Use the cutout's REAL aspect ratio. (prepareLogo assumes a 3.4:1 wordmark for
+    // raster input — that shrank a tall stick packet to a speck on July 16.)
+    const product = { dataUri: toDataUri(cutBuf, "image/png"), w: targetW, h: targetH };
     const png = await renderConceptRatio({
       ratio, imageDataUri: bgDataUri, logo: product, layout: "poster-bottom",
       headline: c.poster_headline, accentLine: c.poster_accent, accent: c.accent,

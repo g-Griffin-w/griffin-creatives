@@ -1,0 +1,46 @@
+{
+  "client": "hikingpony",
+  "domain": "hikingpony.com",
+  "logo_url": "https://hikingpony.com/cdn/shop/files/NEW_HIKING_PONY_LOGO.png?v=1772676412&width=640",
+  "accent": "#1A1A1A",
+  "fal_model": "nano-banana",
+  "engine": "cutout",
+  "concepts": [
+    {
+      "name": "no-machine-required",
+      "framework": "unexpected_context",
+      "big_idea": "Put real coffee where a coffee maker physically cannot follow. A single packet standing on a mountain ridge at sunrise with one steaming mug makes the whole no-brew promise undeniable, and the brand name finally earns the mountain it is named for.",
+      "image_prompt": "Cinematic sunrise on a granite mountain ridge: a single Hiking Pony No-Brew coffee packet stands upright LARGE in the LOWER TWO-THIRDS of the frame, horizontally centered, label crisp and completely legible, a single enamel camp mug set low on the rock with real steam rising, warm golden first light raking across the textured stone, layered blue mountain ridgelines receding behind. The TOP THIRD of the frame is open dawn sky and soft distant peaks, empty and quiet. No coffee machine, no cords, no clutter anywhere. Keep the packet EXACTLY as in the reference photo, do not redesign, recolor, or blur it. Crisp adventure-campaign realism, warm golden palette. add no text or graphics",
+      "bg_prompt": "Cinematic sunrise on a granite mountain ridge, warm golden first light raking across textured rock, layered blue mountain ridgelines receding into the distance, a single enamel camp mug with real steam rising set low to one side, open dawn sky and soft distant peaks filling the upper half. Completely empty smooth rock in the center where a product will stand. No product, no text, no logos, warm golden adventure-campaign palette.",
+      "tagline": "Real coffee. No machine. Just add hot water.",
+      "bullets": ["No brewing", "10g collagen", "Just add hot water"],
+      "layout": "top",
+      "accent": "#C6473B",
+      "source_product_image_url": "https://cdn.shopify.com/s/files/1/0864/2717/3145/files/5_94aa6869-9946-4afa-83c5-6107770f4a40.png"
+    },
+    {
+      "name": "retire-the-routine",
+      "framework": "us_vs_them",
+      "big_idea": "Make the enemy the entire grind-brew-clean morning ritual and stage it abandoned in shadow while one packet takes the spotlight. The contrast does the selling: everything a coffee maker demands, retired by a single stick you just add water to.",
+      "image_prompt": "Dramatic warm studio scene: a single Hiking Pony No-Brew Mocha coffee packet stands upright LARGE in the LOWER TWO-THIRDS of the frame, horizontally centered, lit by one clean warm spotlight like a hero reveal, label crisp and completely legible. Low in the deep-shadow background the clutter of an old coffee routine, a bulky drip coffee machine, a tangle of paper filters, a grinder, lies dark and abandoned receding into blackness. The TOP THIRD of the frame is empty warm-dark atmosphere. Keep the packet EXACTLY as in the reference photo, do not redesign, recolor, or blur it. Rich cinematic contrast, warm espresso-brown palette, one warm light source. add no text or graphics",
+      "bg_prompt": "Dramatic warm studio stage: in the deep-shadow background the clutter of an old coffee routine, a bulky drip coffee machine, a tangle of paper filters, a grinder, lies dark and abandoned receding into blackness at the edges. One clean warm theatrical spotlight illuminates an empty circle of smooth dark surface in the center. Warm espresso-brown and black palette, rich cinematic contrast, one warm light source. Completely empty space in the center. No product, no text, no logos.",
+      "tagline": "Everything your morning coffee isn't.",
+      "bullets": ["1 step, not 6", "No machine to clean", "9g protein"],
+      "layout": "top",
+      "accent": "#D9822B",
+      "source_product_image_url": "https://cdn.shopify.com/s/files/1/0864/2717/3145/files/Untitled_5000_x_5000_px_accff556-7261-4f75-8870-796517265537.png"
+    },
+    {
+      "name": "not-just-coffee",
+      "framework": "ingredient_hero",
+      "big_idea": "Reframe it as a functional stack disguised as a latte: 10g collagen, 9g protein, MCTs, not coffee with add-ons but a beauty-and-energy cup that happens to taste great. Doubles as a conversion ad she can run tomorrow alongside her Join the Herd 10-percent offer.",
+      "image_prompt": "Clean bright studio scene with a warm creamy backdrop: a single Hiking Pony No-Brew Latte coffee packet stands upright LARGE in the LOWER TWO-THIRDS of the frame, horizontally centered, label crisp and completely legible, soft directional light, a gentle swirl of steam and a few coffee beans and a small pour of creamy latte suggested low around its base. The TOP THIRD of the frame is a smooth clean creamy-beige gradient, calm and empty, leaving room for copy. Keep the packet EXACTLY as in the reference photo, do not redesign, recolor, or blur it. Premium, warm, appetizing, minimal. add no text or graphics",
+      "bg_prompt": "Clean bright studio scene with a warm creamy-beige gradient backdrop, soft directional light, a gentle swirl of steam and a few scattered coffee beans low near the bottom, a small pour of creamy latte suggested at the base, the upper half a smooth calm empty creamy gradient. Premium, warm, appetizing, minimal. Completely empty space in the center. No product, no text, no logos.",
+      "tagline": "It's not just coffee. It's your morning, upgraded.",
+      "bullets": ["10g collagen", "9g protein", "MCTs, no preservatives"],
+      "layout": "top",
+      "accent": "#2FA7A0",
+      "source_product_image_url": "https://cdn.shopify.com/s/files/1/0864/2717/3145/files/Untitled_5000_x_5000_px_-2.png"
+    }
+  ]
+}
