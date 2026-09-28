@@ -35,8 +35,14 @@ const PULL_BATCH_SIZE = Math.max(1, Math.min(100, parseInt(process.env.PULL_LEAD
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 // Search profiles per niche — keep these in sync with the actual strategy in
-// use. Only food_beverage is wired up today (the agreed narrowed focus,
-// 2026-08-01) — add more niches here deliberately, don't spray by default.
+// use. Add more niches here deliberately, don't spray by default.
+//
+// salmon_guide / hunting_guide (2026-09-23 niche lock): these are small,
+// often one-person guide/outfitter operations, not funded startups — Apollo's
+// B2B people database skews toward companies with a real org record, so
+// coverage here is a genuine open question, unlike food_beverage which was
+// already validated live. Run with ?dry_run=1 first and actually look at
+// what comes back before trusting this at scale.
 const NICHE_SEARCH_PROFILES = {
   food_beverage: {
     person_titles: ['founder', 'co-founder', 'ceo', 'owner', 'president'],
@@ -44,6 +50,27 @@ const NICHE_SEARCH_PROFILES = {
     q_organization_keyword_tags: ['food and beverage', 'beverage', 'snacks', 'kombucha', 'functional beverage', 'specialty food'],
     person_locations: ['United States'],
   },
+  salmon_guide: {
+    person_titles: ['owner', 'guide', 'founder', 'captain', 'head guide'],
+    organization_num_employees_ranges: ['1,10'],
+    q_organization_keyword_tags: ['fishing charter', 'fishing guide', 'guide service', 'salmon fishing', 'charter fishing'],
+    person_locations: ['Oregon, United States'],
+  },
+  hunting_guide: {
+    person_titles: ['owner', 'guide', 'founder', 'outfitter', 'head guide'],
+    organization_num_employees_ranges: ['1,10'],
+    q_organization_keyword_tags: ['hunting guide', 'outfitter', 'big game hunting', 'guided hunts', 'elk hunting', 'deer hunting'],
+    person_locations: ['Oregon, United States', 'Idaho, United States'],
+  },
+};
+
+// Human-readable label stored in outreach_leads.company_industry — was
+// hardcoded to 'Food & Beverage' for every niche until this was caught while
+// adding salmon_guide/hunting_guide (would've mislabeled every guide lead).
+const NICHE_INDUSTRY_LABEL = {
+  food_beverage: 'Food & Beverage',
+  salmon_guide: 'Fishing Guide',
+  hunting_guide: 'Hunting Guide',
 };
 
 function jsonHeaders(apiKey) {
@@ -160,7 +187,7 @@ module.exports = async (req, res) => {
           linkedin_url: candidate.linkedin_url || '',
           company_name: candidate.organization?.name || '',
           company_website: `https://${candidate.domain}`,
-          company_industry: 'Food & Beverage',
+          company_industry: NICHE_INDUSTRY_LABEL[niche] || niche,
           niche,
           status: 'queued',
         });

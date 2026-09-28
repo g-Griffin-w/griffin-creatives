@@ -65,11 +65,8 @@ Paragraph 2 (personalized hook — ONE natural, human line, max two sentences):
 - IF PRODUCT CONTEXT is empty or too thin to tell what they sell: use the NICHE HOOK below that matches {{niche}}.
 Do not list products or sound like a database — write it like a person who actually looked at their site.
 
-Paragraph 3 (shared pitch — write this exactly, do not change wording):
-here's the idea: we turn your existing product photos into finished, ready-to-upload static ads — designed with the copy right on the image, in every placement ratio. not concepts or briefs — actual files in your google drive within 48 hours, ready to test before your current winners burn out.
-
-Paragraph 4 (shared free-sample offer — write this exactly, do not change wording — this is the FINAL paragraph of the body):
-want me to make you 2 free samples? you send nothing — i'll pull a product from your site, design 2 finished static ads, and they're yours to run whether or not we ever work together.
+Paragraphs 3 and 4 (shared pitch — write this exactly, do not change wording — paragraph 4 is the FINAL paragraph of the body):
+{{pitch_block}}
 
 CLOSE (write exactly, on its own line as the last line of the body):
 sound good?
@@ -86,6 +83,12 @@ NICHE HOOKS (fallback for paragraph 2 ONLY when PRODUCT CONTEXT is empty — use
 
 - supplements:
   "found {{company_name}} while looking at standout supplement brands — and your product shots are honestly too good to only be running a handful of ad variations."
+
+- salmon_guide:
+  "found {{company_name}} while looking at guides who actually know the oregon coast — and i know how brutal the stretch between runs can be when every booking lives or dies by word of mouth."
+
+- hunting_guide:
+  "found {{company_name}} while looking at serious elk and deer outfitters — and i know how hard it is keeping tags filled every season with nothing pulling past clients back."
 
 - anything else, missing, or "dtc_general":
   "found {{company_name}} while looking at fast-growing e-commerce brands — and your product photos are honestly too good to only be running a handful of ad variations."
@@ -113,6 +116,24 @@ OUTPUT FORMAT (JSON only, no markdown fences, no preamble):
   "subject": "...",
   "body": "..."
 }`;
+
+// The core offer differs by business type, not just the hook — a guide
+// service has no "product photos" to turn into ads, and the thing that
+// actually helps them (filling seats, surviving the off-season) isn't ad
+// creative at all. Keyed by pitch variant, not niche directly, since several
+// niches can share one offer.
+const PITCH_VARIANTS = {
+  dtc: `here's the idea: we turn your existing product photos into finished, ready-to-upload static ads — designed with the copy right on the image, in every placement ratio. not concepts or briefs — actual files in your google drive within 48 hours, ready to test before your current winners burn out.
+
+want me to make you 2 free samples? you send nothing — i'll pull a product from your site, design 2 finished static ads, and they're yours to run whether or not we ever work together.`,
+  guide: `here's the idea: most guide services lose clients to word-of-mouth alone, with nothing pulling past clients back once next season opens — rough when your business lives on filling every seat and surviving the off months. i put together a free "book next season" email sequence guides can send straight to their own client list.
+
+want me to send you the actual sequence, plus a free sample ad built from one of your own trophy or action shots? you send nothing — both are yours to use whether or not we ever work together.`,
+};
+const NICHE_PITCH = { salmon_guide: 'guide', hunting_guide: 'guide' };
+function pitchForNiche(niche) {
+  return PITCH_VARIANTS[NICHE_PITCH[niche] || 'dtc'];
+}
 
 // ============================================================
 // Helpers
@@ -224,6 +245,19 @@ async function fetchProductContext(lead) {
 // fishing first (very distinct), then supplements (so "protein"/"nutrition" land
 // here, not in food), then food/beverage. Everything else -> dtc_general.
 const NICHE_KEYWORDS = {
+  // Checked before fishing_outdoor (gear/tackle DTC) since a guide site's
+  // "rod", "reel", "fishing" language would otherwise misclassify it as a
+  // product brand instead of a booking-based service business.
+  salmon_guide: [
+    'salmon', 'steelhead', 'chinook', 'coho', 'fishing charter', 'fishing guide',
+    'drift boat', 'guided fishing', 'river guide', 'bar fishing', 'ocean charter',
+    'guide service',
+  ],
+  hunting_guide: [
+    'elk hunt', 'deer hunt', 'hunting guide', 'outfitter', 'big game', 'guided hunt',
+    'bow hunt', 'rifle hunt', 'archery hunt', 'backcountry hunt', 'wilderness hunt',
+    'tag draw', 'spring bear', 'mule deer', 'whitetail',
+  ],
   fishing_outdoor: [
     'fishing', 'tackle', 'lure', 'rod', 'reel', 'angler', 'bait', 'fly fishing',
     'outdoor', 'hunting', 'camping', 'hiking', 'kayak', 'archery', 'tactical',
@@ -249,7 +283,7 @@ function inferNiche(lead, productContext) {
     .filter(Boolean)
     .join(' ')
     .toLowerCase();
-  for (const niche of ['fishing_outdoor', 'supplements', 'food_beverage']) {
+  for (const niche of ['salmon_guide', 'hunting_guide', 'fishing_outdoor', 'supplements', 'food_beverage']) {
     if (NICHE_KEYWORDS[niche].some((kw) => hay.includes(kw))) return niche;
   }
   return 'dtc_general';
@@ -302,7 +336,8 @@ function buildPrompt(lead, { productContext = '', resolvedNiche = '' } = {}) {
     .replace(/{{company_city}}/g, lead.company_city || '')
     .replace(/{{company_state}}/g, lead.company_state || '')
     .replace(/{{niche}}/g, resolvedNiche || lead.niche || '')
-    .replace(/{{product_context}}/g, productContext || '(none found — use the niche hook)');
+    .replace(/{{product_context}}/g, productContext || '(none found — use the niche hook)')
+    .replace('{{pitch_block}}', pitchForNiche(resolvedNiche || lead.niche || ''));
 }
 
 // Parse Claude's JSON response (strip any markdown fences if Claude adds them)

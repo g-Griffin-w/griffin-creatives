@@ -24,6 +24,10 @@
     {
       "path": "/api/pull-leads",
       "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/send-guide-retention",
+      "schedule": "0 9 * * *"
     }
   ]
 }
