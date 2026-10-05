@@ -1,3 +1,9 @@
+// DORMANT as of 2026-10-01 — Apollo subscription canceled, decision made not
+// to use it going forward. Removed from vercel.json's crons so this stops
+// firing against a dead integration. Left in place as reference/in case that
+// changes, but the new guide niches (salmon_guide, elk_guide) need a
+// different lead source entirely — this file was never run against them.
+//
 // api/pull-leads.js — automated Apollo lead pull, so outreach_leads never
 // runs dry without someone remembering to do it manually. This is the
 // automated version of the manual Apollo search + dedupe + enrich + insert
@@ -37,7 +43,8 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 // Search profiles per niche — keep these in sync with the actual strategy in
 // use. Add more niches here deliberately, don't spray by default.
 //
-// salmon_guide / hunting_guide (2026-09-23 niche lock): these are small,
+// salmon_guide / elk_guide (2026-09-23 niche lock, narrowed to elk-only on
+// 2026-10-01 — dropped deer to niche down further): these are small,
 // often one-person guide/outfitter operations, not funded startups — Apollo's
 // B2B people database skews toward companies with a real org record, so
 // coverage here is a genuine open question, unlike food_beverage which was
@@ -56,21 +63,21 @@ const NICHE_SEARCH_PROFILES = {
     q_organization_keyword_tags: ['fishing charter', 'fishing guide', 'guide service', 'salmon fishing', 'charter fishing'],
     person_locations: ['Oregon, United States'],
   },
-  hunting_guide: {
+  elk_guide: {
     person_titles: ['owner', 'guide', 'founder', 'outfitter', 'head guide'],
     organization_num_employees_ranges: ['1,10'],
-    q_organization_keyword_tags: ['hunting guide', 'outfitter', 'big game hunting', 'guided hunts', 'elk hunting', 'deer hunting'],
+    q_organization_keyword_tags: ['elk hunting guide', 'elk outfitter', 'guided elk hunts', 'elk hunting'],
     person_locations: ['Oregon, United States', 'Idaho, United States'],
   },
 };
 
 // Human-readable label stored in outreach_leads.company_industry — was
 // hardcoded to 'Food & Beverage' for every niche until this was caught while
-// adding salmon_guide/hunting_guide (would've mislabeled every guide lead).
+// adding these guide niches (would've mislabeled every guide lead).
 const NICHE_INDUSTRY_LABEL = {
   food_beverage: 'Food & Beverage',
   salmon_guide: 'Fishing Guide',
-  hunting_guide: 'Hunting Guide',
+  elk_guide: 'Elk Hunting Outfitter',
 };
 
 function jsonHeaders(apiKey) {

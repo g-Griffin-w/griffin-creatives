@@ -87,8 +87,8 @@ NICHE HOOKS (fallback for paragraph 2 ONLY when PRODUCT CONTEXT is empty — use
 - salmon_guide:
   "found {{company_name}} while looking at guides who actually know the oregon coast — and i know how brutal the stretch between runs can be when every booking lives or dies by word of mouth."
 
-- hunting_guide:
-  "found {{company_name}} while looking at serious elk and deer outfitters — and i know how hard it is keeping tags filled every season with nothing pulling past clients back."
+- elk_guide:
+  "found {{company_name}} while looking at serious elk outfitters — and i know how hard it is keeping tags filled every season with nothing pulling past clients back."
 
 - anything else, missing, or "dtc_general":
   "found {{company_name}} while looking at fast-growing e-commerce brands — and your product photos are honestly too good to only be running a handful of ad variations."
@@ -130,7 +130,7 @@ want me to make you 2 free samples? you send nothing — i'll pull a product fro
 
 want me to send you the actual sequence, plus a free sample ad built from one of your own trophy or action shots? you send nothing — both are yours to use whether or not we ever work together.`,
 };
-const NICHE_PITCH = { salmon_guide: 'guide', hunting_guide: 'guide' };
+const NICHE_PITCH = { salmon_guide: 'guide', elk_guide: 'guide' };
 function pitchForNiche(niche) {
   return PITCH_VARIANTS[NICHE_PITCH[niche] || 'dtc'];
 }
@@ -253,10 +253,11 @@ const NICHE_KEYWORDS = {
     'drift boat', 'guided fishing', 'river guide', 'bar fishing', 'ocean charter',
     'guide service',
   ],
-  hunting_guide: [
-    'elk hunt', 'deer hunt', 'hunting guide', 'outfitter', 'big game', 'guided hunt',
-    'bow hunt', 'rifle hunt', 'archery hunt', 'backcountry hunt', 'wilderness hunt',
-    'tag draw', 'spring bear', 'mule deer', 'whitetail',
+  // Elk-only, not general big-game — niched down further on 2026-10-01.
+  elk_guide: [
+    'elk hunt', 'elk hunting', 'elk tag', 'hunting guide', 'outfitter',
+    'guided elk hunt', 'bow hunt', 'rifle hunt', 'archery hunt',
+    'backcountry hunt', 'wilderness hunt', 'tag draw',
   ],
   fishing_outdoor: [
     'fishing', 'tackle', 'lure', 'rod', 'reel', 'angler', 'bait', 'fly fishing',
@@ -283,7 +284,7 @@ function inferNiche(lead, productContext) {
     .filter(Boolean)
     .join(' ')
     .toLowerCase();
-  for (const niche of ['salmon_guide', 'hunting_guide', 'fishing_outdoor', 'supplements', 'food_beverage']) {
+  for (const niche of ['salmon_guide', 'elk_guide', 'fishing_outdoor', 'supplements', 'food_beverage']) {
     if (NICHE_KEYWORDS[niche].some((kw) => hay.includes(kw))) return niche;
   }
   return 'dtc_general';

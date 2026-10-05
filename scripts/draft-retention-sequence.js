@@ -2,7 +2,7 @@
 // scripts/draft-retention-sequence.js
 //
 // Drafts the "book next season" email sequence that's now the free-sample
-// offer for the guide niches (salmon_guide, hunting_guide) in
+// offer for the guide niches (salmon_guide, elk_guide) in
 // api/send-outreach.js's PITCH_VARIANTS.guide. Unlike the photo-based ad
 // sample (make-samples.js), this needs zero fal spend and no per-prospect
 // product photo — it's pure copy, so it exists before a single prospect's
@@ -28,7 +28,8 @@ const path = require('path');
 
 const NICHE_LABELS = {
   salmon_guide: 'Oregon coast salmon fishing guide',
-  hunting_guide: 'Oregon/Idaho elk & deer hunting guide/outfitter',
+  // Elk-only, not general big-game — niched down further on 2026-10-01.
+  elk_guide: 'Oregon/Idaho elk hunting outfitter',
 };
 
 function die(msg) {
@@ -88,37 +89,63 @@ async function scrapeContext(url) {
   }
 }
 
-function buildDraftPrompt({ nicheLabel, businessName, context }) {
+// salmon_guide is direct-booking — a past client can book next season the
+// moment it opens. elk_guide is tag-gated — a past client can't book
+// anything until they've WON a tag in the state draw, so "lock in your
+// dates" is simply false for them. These need different copy, not just
+// different timing. See api/send-guide-retention.js / niche_seasons for the
+// two elk touchpoints this maps to: 'main' (right after season closes) and
+// 'application-reminder' (before the spring application deadline).
+function sequenceTypeFor(niche, seasonLabel) {
+  if (niche === 'elk_guide' && seasonLabel === 'application-reminder') return 'tag_gated_apply';
+  if (niche === 'elk_guide') return 'tag_gated_thanks';
+  return 'direct_booking';
+}
+
+const SEQUENCE_PROMPTS = {
+  direct_booking: (ctx) => `Write a 3-email "book next season now" sequence this guide can send to their OWN past-client list right after the season closes, to pre-sell next season's dates before it opens to new clients. The real problem being solved is empty seats and dead months between runs — not brand awareness.
+
+- Email 1 (Day 0): reconnect + announce next season's booking is open early, past clients first.
+- Email 2 (Day 5): urgency — limited seats/dates, callback to what made a past trip good ([specific memory or result] as a placeholder).
+- Email 3 (Day 10): last call — a small past-client-only incentive ([priority date pick] or [referral perk] as a placeholder) and a clear booking call to action.`,
+
+  tag_gated_thanks: (ctx) => `Write a 2-email sequence this outfitter can send to their OWN past-client list right after the season closes. CRITICAL: this is a TAG-GATED hunt — a past client cannot book next season yet because they haven't drawn a tag. Do NOT ask them to book or lock in dates. Do NOT create urgency about availability. Instead: thank them for the season, plant the idea of hunting again, and set honest expectations that the state controlled-hunt application period opens in spring (use [your state's application deadline] as a placeholder, do not invent a date) — and that this outfitter will remind them when it's time to apply.
+
+- Email 1 (Day 0): thank-you + reflection on the season ([specific memory or result] as a placeholder) — no ask.
+- Email 2 (Day 10): plant the idea of next year, mention the application period is coming in spring, promise a reminder — still no booking ask, since there's nothing to book yet.`,
+
+  tag_gated_apply: (ctx) => `Write a 1-email reminder this outfitter can send to their OWN past-client list in the weeks before the state controlled-hunt application deadline. This is the single most important touch of the year for a tag-gated hunt — missing the application window means missing the entire season, with no second chance until next year (aside from a small second-drawing for leftover tags). Be direct and useful, not salesy: remind them the deadline is coming ([your state's application deadline] as a placeholder — do not invent a date), make it easy (a link or instructions placeholder), and let them know you're ready to guide them again once they draw.
+
+- Email 1 (Day 0 — the only email): deadline reminder + low-key promise to guide them again if they draw.`,
+};
+
+function buildDraftPrompt({ nicheLabel, businessName, context, sequenceType }) {
   return `You are a direct-response email copywriter writing on behalf of a real ${nicheLabel} business named "${businessName}".
 
 CONTEXT scraped from their own site (may be empty): ${context || '(none found)'}
 
-Write a 3-email "book next season now" sequence this guide/outfitter can send to their OWN past-client list during the off-season, to pre-sell next season's dates before it opens to new clients. This is the core value being offered — the real problem for a business like this is empty seats and dead months between seasons, not brand awareness.
+${SEQUENCE_PROMPTS[sequenceType](context)}
 
 Rules:
 - Written in the guide's own voice — first person, plainspoken, outdoorsy, never corporate marketing-speak.
-- Grounded in real seasonal mechanics for this activity (salmon runs, or elk/deer season + tag draws) but do NOT invent specific dates, prices, or claims about this exact business — use bracketed placeholders like [your target dates] or [your season's tag deadline] anywhere a real fact would be needed.
-- Email 1 (Day 0): reconnect + announce next season's booking is open early, past clients first.
-- Email 2 (Day 5): urgency — limited seats/dates, callback to what made a past trip good ([specific memory or result] as a placeholder).
-- Email 3 (Day 10): last call — a small past-client-only incentive ([priority date pick] or [referral perk] as a placeholder) and a clear booking call to action.
+- Do NOT invent specific dates, prices, or claims about this exact business — use bracketed placeholders anywhere a real fact would be needed.
 - Each email: subject line + body under 150 words.
 - No emojis, no exclamation-point stacking, no corporate tone.
 
-OUTPUT FORMAT (JSON only, no markdown fences, no preamble):
+OUTPUT FORMAT (JSON only, no markdown fences, no preamble). Output exactly as many emails as specified above, no more, no fewer:
 {
   "emails": [
-    { "send_day": "Day 0", "subject": "...", "body": "..." },
-    { "send_day": "Day 5", "subject": "...", "body": "..." },
-    { "send_day": "Day 10", "subject": "...", "body": "..." }
+    { "send_day": "Day 0", "subject": "...", "body": "..." }
   ]
 }`;
 }
 
-async function draftSequence({ apiKey, niche, businessName, context }) {
+async function draftSequence({ apiKey, niche, seasonLabel, businessName, context }) {
   const Anthropic = require('@anthropic-ai/sdk');
   const claude = new Anthropic({ apiKey });
   const nicheLabel = NICHE_LABELS[niche];
-  const prompt = buildDraftPrompt({ nicheLabel, businessName, context });
+  const sequenceType = sequenceTypeFor(niche, seasonLabel);
+  const prompt = buildDraftPrompt({ nicheLabel, businessName, context, sequenceType });
   const msg = await claude.messages.create({
     model: 'claude-sonnet-4-5',
     max_tokens: 1500,
@@ -158,9 +185,14 @@ async function main() {
   const website = get('website');
   const niche = get('niche');
   const nameArg = get('name');
+  // 'main' = direct-booking touch for salmon, or the post-season thank-you
+  // for elk. 'application-reminder' = elk's pre-deadline nudge (only
+  // meaningful for elk_guide — salmon ignores this and always uses direct
+  // booking copy, since it has no tag-draw gate).
+  const seasonLabel = get('season-label') || 'main';
   if (!website || !niche) {
     die(
-      'usage: node scripts/draft-retention-sequence.js --website=https://... --niche=salmon_guide|hunting_guide [--name="Business Name"]',
+      'usage: node scripts/draft-retention-sequence.js --website=https://... --niche=salmon_guide|elk_guide [--season-label=main|application-reminder] [--name="Business Name"]',
     );
   }
   if (!NICHE_LABELS[niche]) die(`--niche must be one of: ${Object.keys(NICHE_LABELS).join(', ')}`);
@@ -179,13 +211,15 @@ async function main() {
   const context = await scrapeContext(url);
   const businessName = nameArg || new URL(url).hostname.replace(/^www\./, '');
 
-  console.log('Drafting sequence via Claude...');
-  const emails = await draftSequence({ apiKey, niche, businessName, context });
+  console.log(`Drafting sequence via Claude (${sequenceTypeFor(niche, seasonLabel)})...`);
+  const emails = await draftSequence({ apiKey, niche, seasonLabel, businessName, context });
 
   const outDir = path.join(__dirname, '..', 'retention-sequences');
   fs.mkdirSync(outDir, { recursive: true });
   const slug = slugify(businessName);
-  const outFile = path.join(outDir, `${slug}.md`);
+  // Label suffix so elk's two distinct touches (main / application-reminder)
+  // don't overwrite each other for the same business.
+  const outFile = path.join(outDir, `${slug}${seasonLabel === 'main' ? '' : '-' + slugify(seasonLabel)}.md`);
   fs.writeFileSync(outFile, toMarkdown({ businessName, niche, emails }));
 
   console.log(`\nDrafted ${emails.length} emails -> ${outFile}`);

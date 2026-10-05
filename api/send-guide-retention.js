@@ -125,20 +125,23 @@ module.exports = async (req, res) => {
     // Which niches have a season whose retention window has actually opened?
     // This gates ONLY brand-new (stage 0) sends — a sequence already in
     // motion just keeps following its own next_send_at below.
+    //
+    // Some niches (salmon_guide) run TWO windows a year — fall and spring —
+    // which can share the same season_year (e.g. spring 2027 and fall 2027),
+    // so "most recent" can't just mean max(season_year) anymore. Picking by
+    // retention_launch_at instead correctly orders bimodal windows.
     const { data: openSeasons, error: seasonErr } = await supabase
       .from('niche_seasons')
-      .select('niche, season_year')
+      .select('niche, season_year, season_label, retention_launch_at')
       .lte('retention_launch_at', today);
     if (seasonErr) return res.status(500).json({ error: 'niche_seasons fetch failed', detail: seasonErr.message });
 
     const openNiches = [...new Set((openSeasons || []).map((s) => s.niche))];
-    // Most recent season_year per niche — if two rows are both "open"
-    // (e.g. last season's tail plus this season already seeded), the
-    // approved sequence to use is the newest one.
-    const latestSeasonYearByNiche = {};
+    const latestSeasonByNiche = {};
     for (const s of openSeasons || []) {
-      if (!latestSeasonYearByNiche[s.niche] || s.season_year > latestSeasonYearByNiche[s.niche]) {
-        latestSeasonYearByNiche[s.niche] = s.season_year;
+      const cur = latestSeasonByNiche[s.niche];
+      if (!cur || s.retention_launch_at > cur.retention_launch_at) {
+        latestSeasonByNiche[s.niche] = { season_year: s.season_year, season_label: s.season_label };
       }
     }
 
@@ -177,13 +180,18 @@ module.exports = async (req, res) => {
     async function getApprovedSequence(guideClientId, niche) {
       const cacheKey = guideClientId;
       if (sequenceCache.has(cacheKey)) return sequenceCache.get(cacheKey);
-      const seasonYear = latestSeasonYearByNiche[niche];
+      const season = latestSeasonByNiche[niche];
+      if (!season) {
+        sequenceCache.set(cacheKey, null);
+        return null;
+      }
       const { data, error } = await supabase
         .from('guide_retention_sequences')
         .select('emails, approved')
         .eq('guide_client_id', guideClientId)
         .eq('niche', niche)
-        .eq('season_year', seasonYear)
+        .eq('season_year', season.season_year)
+        .eq('season_label', season.season_label)
         .eq('approved', true)
         .maybeSingle();
       const result = error ? null : data;

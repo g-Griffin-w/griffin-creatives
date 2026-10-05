@@ -50,10 +50,13 @@ async function main() {
   const guideClientId = get('guide-client-id');
   const niche = get('niche');
   const seasonYear = parseInt(get('season-year'), 10);
+  // salmon_guide runs two windows a year (fall/spring) that can share a
+  // season_year — defaults to 'main' for niches with only one window (elk_guide).
+  const seasonLabel = get('season-label') || 'main';
 
   if (!file || !guideClientId || !niche || !Number.isFinite(seasonYear)) {
     die(
-      'usage: node scripts/approve-retention-sequence.js <file.md> --guide-client-id=<uuid> --niche=salmon_guide --season-year=2026',
+      'usage: node scripts/approve-retention-sequence.js <file.md> --guide-client-id=<uuid> --niche=salmon_guide --season-year=2026 [--season-label=fall]',
     );
   }
   if (!fs.existsSync(file)) die(`file not found: ${file}`);
@@ -82,15 +85,16 @@ async function main() {
         guide_client_id: guideClientId,
         niche,
         season_year: seasonYear,
+        season_label: seasonLabel,
         emails,
         approved: true,
         approved_at: new Date().toISOString(),
       },
-      { onConflict: 'guide_client_id,season_year' },
+      { onConflict: 'guide_client_id,season_year,season_label' },
     );
   if (error) die(`Supabase upsert failed: ${error.message}`);
 
-  console.log(`Approved ${emails.length} email(s) for guide_client_id=${guideClientId}, niche=${niche}, season_year=${seasonYear}.`);
+  console.log(`Approved ${emails.length} email(s) for guide_client_id=${guideClientId}, niche=${niche}, season_year=${seasonYear}, season_label=${seasonLabel}.`);
   console.log('api/send-guide-retention.js will now use this copy once each contact is due.');
 }
 
