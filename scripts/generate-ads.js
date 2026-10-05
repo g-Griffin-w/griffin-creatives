@@ -25,7 +25,7 @@
 const fs = require("fs");
 const path = require("path");
 const { renderOneRatio, RATIOS } = require("../api/render-ad.js");
-const { renderConceptRatio, prepareLogo } = require("../api/render-concept-ad.js");
+const { renderConceptRatio, prepareLogo } = require("../lib/render-concept-ad.js");
 
 const FAL_EDIT   = "https://fal.run/fal-ai/bytedance/seedream/v4.5/edit";
 const FAL_T2I    = "https://fal.run/fal-ai/bytedance/seedream/v4.5/text-to-image";

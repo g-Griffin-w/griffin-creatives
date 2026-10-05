@@ -21,7 +21,7 @@ const {
   renderConceptRatio,
   prepareLogo,
   RATIOS,
-} = require("../api/render-concept-ad.js");
+} = require("../lib/render-concept-ad.js");
 
 // Two img2img engines. Seedream 4.5 preserves label text noticeably better than
 // nano-banana — prefer it when the client has flagged product fidelity (Kobu, July 16).

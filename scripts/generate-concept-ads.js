@@ -27,7 +27,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { renderConceptRatio, prepareLogo, RATIOS } = require("../api/render-concept-ad.js");
+const { renderConceptRatio, prepareLogo, RATIOS } = require("../lib/render-concept-ad.js");
 
 const FAL_KEY = process.env.FAL_KEY;
 if (!FAL_KEY) {
