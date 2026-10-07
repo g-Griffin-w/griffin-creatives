@@ -183,18 +183,15 @@ function scrapeImagesFromHtml(html, origin) {
 
 // ---------- Claude concept drafting ----------
 
-async function draftConcepts({ apiKey, brandName, domain, brandContext, niche, products }) {
-  const claude = new Anthropic({ apiKey });
-  const productBlock = products
-    .map(
-      (p, i) =>
-        `PRODUCT ${i + 1}:\n  title: ${p.title || '(unknown — infer from brand context)'}\n  description: ${
-          p.description || '(none scraped)'
-        }\n  photo_url: ${p.image_url}`,
-    )
-    .join('\n\n');
+const GUIDE_NICHES = new Set(['salmon_guide', 'elk_guide']);
 
-  const prompt = `You are the creative director for GriffinCreative, a done-for-you ad creative studio. You are drafting a SAMPLE config for a NEW cold-outreach prospect — these samples are the prospect's very first impression of our work, sent for free before they've agreed to anything.
+// DTC prompt: the photo is a literal product (title, description, "ingredient_hero"
+// framing all make sense). Guide prompt: the photo is a real trip moment (a catch, a
+// harvest, a client on the water/in the field) — there's no "title" or "description"
+// to scrape, and talking about "the product" at all is simply the wrong frame. These
+// are different enough prompts, not one prompt with a word swapped in.
+function buildProductPrompt({ brandName, domain, niche, brandContext, productBlock }) {
+  return `You are the creative director for GriffinCreative, a done-for-you ad creative studio. You are drafting a SAMPLE config for a NEW cold-outreach prospect — these samples are the prospect's very first impression of our work, sent for free before they've agreed to anything.
 
 BRAND: ${brandName} (${domain})
 NICHE: ${niche || '(unspecified — infer from brand context)'}
@@ -227,13 +224,74 @@ Return EXACTLY 2 concepts as a JSON array (no markdown fences, no preamble), eac
   "layout": "top",
   "source_product_image_url": "one of the photo_url values above — pick whichever product fits the concept"
 }`;
+}
+
+function buildGuidePrompt({ brandName, domain, niche, brandContext, productBlock }) {
+  const activityLabel = niche === 'elk_guide' ? 'elk hunting outfitter' : 'salmon fishing guide';
+  return `You are the creative director for GriffinCreative. You are drafting a SAMPLE config for a NEW cold-outreach prospect — a real ${activityLabel} — before they've agreed to anything. The pitch to this business is simple: we help guides fill their calendar, not generic brand awareness.
+
+BUSINESS: ${brandName} (${domain})
+NICHE: ${niche}
+SCRAPED SITE CONTEXT: ${brandContext || '(none scraped)'}
+
+${productBlock}
+
+CRITICAL: there is no "product" here. Each HERO PHOTO above is a real moment from this outfitter's own trips — a client's catch, a harvest, a day on the water or in the field. Do not describe it as a product, do not invent a product name or claim about it. Every concept uses the CUTOUT engine: the hero photo gets cut out pixel-for-pixel (zero AI redraw of the people or the catch/harvest itself) and composited into an AI-generated background. Fidelity is non-negotiable — you are never regenerating what actually happened in that photo, only the world around it.
+
+HARD RULES (violating any of these means the batch gets rejected before it ever ships):
+1. Pick ONE FRAMEWORK per concept from exactly this list: ${FRAMEWORKS.join(', ')}. In this context: identity_badge and social_proof are usually the strongest fits (this moment, this kind of trip, proof it really happens); us_vs_them and problem_agitation work if there's a real contrast (guided vs. going it alone, wasted vacation days with nothing to show for it).
+2. big_idea must be a real insight (min 40 characters) tied to filling seats/tags, not "here's a nice photo."
+3. NEVER describe a beauty-shot / flat-lay cliché — this isn't product photography. Banned phrases: "flat-lay", "flat lay", "beside a", "next to a", "on a marble", "styled with", "editorial product photography".
+4. bg_prompt describes ONLY the background/scene — the person/catch/harvest must NEVER appear in it (it gets composited on top by code, not by the model). End every bg_prompt with exactly: "No people, no animals, no fish, no text, no logos."
+5. image_prompt is a backup full-scene description (same scene as bg_prompt, written as if the photo were being generated in place with a fidelity lock). End it with exactly: "CRITICAL FIDELITY RULE: reproduce the people and the catch/harvest from the reference photo EXACTLY — do not redesign, recolor, or blur them. add no text or graphics"
+6. layout must be "top" (text above, photo below — text must never cover the people or the catch/harvest).
+7. bullets: only include claims directly supported by the scraped site context above (years guiding, real location/water/unit names, etc). If you don't have real facts, return an empty array — never invent a claim about this business.
+8. tagline: short, punchy, under 8 words.
+9. Never use the words "AI" or "generated" in any copy field.
+
+Return EXACTLY 2 concepts as a JSON array (no markdown fences, no preamble), each object shaped like:
+{
+  "name": "kebab-case-slug",
+  "framework": "one of the list above",
+  "big_idea": "...",
+  "image_prompt": "...",
+  "bg_prompt": "...",
+  "tagline": "...",
+  "bullets": ["...", "..."],
+  "layout": "top",
+  "source_product_image_url": "one of the photo_url values above — pick whichever photo fits the concept"
+}`;
+}
+
+async function draftConcepts({ apiKey, brandName, domain, brandContext, niche, products }) {
+  const claude = new Anthropic({ apiKey });
+  const isGuide = GUIDE_NICHES.has(niche);
+  const productBlock = products
+    .map((p, i) =>
+      isGuide
+        ? `HERO PHOTO ${i + 1}:\n  photo_url: ${p.image_url}`
+        : `PRODUCT ${i + 1}:\n  title: ${p.title || '(unknown — infer from brand context)'}\n  description: ${
+            p.description || '(none scraped)'
+          }\n  photo_url: ${p.image_url}`,
+    )
+    .join('\n\n');
+
+  const prompt = (isGuide ? buildGuidePrompt : buildProductPrompt)({ brandName, domain, niche, brandContext, productBlock });
 
   const msg = await claude.messages.create({
     model: 'claude-sonnet-5',
     max_tokens: 2000,
     messages: [{ role: 'user', content: prompt }],
   });
-  const text = msg.content[0].text;
+  // content[0] isn't reliably the text block — claude-sonnet-5 returns a
+  // "thinking" block first by default, which silently broke this on a real
+  // live run (2026-10-06). Find the text block by type instead of assuming
+  // position.
+  const textBlock = msg.content.find((b) => b.type === 'text');
+  if (!textBlock) {
+    fail(`Claude response had no text block (got: ${msg.content.map((b) => b.type).join(', ')})`);
+  }
+  const text = textBlock.text;
   let cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
   const first = cleaned.indexOf('[');
   const last = cleaned.lastIndexOf(']');
@@ -277,23 +335,43 @@ async function draftProspectConfig({ website, niche = '', slug: slugArg = '', pr
   const accent = extractAccent(homepageHtml);
   const logoUrl = extractLogo(homepageHtml, origin);
 
-  log('Looking for real product photos...');
-  let products = await tryShopifyProducts(origin);
-  let source = 'shopify /products.json';
-  if (products.length === 0) {
+  const isGuide = GUIDE_NICHES.has(niche);
+  let products = [];
+  let source;
+  if (isGuide) {
+    // No product catalog to try — a guide's site is a gallery, not a shop.
+    log('Looking for real trip photos...');
     products = scrapeImagesFromHtml(homepageHtml, origin);
     source = 'homepage <img> scan';
+    if (products.length === 0) {
+      // Common gallery page paths worth a second look before giving up.
+      for (const p of ['/gallery', '/photos', '/trips', '/hunts']) {
+        const html = await fetchText(`${origin}${p}`);
+        products = scrapeImagesFromHtml(html, origin);
+        if (products.length > 0) { source = `${p} <img> scan`; break; }
+      }
+    }
+  } else {
+    log('Looking for real product photos...');
+    products = await tryShopifyProducts(origin);
+    source = 'shopify /products.json';
+    if (products.length === 0) {
+      products = scrapeImagesFromHtml(homepageHtml, origin);
+      source = 'homepage <img> scan';
+    }
+    if (products.length === 0) {
+      const collHtml = await fetchText(`${origin}/collections/all`);
+      products = scrapeImagesFromHtml(collHtml, origin);
+      source = '/collections/all <img> scan';
+    }
   }
   if (products.length === 0) {
-    const collHtml = await fetchText(`${origin}/collections/all`);
-    products = scrapeImagesFromHtml(collHtml, origin);
-    source = '/collections/all <img> scan';
-  }
-  if (products.length === 0) {
-    fail(`no usable product photos found on ${origin} — not Shopify, or the scan found nothing real.`);
+    fail(`no usable ${isGuide ? 'trip' : 'product'} photos found on ${origin} — site may block scraping, or the scan found nothing real.`);
   }
 
-  products = rankProducts(products);
+  // Merch-vs-real-product ranking is a DTC-catalog concept — doesn't apply to
+  // a guide's trip gallery, so skip it and use scrape order as-is.
+  if (!isGuide) products = rankProducts(products);
   if (productArg) {
     const filtered = products.filter((p) => (p.title || '').toLowerCase().includes(productArg.toLowerCase()));
     if (filtered.length === 0) {

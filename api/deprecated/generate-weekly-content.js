@@ -297,7 +297,12 @@ async function callClaude(prompt, { model = "claude-sonnet-4-5", max_tokens = 25
     max_tokens,
     messages: [{ role: "user", content: prompt }],
   });
-  return msg.content[0].text;
+  // content[0] isn't reliably the text block — some model versions return a
+  // "thinking" block first by default (caught live in draft-prospect-config.js,
+  // 2026-10-06). Find the text block by type instead of assuming position.
+  const textBlock = msg.content.find((b) => b.type === "text");
+  if (!textBlock) throw new Error(`Claude response had no text block (got: ${msg.content.map((b) => b.type).join(", ")})`);
+  return textBlock.text;
 }
 
 function parseJsonLoose(text) {

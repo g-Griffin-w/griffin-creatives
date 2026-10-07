@@ -366,7 +366,12 @@ async function generateEmail(lead) {
     max_tokens: 500,
     messages: [{ role: 'user', content: prompt }],
   });
-  const text = msg.content[0].text;
+  // content[0] isn't reliably the text block — some model versions return a
+  // "thinking" block first by default (caught live in draft-prospect-config.js,
+  // 2026-10-06). Find the text block by type instead of assuming position.
+  const textBlock = msg.content.find((b) => b.type === 'text');
+  if (!textBlock) throw new Error(`Claude response had no text block (got: ${msg.content.map((b) => b.type).join(', ')})`);
+  const text = textBlock.text;
   const parsed = parseClaudeJson(text);
   if (!parsed.subject || !parsed.body) {
     throw new Error('Claude returned malformed email (missing subject or body)');

@@ -151,7 +151,12 @@ async function draftSequence({ apiKey, niche, seasonLabel, businessName, context
     max_tokens: 1500,
     messages: [{ role: 'user', content: prompt }],
   });
-  const text = msg.content[0].text
+  // content[0] isn't reliably the text block — some model versions return a
+  // "thinking" block first by default (caught live in draft-prospect-config.js,
+  // 2026-10-06). Find the text block by type instead of assuming position.
+  const textBlock = msg.content.find((b) => b.type === 'text');
+  if (!textBlock) die(`Claude response had no text block (got: ${msg.content.map((b) => b.type).join(', ')})`);
+  const text = textBlock.text
     .trim()
     .replace(/^```(?:json)?\s*/i, '')
     .replace(/```\s*$/i, '')

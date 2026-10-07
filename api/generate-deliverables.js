@@ -835,7 +835,13 @@ Output the JSON object and nothing else.`);
           max_tokens,
           messages: [{ role: 'user', content: text }],
         });
-        return { key, content: msg.content[0].text, parseJson };
+        // content[0] isn't reliably the text block — some model versions
+        // return a "thinking" block first by default (caught live in
+        // draft-prospect-config.js, 2026-10-06). Find the text block by
+        // type instead of assuming position.
+        const textBlock = msg.content.find((b) => b.type === 'text');
+        if (!textBlock) throw new Error(`Claude response for "${key}" had no text block (got: ${msg.content.map((b) => b.type).join(', ')})`);
+        return { key, content: textBlock.text, parseJson };
       })
     );
 
