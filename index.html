@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Griffin Creative — Fill Your Calendar | Marketing for Salmon Guides &amp; Elk Outfitters</title>
+<title>Griffin Creative — Fill Your Calendar | Marketing for Elk Outfitters</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,7 +26,10 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; padding: 20px 40p
 .niche-btn { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; padding: 9px 20px; border-radius: 999px; border: none; background: transparent; color: var(--gray); cursor: pointer; transition: all 0.2s; }
 .niche-btn.active { background: var(--orange); color: #fff; }
 
-/* Show/hide by niche — default state shows salmon; JS toggles data-active on body */
+/* Show/hide by niche — salmon is paused (2026-10-08), body is hardcoded to
+   data-active="elk" below with no toggle UI. The salmon blocks and pricing
+   grid stay in this file, fully intact, so bringing the niche back later is
+   just re-adding the toggle — not rebuilding the content. */
 [data-niche-block] { display: none; }
 body[data-active="salmon"] [data-niche-block="salmon"] { display: block; }
 body[data-active="elk"] [data-niche-block="elk"] { display: block; }
@@ -75,6 +78,7 @@ body[data-active="elk"] .pricing-grid[data-niche-block="elk"] { display: grid; }
 .pricing-section { background: var(--card); border-top: 1px solid var(--border); padding: 100px 40px; }
 .pricing-inner { max-width: 1200px; margin: 0 auto; }
 .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 48px; }
+.pricing-grid.single { grid-template-columns: 1fr; max-width: 420px; }
 .price-card { background: var(--black); padding: 36px 24px; position: relative; }
 .price-card.featured { background: #0d0800; }
 .price-card.featured::before { content: 'MOST POPULAR'; position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: var(--orange); color: #fff; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; padding: 3px 14px; white-space: nowrap; }
@@ -161,21 +165,14 @@ footer p { font-size: 13px; color: #2e2e2e; }
   </div>
 </nav>
 
-<div class="niche-toggle-wrap">
-  <div class="niche-toggle">
-    <button class="niche-btn" data-set-niche="salmon">Salmon Guides</button>
-    <button class="niche-btn active" data-set-niche="elk">Elk Outfitters</button>
-  </div>
-</div>
-
 <!-- HERO -->
 <section class="hero">
   <div class="hero-bg"></div>
-  <div class="hero-tag">// Marketing for Oregon Coast Salmon Guides &amp; Oregon/Idaho Elk Outfitters</div>
+  <div class="hero-tag">// Marketing for Elk Outfitters in the Northwest</div>
   <h1>FILL YOUR<br><span class="outline">CALENDAR.</span><br><span class="accent">EVERY SEASON.</span></h1>
   <p class="hero-sub" data-niche-block="salmon">You know the water. We fill the boat. Real proof content from your own trips, a system that brings past clients back before next season even opens, and getting found by people already searching for a guide like you.</p>
   <p class="hero-sub" data-niche-block="elk">You know the country. We fill the tags. Real proof content from your own hunts, a system that brings past clients back before next season's applications open, and getting found by people already searching for an outfitter like you.</p>
-  <div class="hero-pitch">If we even bring in one client — or fill one more seat — it pays for itself. Potentially then some.</div>
+  <div class="hero-pitch">If we even bring in one client, it pays for itself. Potentially then some.</div>
   <div class="hero-actions">
     <a href="#pricing" class="btn-primary">See Pricing</a>
     <a href="#contact" class="btn-ghost">Book a Call</a>
@@ -240,37 +237,31 @@ footer p { font-size: 13px; color: #2e2e2e; }
         <div class="deliver-num">01</div>
         <h3>Book-Next-Season System</h3>
         <p>A 3-email sequence to your own past clients, timed to launch the moment your season closes — before they book with someone else. Written, reviewed, and running — not a template you fill in yourself.</p>
-        <span class="deliver-tag">All plans</span>
       </div>
       <div class="deliver-card">
         <div class="deliver-num">02</div>
         <h3>Real Trip Proof Content</h3>
         <p>Your own catch and harvest photos turned into finished, ready-to-post ads and social content every month. No stock photography, no staged shots — the real thing, done right.</p>
-        <span class="deliver-tag">All plans</span>
       </div>
       <div class="deliver-card">
         <div class="deliver-num">03</div>
         <h3>Google Business Profile</h3>
         <p>Claimed, filled out, and optimized for the exact searches people run before booking — plus an automated system that asks every client for a review after their trip.</p>
-        <span class="deliver-tag">All plans</span>
       </div>
       <div class="deliver-card">
         <div class="deliver-num">04</div>
         <h3>Referral Program</h3>
         <p>A trackable link for your past clients to send to friends, with a real incentive attached — so word-of-mouth stops being an accident and starts being a system.</p>
-        <span class="deliver-tag">Full Season &amp; up</span>
       </div>
       <div class="deliver-card">
         <div class="deliver-num">05</div>
         <h3>Season-Timed Campaigns</h3>
         <p>Content and outreach queued to your actual calendar — season open, prime dates, off-season check-ins — not a generic monthly schedule that ignores how your business actually runs.</p>
-        <span class="deliver-tag">Full Season &amp; up</span>
       </div>
       <div class="deliver-card">
         <div class="deliver-num">06</div>
         <h3>Local Search &amp; Booking</h3>
         <p>Managed search ads for people actively looking to book, plus a real booking system if you don't already have one — and reporting built around seats filled, not clicks.</p>
-        <span class="deliver-tag">Booked Out only</span>
       </div>
     </div>
   </div>
@@ -283,15 +274,15 @@ footer p { font-size: 13px; color: #2e2e2e; }
     <h2 class="sec-title">THE MATH IS<br><span style="color:var(--orange);">SIMPLE.</span></h2>
     <p style="font-size:17px;color:var(--gray);max-width:640px;font-weight:300;line-height:1.7;margin-bottom:0;">You don't need a hundred new clients for this to be worth it. You need one.</p>
 
-    <div class="math-box" data-niche-block="salmon" style="display:block;max-width:640px;">
+    <div class="math-box" data-niche-block="salmon" style="max-width:640px;">
       <div class="math-row"><span class="label">One full-day charter, booked</span><span class="value">~$1,500–2,000</span></div>
       <div class="math-row"><span class="label">A season of our Full Season plan</span><span class="value">~$750/mo</span></div>
       <div class="math-row total"><span class="label">One extra booking covers</span><span class="value">2+ months, paid for</span></div>
     </div>
-    <div class="math-box" data-niche-block="elk" style="display:block;max-width:640px;">
+    <div class="math-box" data-niche-block="elk" style="max-width:640px;">
       <div class="math-row"><span class="label">One guided elk hunt, booked</span><span class="value">~$4,000–7,000</span></div>
-      <div class="math-row"><span class="label">A season of our Full Season plan</span><span class="value">~$1,400/mo</span></div>
-      <div class="math-row total"><span class="label">One extra client covers</span><span class="value">3+ months, paid for</span></div>
+      <div class="math-row"><span class="label">A month of Booked Out</span><span class="value">~$2,800/mo</span></div>
+      <div class="math-row total"><span class="label">One extra client covers</span><span class="value">1.5+ months, paid for</span></div>
     </div>
     <p style="font-size:13px;color:var(--gray);font-weight:300;margin-top:20px;max-width:640px;">Rough industry ranges, not a quote for your specific trips — the point stands either way: this doesn't need to work a hundred times to be worth it. It needs to work once.</p>
   </div>
@@ -302,7 +293,7 @@ footer p { font-size: 13px; color: #2e2e2e; }
   <div class="pricing-inner">
     <span class="sec-tag">// Pricing</span>
     <h2 class="sec-title">NO CONTRACTS.<br>CANCEL ANYTIME.</h2>
-    <p style="font-size:16px;color:var(--gray);font-weight:300;max-width:560px;">Salmon and elk guiding run on different economics — one extra elk client is worth a lot more than one extra boat seat — so the plans are priced to match, not copy-pasted.</p>
+    <p style="font-size:16px;color:var(--gray);font-weight:300;max-width:560px;">Priced around what one real client is actually worth to a guided elk hunt — not a generic marketing retainer.</p>
 
     <!-- SALMON PRICING -->
     <div class="pricing-grid" data-niche-block="salmon">
@@ -347,46 +338,28 @@ footer p { font-size: 13px; color: #2e2e2e; }
       </div>
     </div>
 
-    <!-- ELK PRICING -->
-    <div class="pricing-grid" data-niche-block="elk">
+    <!-- ELK PRICING — single offer only, per 2026-10-08: Get Found / Full
+         Season deliverables are now used as lead magnets to sell this
+         directly, not sold as their own tiers. -->
+    <div class="pricing-grid single" data-niche-block="elk">
       <div class="price-card">
-        <div class="price-name">Get Found</div>
-        <div class="price-desc">Show up when people search for an elk outfitter in Oregon or Idaho.</div>
-        <div class="price-amount">$600<span>/mo</span></div>
+        <div class="price-name">Booked Out</div>
+        <div class="price-desc">Everything it takes to keep every remaining tag actively filled.</div>
+        <div class="price-amount">$2,800<span>/mo</span></div>
         <div class="price-period">Billed monthly · Cancel anytime</div>
         <ul class="price-features">
           <li class="highlight">Google Business Profile setup + optimization</li>
           <li class="highlight">Automated review requests after every hunt</li>
           <li class="highlight">Monthly proof-content batch from your real hunts</li>
-          <li>Local search cleanup on your site</li>
-        </ul>
-        <a href="#contact" class="price-btn price-btn-outline">Book a Call →</a>
-      </div>
-      <div class="price-card featured">
-        <div class="price-name">Full Season</div>
-        <div class="price-desc">Everything in Get Found, plus the system that fights the off-season.</div>
-        <div class="price-amount">$1,400<span>/mo</span></div>
-        <div class="price-period">Billed monthly · Cancel anytime</div>
-        <ul class="price-features">
           <li class="highlight">Book-next-season email sequence, built &amp; running</li>
           <li class="highlight">Referral program with a real incentive</li>
           <li class="highlight">Season- &amp; tag-draw-timed campaign calendar</li>
-          <li>Everything in Get Found</li>
-        </ul>
-        <a href="#contact" class="price-btn price-btn-filled">Book a Call →</a>
-      </div>
-      <div class="price-card">
-        <div class="price-name">Booked Out</div>
-        <div class="price-desc">For outfitters who want every remaining tag actively filled.</div>
-        <div class="price-amount">$2,800<span>/mo</span></div>
-        <div class="price-period">Billed monthly · Cancel anytime</div>
-        <ul class="price-features">
           <li class="highlight">Managed local search ads (booking-intent only)</li>
           <li class="highlight">Booking system setup, if you don't have one</li>
-          <li class="highlight">Monthly report built around tags filled</li>
-          <li>Everything in Full Season</li>
+          <li>Local search cleanup on your site</li>
+          <li>Monthly report built around tags filled</li>
         </ul>
-        <a href="#contact" class="price-btn price-btn-outline">Book a Call →</a>
+        <a href="#contact" class="price-btn price-btn-filled">Book a Call →</a>
       </div>
     </div>
 
@@ -462,20 +435,8 @@ footer p { font-size: 13px; color: #2e2e2e; }
 <footer>
   <div class="logo" style="font-size:20px;">GRIFFIN<span>CREATIVE</span></div>
   <p>© 2026 Griffin Creative. All rights reserved.</p>
-  <p>Oregon coast salmon guides. Oregon &amp; Idaho elk outfitters.</p>
+  <p>Northwest elk outfitters.</p>
 </footer>
-
-<script>
-document.querySelectorAll('[data-set-niche]').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    var niche = btn.getAttribute('data-set-niche');
-    document.body.setAttribute('data-active', niche);
-    document.querySelectorAll('[data-set-niche]').forEach(function(b) {
-      b.classList.toggle('active', b === btn);
-    });
-  });
-});
-</script>
 
 </body>
 </html>
