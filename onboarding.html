@@ -83,6 +83,12 @@ select:disabled { opacity: 0.4; cursor: not-allowed; }
 textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
 textarea.mono { font-family: 'DM Mono', monospace; font-size: 13px; }
 
+/* CHECKBOX GROUP (multi-state select) */
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; background: #0d0d0d; border: 1px solid var(--border); border-radius: 2px; padding: 16px; }
+.checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 300; color: var(--white); cursor: pointer; padding: 6px 12px; border: 1px solid var(--border); border-radius: 2px; transition: border-color 0.2s; }
+.checkbox-item:has(input:checked) { border-color: var(--orange); color: var(--orange); }
+.checkbox-item input[type="checkbox"] { accent-color: var(--orange); width: 15px; height: 15px; cursor: pointer; }
+
 /* DIVIDER */
 .form-divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 .form-section-label { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.06em; color: var(--gray); margin-bottom: 28px; }
@@ -205,24 +211,24 @@ footer p { font-size: 13px; color: #2e2e2e; }
           </div>
         </div>
 
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label" for="region">State</label>
-            <select id="region" name="region" required>
-              <option value="" disabled selected>Select...</option>
-              <option value="OR">Oregon</option>
-              <option value="ID">Idaho</option>
-              <option value="OR+ID">Both</option>
-            </select>
-            <p class="field-hint">Application deadlines and season dates differ by state — this is how we time everything correctly.</p>
+        <div class="field-group">
+          <label class="field-label">State(s)</label>
+          <div class="checkbox-group" id="region-group">
+            <label class="checkbox-item"><input type="checkbox" class="region-opt" value="OR"> Oregon</label>
+            <label class="checkbox-item"><input type="checkbox" class="region-opt" value="ID"> Idaho</label>
+            <label class="checkbox-item"><input type="checkbox" class="region-opt" value="WA"> Washington</label>
+            <label class="checkbox-item"><input type="checkbox" class="region-opt" value="MT"> Montana</label>
+            <label class="checkbox-item"><input type="checkbox" class="region-opt" value="CA"> California</label>
           </div>
-          <div class="field-group">
-            <label class="field-label" for="season-window">Your Season</label>
-            <select id="season-window" name="season-window" required disabled>
-              <option value="" selected>Pick what you guide first...</option>
-            </select>
-            <p class="field-hint" id="season-window-hint">Options change based on what you guide.</p>
-          </div>
+          <p class="field-hint">Check every state you guide in — application deadlines differ by state, this is how we time everything correctly.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="season-window">Your Season</label>
+          <select id="season-window" name="season-window" required disabled>
+            <option value="" selected>Pick what you guide first...</option>
+          </select>
+          <p class="field-hint" id="season-window-hint">Options change based on what you guide.</p>
         </div>
 
         <div class="field-group">
@@ -596,6 +602,13 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
 
   const f = e.target;
 
+  const regionValues = Array.from(document.querySelectorAll('.region-opt:checked')).map(function(cb) { return cb.value; });
+  if (regionValues.length === 0) {
+    alert('Check at least one state.');
+    return;
+  }
+  const regionJoined = regionValues.join(',');
+
   const productPathsJson = uploadedPaths.products.length > 0
     ? JSON.stringify(uploadedPaths.products)
     : '';
@@ -607,7 +620,7 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
     business_name: f['business-name'].value,
     website: f['website'].value,
     niche: f['niche'].value,
-    region: f['region'].value,
+    region: regionJoined,
     season_window: f['season-window'].value,
     plan: f['plan'].value,
     ad_goals: f['trip-details'].value,
