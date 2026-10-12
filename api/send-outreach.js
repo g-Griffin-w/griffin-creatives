@@ -470,11 +470,15 @@ module.exports = async (req, res) => {
     : BATCH_SIZE;
 
   try {
-    // Pull next batch of queued leads
+    // Pull next batch of queued leads. elk_guide is excluded while we build
+    // real proof-content lead magnets per-lead (see BLUEPRINTS.md #1/#5) instead
+    // of sending the generic ask-first "guide" pitch — remove this filter once
+    // that pipeline is wired to send with a finished sample link attached.
     const { data: leads, error: fetchError } = await supabase
       .from('outreach_leads')
       .select('*')
       .eq('status', 'queued')
+      .neq('niche', 'elk_guide')
       .order('created_at', { ascending: true })
       .limit(batchLimit);
 

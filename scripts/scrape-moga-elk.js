@@ -146,12 +146,21 @@ async function main() {
   );
 
   const rows = [];
+  const seenEmails = new Set();
   for (const r of results) {
     const domain = r.website.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '').toLowerCase();
     if (existingDomains.has(domain)) {
       console.log(`  skip (already contacted): ${r.name}`);
       continue;
     }
+    // Some outfitters have multiple listing pages (dba names, aliases) sharing
+    // one contact email — dedupe within this batch too, not just against the
+    // DB, since a bulk insert fails entirely on any single unique violation.
+    if (seenEmails.has(r.email)) {
+      console.log(`  skip (duplicate email within this run): ${r.name}`);
+      continue;
+    }
+    seenEmails.add(r.email);
     rows.push({
       first_name: '',
       last_name: '',
@@ -173,10 +182,21 @@ async function main() {
     return;
   }
 
-  const { error: insertErr } = await sb.from('outreach_leads').insert(rows);
+  // onConflict + ignoreDuplicates as a second safety net: if an email still
+  // collides with an existing row (e.g. a lead added outside this script
+  // since existingDomains was fetched), skip just that row instead of
+  // failing the whole batch.
+  const { data: inserted, error: insertErr } = await sb
+    .from('outreach_leads')
+    .upsert(rows, { onConflict: 'email', ignoreDuplicates: true })
+    .select('id');
   if (insertErr) die(`Supabase insert failed: ${insertErr.message}`);
+  const skippedAsConflict = rows.length - (inserted ? inserted.length : rows.length);
+  if (skippedAsConflict > 0) {
+    console.log(`  (${skippedAsConflict} row(s) skipped as existing-email conflicts)`);
+  }
 
-  console.log(`\nInserted ${rows.length} new elk_guide lead(s) (Montana) into outreach_leads.`);
+  console.log(`\nInserted ${inserted ? inserted.length : rows.length} new elk_guide lead(s) (Montana) into outreach_leads.`);
 }
 
 main().catch((err) => die(err.message));
