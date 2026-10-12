@@ -211,6 +211,7 @@ HARD RULES (violating any of these means the batch gets rejected before it ever 
 7. bullets: only include claims directly supported by the scraped brand context / product description above. If you don't have real facts, return an empty array — never invent product claims.
 8. tagline: short, punchy, under 8 words.
 9. Never use the words "AI" or "generated" in any copy field.
+10. The scraped site context may come from a third-party directory/association listing page (e.g. "Send an inquiry through MOGA"), not the business's own site. NEVER mention, imply, or instruct booking "through" any association, directory, or aggregator in any copy field, even if the scraped context says so verbatim — this ad is being shown to the business as ITS OWN marketing asset, sold and booked directly. Real facts like location, species, or years in business are fine to use; anything about how the lead was found or who to book "through" is not.
 
 Return EXACTLY 2 concepts as a JSON array (no markdown fences, no preamble), each object shaped like:
 {
@@ -248,6 +249,7 @@ HARD RULES (violating any of these means the batch gets rejected before it ever 
 7. bullets: only include claims directly supported by the scraped site context above (years guiding, real location/water/unit names, etc). If you don't have real facts, return an empty array — never invent a claim about this business.
 8. tagline: short, punchy, under 8 words.
 9. Never use the words "AI" or "generated" in any copy field.
+10. The scraped site context may come from a third-party directory/association listing page (e.g. "Send an inquiry through MOGA"), not the business's own site. NEVER mention, imply, or instruct booking "through" any association, directory, or aggregator in any copy field, even if the scraped context says so verbatim — this ad is being shown to the business as ITS OWN marketing asset, sold and booked directly. Real facts like location, species, or years in business are fine to use; anything about how the lead was found or who to book "through" is not.
 
 Return EXACTLY 2 concepts as a JSON array (no markdown fences, no preamble), each object shaped like:
 {
@@ -314,7 +316,7 @@ async function draftConcepts({ apiKey, brandName, domain, brandContext, niche, p
 // Throws DraftError on any expected failure (site down, no products found,
 // bad Claude output) — never calls process.exit, so a caller looping over
 // many prospects can catch-and-continue per item.
-async function draftProspectConfig({ website, niche = '', slug: slugArg = '', product: productArg = '', force = false, apiKey, log = () => {} }) {
+async function draftProspectConfig({ website, niche = '', slug: slugArg = '', product: productArg = '', name: nameArg = '', force = false, apiKey, log = () => {} }) {
   if (!apiKey) fail('missing apiKey (pass ANTHROPIC_API_KEY)');
 
   const url = normalizeUrl(website);
@@ -327,9 +329,13 @@ async function draftProspectConfig({ website, niche = '', slug: slugArg = '', pr
   const outFile = path.join(__dirname, '..', 'clients', `${slug}.json`);
   if (fs.existsSync(outFile) && !force) fail(`${outFile} already exists — pass force:true to overwrite`);
 
-  log(`Scraping ${origin} ...`);
-  const homepageHtml = await fetchText(origin);
-  if (!homepageHtml) fail(`could not fetch ${origin} (site down, blocking bots, or not reachable over https)`);
+  // Scrape the literal URL given, not just the site origin — for a standalone
+  // brand site these are usually the same page, but for a directory-listing
+  // URL (e.g. a MOGA/WOGA outfitter profile page) the real per-business photo
+  // only lives on that specific sub-page, not the directory's own homepage.
+  log(`Scraping ${url} ...`);
+  const homepageHtml = await fetchText(url);
+  if (!homepageHtml) fail(`could not fetch ${url} (site down, blocking bots, or not reachable over https)`);
 
   const brandContext = extractBrandContext(homepageHtml);
   const accent = extractAccent(homepageHtml);
@@ -385,7 +391,7 @@ async function draftProspectConfig({ website, niche = '', slug: slugArg = '', pr
   log('Drafting creative concepts with Claude...');
   const concepts = await draftConcepts({
     apiKey,
-    brandName: slug,
+    brandName: nameArg || slug,
     domain,
     brandContext,
     niche,
@@ -428,6 +434,7 @@ async function main() {
   const nicheArg = args.find((a) => a.startsWith('--niche='))?.slice(8) || '';
   const slugArg = args.find((a) => a.startsWith('--slug='))?.slice(7) || '';
   const productArg = args.find((a) => a.startsWith('--product='))?.slice(10) || '';
+  const nameArg = args.find((a) => a.startsWith('--name='))?.slice(7) || '';
   const force = args.includes('--force');
 
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
@@ -440,6 +447,7 @@ async function main() {
       niche: nicheArg,
       slug: slugArg,
       product: productArg,
+      name: nameArg,
       force,
       apiKey: ANTHROPIC_API_KEY,
       log: (m) => console.log(m),

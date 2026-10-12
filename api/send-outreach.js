@@ -104,7 +104,7 @@ STYLE RULES:
 - "i'd" / "i'll" stay lowercase
 - Friendly and warm, never salesy or pushy
 - Total email body under 130 words
-- NO links anywhere in the body
+- NO links anywhere in the body, EXCEPT: paragraphs 3 and 4 (pitch_block) are copied verbatim per the rule above, and for the guide pitch that block contains exactly one real link — never remove it, never alter it, never add any other link
 - NO urgency words (URGENT, FREE in caps, LIMITED, ACT NOW)
 - NO exclamation points, no all caps, no smart quotes
 - Use em dashes (—) not hyphens for inline asides
@@ -126,13 +126,15 @@ const PITCH_VARIANTS = {
   dtc: `here's the idea: we turn your existing product photos into finished, ready-to-upload static ads — designed with the copy right on the image, in every placement ratio. not concepts or briefs — actual files in your google drive within 48 hours, ready to test before your current winners burn out.
 
 want me to make you 2 free samples? you send nothing — i'll pull a product from your site, design 2 finished static ads, and they're yours to run whether or not we ever work together.`,
-  guide: `here's the idea: most guide services lose clients to word-of-mouth alone, with nothing pulling past clients back once next season opens — rough when your business lives on filling every seat and surviving the off months. i put together a free "book next season" email sequence guides can send straight to their own client list.
+  guide: `so instead of pitching you anything, we put together 4 things we'd normally charge for and made them free — a real google business profile set-up (not an audit, the finished thing), a review-request template with your own direct review link, a real "book next season" email sequence with your actual name on it, and a campaign calendar built off your state's actual tag-draw dates.
 
-want me to send you the actual sequence, plus a free sample ad built from one of your own trophy or action shots? you send nothing — both are yours to use whether or not we ever work together.`,
+one signup gets you all 4, no catch, yours either way: {{starter_kit_link}}`,
 };
 const NICHE_PITCH = { salmon_guide: 'guide', elk_guide: 'guide' };
-function pitchForNiche(niche) {
-  return PITCH_VARIANTS[NICHE_PITCH[niche] || 'dtc'];
+function pitchForNiche(niche, leadId) {
+  const block = PITCH_VARIANTS[NICHE_PITCH[niche] || 'dtc'];
+  const link = `https://www.griffincreativelab.com/starter-kit${leadId ? `?lead=${leadId}` : ''}`;
+  return block.replace('{{starter_kit_link}}', link);
 }
 
 // ============================================================
@@ -338,7 +340,7 @@ function buildPrompt(lead, { productContext = '', resolvedNiche = '' } = {}) {
     .replace(/{{company_state}}/g, lead.company_state || '')
     .replace(/{{niche}}/g, resolvedNiche || lead.niche || '')
     .replace(/{{product_context}}/g, productContext || '(none found — use the niche hook)')
-    .replace('{{pitch_block}}', pitchForNiche(resolvedNiche || lead.niche || ''));
+    .replace('{{pitch_block}}', pitchForNiche(resolvedNiche || lead.niche || '', lead.id));
 }
 
 // Parse Claude's JSON response (strip any markdown fences if Claude adds them)
