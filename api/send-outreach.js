@@ -52,8 +52,8 @@ LEAD INFO:
 PRODUCT CONTEXT (scraped live from their website — may be empty):
 {{product_context}}
 
-SUBJECT (all niches):
-a couple free ads for {{company_name}}?
+SUBJECT (write exactly this, do not change it):
+{{subject_line}}
 
 EMAIL STRUCTURE (write the body in exactly this order):
 
@@ -126,11 +126,23 @@ const PITCH_VARIANTS = {
   dtc: `here's the idea: we turn your existing product photos into finished, ready-to-upload static ads — designed with the copy right on the image, in every placement ratio. not concepts or briefs — actual files in your google drive within 48 hours, ready to test before your current winners burn out.
 
 want me to make you 2 free samples? you send nothing — i'll pull a product from your site, design 2 finished static ads, and they're yours to run whether or not we ever work together.`,
-  guide: `so instead of pitching you anything, we put together 4 things we'd normally charge for and made them free — a real google business profile set-up (not an audit, the finished thing), a review-request template with your own direct review link, a real "book next season" email sequence with your actual name on it, and a campaign calendar built off your state's actual tag-draw dates.
+  guide: `so instead of pitching you anything, here's 4 free things, no catch:
 
-one signup gets you all 4, no catch, yours either way: {{starter_kit_link}}`,
+1 — a real google business profile set-up, the finished thing, not an audit
+2 — a review-request template with your own direct review link
+3 — a real "book next season" email sequence with your actual business on it
+4 — a campaign calendar built off your state's actual tag-draw dates
+
+one signup gets you all 4, yours either way: {{starter_kit_link}}`,
 };
 const NICHE_PITCH = { salmon_guide: 'guide', elk_guide: 'guide' };
+const SUBJECT_VARIANTS = {
+  dtc: 'a couple free ads for {{company_name}}?',
+  guide: 'a free starter kit for {{company_name}}',
+};
+function subjectForNiche(niche, companyName) {
+  return SUBJECT_VARIANTS[NICHE_PITCH[niche] || 'dtc'].replace('{{company_name}}', companyName);
+}
 function pitchForNiche(niche, leadId) {
   const block = PITCH_VARIANTS[NICHE_PITCH[niche] || 'dtc'];
   const link = `https://www.griffincreativelab.com/starter-kit${leadId ? `?lead=${leadId}` : ''}`;
@@ -332,15 +344,17 @@ function applyCanonicalSignature(body) {
 // fallback hook; productContext drives the product-specific paragraph 2.
 function buildPrompt(lead, { productContext = '', resolvedNiche = '' } = {}) {
   const cleanCompany = sanitizeCompanyName(lead.company_name);
+  const niche = resolvedNiche || lead.niche || '';
   return COLD_EMAIL_PROMPT
+    .replace('{{subject_line}}', subjectForNiche(niche, cleanCompany))
     .replace(/{{first_name}}/g, lead.first_name || '')
     .replace(/{{job_title}}/g, lead.job_title || '')
     .replace(/{{company_name}}/g, cleanCompany)
     .replace(/{{company_city}}/g, lead.company_city || '')
     .replace(/{{company_state}}/g, lead.company_state || '')
-    .replace(/{{niche}}/g, resolvedNiche || lead.niche || '')
+    .replace(/{{niche}}/g, niche)
     .replace(/{{product_context}}/g, productContext || '(none found — use the niche hook)')
-    .replace('{{pitch_block}}', pitchForNiche(resolvedNiche || lead.niche || '', lead.id));
+    .replace('{{pitch_block}}', pitchForNiche(niche, lead.id));
 }
 
 // Parse Claude's JSON response (strip any markdown fences if Claude adds them)
