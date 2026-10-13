@@ -4,7 +4,9 @@ const { createClient } = require('@supabase/supabase-js');
 // ============================================================
 // Follow-up sender
 // Sends threaded follow-ups to leads that were emailed but haven't replied.
-// Two touches: stage 0 -> follow-up #1 (bump), stage 1 -> follow-up #2 (breakup).
+// DTC: two touches — stage 0 -> follow-up #1 (bump), stage 1 -> follow-up #2 (breakup).
+// Guide niches: three touches, each a separate email pitching the next free kit
+// item (see GUIDE_* constants and buildGuideFollowup below).
 // Auto-stops the moment a reply is logged (reply_received=true), because the
 // check-replies job flips that flag and this query excludes it.
 //
@@ -14,8 +16,8 @@ const { createClient } = require('@supabase/supabase-js');
 //   Header: Authorization: Bearer <CRON_SECRET>
 //   ?dry_run=1 to preview without sending. ?limit=N to cap the batch.
 //
-// Follow-up copy intentionally matches the Tier-2 initial email (offer to MAKE
-// 2 free ads), so nothing here claims work that wasn't done.
+// DTC follow-up copy intentionally matches the Tier-2 initial email (offer to
+// MAKE 2 free ads), so nothing here claims work that wasn't done.
 // ============================================================
 
 // Vercel kills the function at ~300s (FUNCTION_INVOCATION_TIMEOUT — happened
@@ -34,6 +36,17 @@ const DELAY_MS_MAX = 7000;
 // After follow-up #1 we schedule follow-up #2 four days later (~day 7 overall).
 const DAYS_TO_FOLLOWUP_2 = 4;
 const MAX_STAGE = 2; // stop after two follow-ups
+
+// Guide niches (elk_guide / salmon_guide) run a different play: the initial
+// email pitches ONE free kit item, and each follow-up pitches the next one as
+// its own email (new thread, new subject) so the prospect sees our name four
+// times with something useful each time — 4 emails total, 3 days apart.
+// The sequence stops on reply (same as DTC) and when the lead signs up at
+// /starter-kit, since the drip in send-starter-kit-drip.js takes over then.
+const GUIDE_NICHES = new Set(['elk_guide', 'salmon_guide']);
+const GUIDE_MAX_STAGE = 3;
+const GUIDE_DAYS_BETWEEN = 3;
+const isGuideLead = (lead) => GUIDE_NICHES.has(lead.niche);
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -93,6 +106,63 @@ function buildFollowupBody(lead, stage) {
     `either way is totally fine — just don't want to keep landing in your inbox.` +
     SIGNATURE
   );
+}
+
+// Guide follow-ups. Email 1 (the rebooking email) is written by send-outreach.js;
+// stage 0/1/2 here are emails 2/3/4. Each pitches exactly one free item and
+// links to the same signup page — one signup unlocks the whole kit. Copy only
+// offers work we'll do after signup; nothing claims it's already done.
+const GUIDE_SIGNATURE = '\n\ngabriel\ngriffincreative\ngriffincreativelab.com';
+
+function buildGuideFollowup(lead, stage) {
+  const first = firstName(lead);
+  const co = companyName(lead);
+  const link = `https://www.griffincreativelab.com/starter-kit?lead=${lead.id}`;
+  const salmon = lead.niche === 'salmon_guide';
+
+  if (stage === 0) {
+    const search = salmon ? 'a guided fishing trip' : 'an elk hunt';
+    return {
+      subject: `a free google profile set-up for ${co}`,
+      body:
+        `hi ${first},\n\n` +
+        `gabriel from griffincreative again — different free thing this time.\n\n` +
+        `when someone searches for ${search}, your google business profile is usually the first thing they see. ` +
+        `we'll claim it, fill it out, and set your service area to the country you actually work — ` +
+        `the finished thing, not an audit.\n\n` +
+        `it's free, and all we need from you is to add us as a manager (two minutes). start here: ${link}` +
+        GUIDE_SIGNATURE,
+    };
+  }
+  if (stage === 1) {
+    const plan = salmon
+      ? `your runs come in two windows a year, and most guides don't have anything ready to send when one opens. ` +
+        `we'll map out your whole year around them — pre-run, in-run, off-season — with what to send past clients and when.`
+      : `draw results land once a year and it's the one week every tag-holder is paying attention. ` +
+        `we'll map out your whole year around it — application window, results week, pre-season, post-season — ` +
+        `with what to send past clients and when.`;
+    return {
+      subject: `a free season calendar for ${co}`,
+      body:
+        `hi ${first},\n\n` +
+        `griffincreative again — another free one, no strings.\n\n` +
+        `${plan}\n\n` +
+        `yours either way: ${link}` +
+        GUIDE_SIGNATURE,
+    };
+  }
+  // stage 2 — fourth and last
+  return {
+    subject: `a free review-request message for ${co}`,
+    body:
+      `hi ${first},\n\n` +
+      `griffincreative, last free one.\n\n` +
+      `guests are happiest the week they get home, and that's the best moment to ask for a review — ` +
+      `as long as it takes one tap. we'll write you the message and set up your direct google review link ` +
+      `so it's ready for your next trip.\n\n` +
+      `free, yours either way: ${link}` +
+      GUIDE_SIGNATURE,
+  };
 }
 
 // ============================================================
@@ -224,7 +294,7 @@ module.exports = async (req, res) => {
       .select('*')
       .eq('status', 'sent')
       .eq('reply_received', false)
-      .lt('followup_stage', MAX_STAGE)
+      .lt('followup_stage', GUIDE_MAX_STAGE) // widest cap; per-lead cap enforced below
       .not('next_followup_at', 'is', null)
       .lte('next_followup_at', nowIso)
       .order('next_followup_at', { ascending: true })
@@ -243,10 +313,44 @@ module.exports = async (req, res) => {
       });
     }
 
-    const results = { sent: 0, failed: 0, skipped_replied: 0, dry_run: dryRun, errors: [], drafts: [] };
+    const results = { sent: 0, failed: 0, skipped_replied: 0, skipped_signed_up: 0, dry_run: dryRun, errors: [], drafts: [] };
+
+    // Guide leads who already signed up at /starter-kit are in the drip now —
+    // stop the cold sequence so they don't get both. Matched by the lead id the
+    // tracked link carries, plus the lead's own email as a fallback.
+    const signedUpIds = new Set();
+    const signedUpEmails = new Set();
+    const guideLeads = leads.filter(isGuideLead);
+    if (guideLeads.length > 0) {
+      const [byLead, byEmail] = await Promise.all([
+        supabase.from('lead_magnet_signups').select('outreach_lead_id').in('outreach_lead_id', guideLeads.map((l) => l.id)),
+        supabase.from('lead_magnet_signups').select('email').in('email', guideLeads.map((l) => l.email)),
+      ]);
+      (byLead.data || []).forEach((r) => signedUpIds.add(r.outreach_lead_id));
+      (byEmail.data || []).forEach((r) => signedUpEmails.add((r.email || '').toLowerCase()));
+    }
 
     for (const lead of leads) {
       try {
+        const guide = isGuideLead(lead);
+        const maxStage = guide ? GUIDE_MAX_STAGE : MAX_STAGE;
+
+        // A DTC lead already at its cap shouldn't be here, but never send past it.
+        if ((lead.followup_stage || 0) >= maxStage) {
+          if (!dryRun) {
+            await supabase.from('outreach_leads').update({ next_followup_at: null }).eq('id', lead.id);
+          }
+          continue;
+        }
+
+        if (guide && (signedUpIds.has(lead.id) || signedUpEmails.has((lead.email || '').toLowerCase()))) {
+          results.skipped_signed_up++;
+          if (!dryRun) {
+            await supabase.from('outreach_leads').update({ next_followup_at: null }).eq('id', lead.id);
+          }
+          continue;
+        }
+
         // Safeguard: if the real Gmail thread shows the lead already replied,
         // never follow up. Flip reply_received so the state is corrected too.
         const replied = await threadHasInboundReply(lead.gmail_thread_id);
@@ -266,13 +370,22 @@ module.exports = async (req, res) => {
         }
 
         const stage = lead.followup_stage || 0;
-        const subject = replySubject(lead.email_subject);
-        const body = buildFollowupBody(lead, stage);
+        // Guide follow-ups are their own emails (fresh subject, new thread);
+        // DTC follow-ups stay in-thread "Re:" bumps.
+        let subject;
+        let body;
+        if (guide) {
+          ({ subject, body } = buildGuideFollowup(lead, stage));
+        } else {
+          subject = replySubject(lead.email_subject);
+          body = buildFollowupBody(lead, stage);
+        }
         const newStage = stage + 1;
+        const gapDays = guide ? GUIDE_DAYS_BETWEEN : DAYS_TO_FOLLOWUP_2;
         // Schedule the next touch only if we haven't hit the cap.
         const nextAt =
-          newStage < MAX_STAGE
-            ? new Date(Date.now() + DAYS_TO_FOLLOWUP_2 * 24 * 60 * 60 * 1000).toISOString()
+          newStage < maxStage
+            ? new Date(Date.now() + gapDays * 24 * 60 * 60 * 1000).toISOString()
             : null;
 
         if (dryRun) {
@@ -291,8 +404,10 @@ module.exports = async (req, res) => {
             to: lead.email,
             subject,
             body,
-            threadId: lead.gmail_thread_id,
-            inReplyTo: lead.rfc_message_id,
+            // Guide emails go out as new threads so each shows up as its own
+            // message in the inbox instead of collapsing under email 1.
+            threadId: guide ? null : lead.gmail_thread_id,
+            inReplyTo: guide ? null : lead.rfc_message_id,
           });
 
           const { error: updateError } = await supabase

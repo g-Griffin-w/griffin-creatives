@@ -208,31 +208,28 @@ cached — MT/WA/CA lookups are the one-time cost, after that it's free reuse.
 
 ## The actual email + social copy
 
-**Cold outreach email** — replaces the current ask-first "guide" pitch
-variant in `api/send-outreach.js` (`PITCH_VARIANTS.guide`). This is a
-direct-link CTA, not a "want samples?" question, so the close changes too:
+**Cold outreach — 4 separate emails, one free item each** (not one email
+listing everything). The point is repeated, useful touches: the prospect sees
+our name four times, each time with a different free thing. Each email links
+to the same `/starter-kit?lead=<id>` page — one signup unlocks the whole kit.
 
-> **Subject:** a free starter kit for {{company_name}}
->
-> hi {{first_name}},
->
-> found {{company_name}} while looking at serious elk outfitters — and i
-> know how hard it is keeping tags filled every season with nothing pulling
-> past clients back once things go quiet.
->
-> so instead of pitching you anything, we put together 4 things we'd
-> normally charge for and made them free — a real Google Business Profile
-> set-up (not an audit, the finished thing), a review-request template with
-> your own direct review link, a real "book next season" email sequence with
-> your actual name on it, and a campaign calendar built off your state's
-> actual tag-draw dates.
->
-> one signup gets you all 4, no catch, yours either way:
-> griffincreativelab.com/starter-kit
->
-> gabriel
-> griffincreative
-> griffincreativelab.com
+| # | Sent by | When | Subject | Pitches |
+|---|---------|------|---------|---------|
+| 1 | `api/send-outreach.js` | day 0 | a free rebooking email for {company} | the "book next season" email |
+| 2 | `api/send-followups.js` | day 3 | a free google profile set-up for {company} | Google Business Profile |
+| 3 | `api/send-followups.js` | day 6 | a free season calendar for {company} | campaign calendar |
+| 4 | `api/send-followups.js` | day 9 | a free review-request message for {company} | review-request template |
+
+- Emails 2-4 go out as new threads with their own subject (not "Re:") so each
+  lands as its own message in the inbox.
+- The sequence stops on reply, and stops when the lead signs up (the drip in
+  `send-starter-kit-drip.js` takes over, so they never get both).
+- Every email offers future work ("i'll write", "we'll claim") — none claims
+  something already exists.
+- No 5th pitch email on the cold side; the paid-plan pitch only goes to
+  people who signed up, as the last drip stage.
+- Copy lives in `PITCH_VARIANTS.guide` (email 1) and `buildGuideFollowup()`
+  (emails 2-4).
 
 **Social media** — bio link + pinned post for Griffin Creative's own
 accounts (the one channel that reaches outfitters who never got a cold

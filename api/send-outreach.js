@@ -126,27 +126,32 @@ const PITCH_VARIANTS = {
   dtc: `here's the idea: we turn your existing product photos into finished, ready-to-upload static ads — designed with the copy right on the image, in every placement ratio. not concepts or briefs — actual files in your google drive within 48 hours, ready to test before your current winners burn out.
 
 want me to make you 2 free samples? you send nothing — i'll pull a product from your site, design 2 finished static ads, and they're yours to run whether or not we ever work together.`,
-  guide: `so instead of pitching you anything, here's 4 free things, no catch:
+  // Email 1 of 4. The guide play is four separate emails, each pitching ONE
+  // free kit item, so the prospect sees our name four times with something
+  // useful each time. This is the first (the rebooking email); emails 2-4
+  // (google profile, season calendar, review request) are sent as follow-ups
+  // by send-followups.js. Offers future work ("i'll write") — never claims
+  // something already exists. No inner quotes: Claude returns this inside JSON.
+  guide: `so instead of pitching you anything, i'll just do something useful — i'll write {{company_name}} a rebooking email, the one short message you send past clients the week your season wraps so they lock in next year's dates before anyone else gets them.
 
-1 — a real google business profile set-up, the finished thing, not an audit
-2 — a review-request template with your own direct review link
-3 — a real "book next season" email sequence with your actual business on it
-4 — a campaign calendar built off your state's actual tag-draw dates
-
-one signup gets you all 4, yours either way: {{starter_kit_link}}`,
+it's free and it's yours either way — grab it here: {{starter_kit_link}}`,
 };
 const NICHE_PITCH = { salmon_guide: 'guide', elk_guide: 'guide' };
 const SUBJECT_VARIANTS = {
   dtc: 'a couple free ads for {{company_name}}?',
-  guide: 'a free starter kit for {{company_name}}',
+  guide: 'a free rebooking email for {{company_name}}',
 };
 function subjectForNiche(niche, companyName) {
   return SUBJECT_VARIANTS[NICHE_PITCH[niche] || 'dtc'].replace('{{company_name}}', companyName);
 }
-function pitchForNiche(niche, leadId) {
+// pitch_block is inserted after the prompt's global {{company_name}} replace,
+// so any tokens inside it must be resolved here.
+function pitchForNiche(niche, leadId, companyName) {
   const block = PITCH_VARIANTS[NICHE_PITCH[niche] || 'dtc'];
   const link = `https://www.griffincreativelab.com/starter-kit${leadId ? `?lead=${leadId}` : ''}`;
-  return block.replace('{{starter_kit_link}}', link);
+  return block
+    .replace(/{{company_name}}/g, companyName || 'your business')
+    .replace('{{starter_kit_link}}', link);
 }
 
 // ============================================================
@@ -354,7 +359,7 @@ function buildPrompt(lead, { productContext = '', resolvedNiche = '' } = {}) {
     .replace(/{{company_state}}/g, lead.company_state || '')
     .replace(/{{niche}}/g, niche)
     .replace(/{{product_context}}/g, productContext || '(none found — use the niche hook)')
-    .replace('{{pitch_block}}', pitchForNiche(niche, lead.id));
+    .replace('{{pitch_block}}', pitchForNiche(niche, lead.id, cleanCompany));
 }
 
 // Parse Claude's JSON response (strip any markdown fences if Claude adds them)
