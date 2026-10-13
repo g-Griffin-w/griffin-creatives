@@ -307,6 +307,11 @@ const NICHE_KEYWORDS = {
 // Classify a lead into one of the three target niches (or dtc_general) using the
 // company name, Apollo industry, existing niche tag, and live product context.
 function inferNiche(lead, productContext) {
+  // A lead we sourced as an elk outfitter stays one. Keyword matching on its
+  // site text used to re-label some of them salmon_guide ("charter", "guide
+  // service"), which sent Montana hunting outfitters the Oregon-coast salmon
+  // hook (4 leads, 2026-10-11..13).
+  if (lead.niche === 'elk_guide') return 'elk_guide';
   const hay = [lead.company_name, lead.company_industry, lead.niche, productContext]
     .filter(Boolean)
     .join(' ')
