@@ -126,32 +126,40 @@ const PITCH_VARIANTS = {
   dtc: `here's the idea: we turn your existing product photos into finished, ready-to-upload static ads — designed with the copy right on the image, in every placement ratio. not concepts or briefs — actual files in your google drive within 48 hours, ready to test before your current winners burn out.
 
 want me to make you 2 free samples? you send nothing — i'll pull a product from your site, design 2 finished static ads, and they're yours to run whether or not we ever work together.`,
-  // Email 1 of 4. The guide play is four separate emails, each pitching ONE
-  // free kit item, so the prospect sees our name four times with something
-  // useful each time. This is the first (the rebooking email); emails 2-4
-  // (google profile, season calendar, review request) are sent as follow-ups
-  // by send-followups.js. Offers future work ("i'll write") — never claims
-  // something already exists. No inner quotes: Claude returns this inside JSON.
-  guide: `so instead of pitching you anything, i'll just do something useful — i'll write {{company_name}} a rebooking email, the one short message you send past clients the week your season wraps so they lock in next year's dates before anyone else gets them.
+  // The guide play is opt-in: this cold email explains the four free guides and
+  // has a CTA button to /starter-kit.html (name + email). Only people who sign
+  // up receive the guides — the first immediately, then one every 2 days from
+  // send-starter-kit-drip.js — and the Booked Out pitch comes at the end of
+  // that drip. Follow-ups to
+  // non-subscribers (send-followups.js) are just reminders of this ask.
+  // No inner quotes: Claude returns this inside JSON.
+  guide: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — rebooking past clients, setting up your google business profile, a season marketing calendar, and getting reviews after every hunt.
 
-it's free and it's yours either way — grab it here: {{starter_kit_link}}`,
+sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
 };
 const NICHE_PITCH = { salmon_guide: 'guide', elk_guide: 'guide' };
 const SUBJECT_VARIANTS = {
   dtc: 'a couple free ads for {{company_name}}?',
-  guide: 'a free rebooking email for {{company_name}}',
+  guide: '4 free guides for {{company_name}}',
 };
+const GUIDE_CTA_LABEL = 'Get the 4 free guides';
+// Links use the .html path: the site has no clean-URL routing, so
+// extensionless paths 404. ?lead=<id> ties the signup back to this lead.
+const signupUrl = (leadId) =>
+  `https://www.griffincreativelab.com/starter-kit.html${leadId ? `?lead=${leadId}` : ''}`;
 function subjectForNiche(niche, companyName) {
   return SUBJECT_VARIANTS[NICHE_PITCH[niche] || 'dtc'].replace('{{company_name}}', companyName);
 }
 // pitch_block is inserted after the prompt's global {{company_name}} replace,
 // so any tokens inside it must be resolved here.
+// NOTE: the guides are written for elk outfitters. NICHE_PITCH maps
+// salmon_guide here too, but salmon is dormant — it needs its own guides
+// before any salmon lead is queued.
 function pitchForNiche(niche, leadId, companyName) {
   const block = PITCH_VARIANTS[NICHE_PITCH[niche] || 'dtc'];
-  const link = `https://www.griffincreativelab.com/starter-kit${leadId ? `?lead=${leadId}` : ''}`;
   return block
     .replace(/{{company_name}}/g, companyName || 'your business')
-    .replace('{{starter_kit_link}}', link);
+    .replace('{{signup_link}}', signupUrl(leadId));
 }
 
 // ============================================================
@@ -425,10 +433,36 @@ function generateMessageId(fromEmail) {
   return `<${Date.now()}.${rand}@${domain}>`;
 }
 
-// Build raw RFC 2822 email and send via Gmail API.
+// Plain text -> a minimal HTML email, turning the one CTA url into a button.
+// The plain-text part is always sent too, so text-only clients see the url.
+function textToHtml(body, cta) {
+  const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const para = (t) => `<p style="margin:0 0 14px">${esc(t).replace(/\n/g, '<br>')}</p>`;
+  const button =
+    `<p style="margin:22px 0"><a href="${esc(cta ? cta.url : '')}" ` +
+    `style="background:#ff4d00;color:#ffffff;text-decoration:none;font-weight:bold;` +
+    `padding:13px 24px;border-radius:4px;display:inline-block;font-size:15px">${esc(cta ? cta.label : '')}</a></p>`;
+  const html = body
+    .split(/\n{2,}/)
+    .map((p) => {
+      if (cta && p.includes(cta.url)) {
+        const rest = p.replace(cta.url, '').trim();
+        return (rest ? para(rest) : '') + button;
+      }
+      return para(p);
+    })
+    .join('');
+  return `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#222222;max-width:560px">${html}</div>`;
+}
+
+const b64 = (str) => Buffer.from(str, 'utf-8').toString('base64').match(/.{1,76}/g).join('\r\n');
+
+// Build raw RFC 2822 email and send via Gmail API. With `cta` ({url, label})
+// the message is multipart/alternative (text + HTML with a button); without it
+// it stays plain text exactly as before.
 // Returns { id, threadId, rfcMessageId } so the caller can persist the thread
 // + message id for later in-thread follow-ups.
-async function sendEmail({ to, subject, body }) {
+async function sendEmail({ to, subject, body, cta }) {
   const fromEmail = process.env.GMAIL_FROM_EMAIL;
   const fromName = process.env.GMAIL_FROM_NAME;
 
@@ -442,14 +476,21 @@ async function sendEmail({ to, subject, body }) {
     `Subject: ${subjectHeader}`,
     `Message-ID: ${rfcMessageId}`,
     'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset=utf-8',
-    'Content-Transfer-Encoding: base64',
   ];
 
-  // Base64-encode the body (handles UTF-8 cleanly, matches Content-Transfer-Encoding)
-  const bodyEncoded = Buffer.from(body, 'utf-8').toString('base64').match(/.{1,76}/g).join('\r\n');
-
-  const message = headers.join('\r\n') + '\r\n\r\n' + bodyEncoded;
+  let message;
+  if (cta) {
+    const boundary = `=_gc_${Math.random().toString(36).slice(2)}`;
+    headers.push(`Content-Type: multipart/alternative; boundary="${boundary}"`);
+    message =
+      headers.join('\r\n') + '\r\n\r\n' +
+      `--${boundary}\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b64(body)}\r\n` +
+      `--${boundary}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b64(textToHtml(body, cta))}\r\n` +
+      `--${boundary}--`;
+  } else {
+    headers.push('Content-Type: text/plain; charset=utf-8', 'Content-Transfer-Encoding: base64');
+    message = headers.join('\r\n') + '\r\n\r\n' + b64(body);
+  }
 
   const encoded = Buffer.from(message)
     .toString('base64')
@@ -491,15 +532,14 @@ module.exports = async (req, res) => {
     : BATCH_SIZE;
 
   try {
-    // Pull next batch of queued leads. elk_guide is excluded while we build
-    // real proof-content lead magnets per-lead (see BLUEPRINTS.md #1/#5) instead
-    // of sending the generic ask-first "guide" pitch — remove this filter once
-    // that pipeline is wired to send with a finished sample link attached.
+    // Pull next batch of queued leads. elk_guide leads are included: their
+    // email is the opt-in guide pitch (CTA button to /starter-kit.html), and
+    // the follow-up + drip crons in vercel.json take it from there.
+    // (The old exclusion was lifted 2026-10-13.)
     const { data: leads, error: fetchError } = await supabase
       .from('outreach_leads')
       .select('*')
       .eq('status', 'queued')
-      .neq('niche', 'elk_guide')
       .order('created_at', { ascending: true })
       .limit(batchLimit);
 
@@ -536,7 +576,13 @@ module.exports = async (req, res) => {
           });
         } else {
           // Send the email (returns Gmail thread id + the Message-ID we set)
-          const sendResult = await sendEmail({ to: lead.email, subject, body });
+          const isGuide = NICHE_PITCH[resolvedNiche] === 'guide';
+          const sendResult = await sendEmail({
+            to: lead.email,
+            subject,
+            body,
+            cta: isGuide ? { url: signupUrl(lead.id), label: GUIDE_CTA_LABEL } : null,
+          });
 
           // Schedule the first follow-up 3 days out. The follow-up job threads
           // against gmail_thread_id + rfc_message_id and auto-stops on reply.

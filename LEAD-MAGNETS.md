@@ -1,21 +1,40 @@
-## Status (2026-10-12): built and deployed
+## Status (2026-10-13): built and tested, NOT yet pushed
 
-- `starter-kit.html` — live signup page, name + email only.
-- `lead_magnet_signups` table — built, RLS matches `griffin_clients`' anon-insert pattern.
-- `api/send-starter-kit-drip.js` — 5-stage drip cron, one touch every 3 days
-  (`DRIP_INTERVAL_DAYS`), in this order: review-request template → email
-  sequence (real Claude call, no placeholders) → campaign calendar
-  (OR/ID dates are real, MT/WA/CA fall back to an honest "not verified yet"
-  line) → Google Business Profile access ask → Booked Out pitch. The GBP ask
-  comes last deliberately — it's the one item that needs an action from
-  them, placed after three free deliverables have already landed.
-- `api/send-outreach.js`'s guide pitch now links straight to
-  `/starter-kit?lead={{lead.id}}` instead of asking permission first.
-- **Not done yet:** the cron itself needs one external cron-job.org job
-  (same pattern as `check-replies`/`send-followups`) hitting
-  `POST /api/send-starter-kit-drip` daily with `Authorization: Bearer
-  $CRON_SECRET` — nothing fires until that's wired. `elk_guide` is also
-  still excluded from the main outreach send until that's confirmed working.
+**The flow (opt-in):**
+1. **Cold email** (`send-outreach.js`): explains the four free guides, with a
+   CTA **button** to `/starter-kit.html?lead=<id>`. Subject: "4 free guides
+   for {company}". Sent as text + HTML (multipart) so the button renders.
+2. **Signup page**: name + email only. `POST /api/send-starter-kit-drip` saves
+   the subscriber and sends **guide 1 immediately**. If that send fails the
+   daily cron sends it, so a signup is never lost.
+3. **Drip** (`send-starter-kit-drip.js`): guide 1 on signup, guides 2-4 on
+   days 2 / 4 / 6, then a short Booked Out pitch on day 8. Each email has a
+   "Read guide N" button. Guides 2-4 carry a "reply 'booked out'" PS.
+4. **Non-subscribers** (`send-followups.js`): a reminder (+3d) and a breakup
+   (+4d), both with the CTA button. They never receive the guides unless they
+   sign up. Stops on reply and on signup.
+
+**Crons** (`vercel.json`; Vercel Hobby allows 100 cron jobs/project, once a
+day each): `check-replies` 14:00 UTC, `send-followups` 17:00, drip 18:00.
+These replace the cron-job.org jobs, which stopped in July (last logged
+reply 2026-07-22, last follow-up 2026-07-14).
+
+**Guard rails**
+- `send-followups` is guide-niche only by default. ~680 stale DTC leads have
+  been overdue since July; `FOLLOWUP_INCLUDE_DTC=1` includes them.
+- 56 Montana outfitters were sent the old ask-first email on Oct 10-12
+  (subject "a couple free ads for X?"). Their first follow-up is the
+  explanation of the guides + button; then the breakup.
+- Public signup endpoint: honeypot field, email validation, duplicate emails
+  never re-sent, instant sends capped at 150 new signups / 24h.
+- `elk_guide` is no longer excluded from `send-outreach.js`'s queue (lifted
+  2026-10-13, takes effect on deploy). 92 queued elk leads send at
+  `OUTREACH_BATCH_SIZE` per day (default 25).
+
+**Tracking:** guide links carry `?lead=<id>` / `?s=<signup id>`; guide pages
+and the signup page log to `guide_views`. Read it with
+`select * from guide_engagement order by guides_viewed desc, last_view desc;`
+(a `signup-page` view with no signup = clicked the CTA but didn't subscribe).
 
 ---
 
@@ -82,154 +101,39 @@ and a signup is the first action that makes sense to ask for.
 
 ---
 
-## 1. Google Business Profile — real set-up, not an audit
+## The four lead magnets are DIY guides
 
-**The free deliverable:** we actually claim, fill out, and optimize their
-listing — not a list of gaps, the finished profile.
+Decision (2026-10-13): the lead magnets are the **blueprints themselves** —
+step-by-step guides the outfitter follows on their own. We do not do the
+work for free; doing it for them is what `Booked Out` is. Each guide ends
+with a one-line pointer to that.
 
-**Blueprint:**
-1. On signup, auto-confirmation email includes one ask: "reply with your
-   Google Business Profile link (or business name + city) and add
-   `hello@griffincreativelab.com` as a manager — takes 2 minutes, here's how:
-   [Google's own help link]."
-2. Once access lands: set category correctly, fill every field, set service
-   area to their real hunting units/region, seed 3-4 Q&A entries (season
-   length, what's included, license/tag requirements — reusable copy across
-   every elk client, lightly tailored).
-3. If they replied with any trip photos, upload those; otherwise leave photos
-   for later (don't block on it).
-4. Reply once done: "profile's live — go look." That's the whole pitch,
-   delivered, free, before any contract exists.
+| # | Guide | File |
+|---|-------|------|
+| 1 | Three emails that bring past clients back | `guides/rebooking-emails.html` |
+| 2 | Set up your Google Business Profile | `guides/google-business-profile.html` |
+| 3 | Your elk season marketing calendar | `guides/season-calendar.html` |
+| 4 | Ask for reviews after every hunt | `guides/review-requests.html` |
 
-**Why this is the generous version:** BLUEPRINTS.md's existing GBP entry
-(#2) stops at an audit because a cold prospect hasn't granted access yet.
-Gating the real thing behind the Starter Kit signup — instead of behind a
-signed contract — is what makes this a true "taste of the real work," not a
-teaser.
+The earlier version of this section described how *we* would do each item
+for them (manager access, our scripts, our delivery). That is no longer the
+offer and was removed.
 
-**Cost/time:** ~15-20 min of real work per business, no API spend. The
-bottleneck is human time, same honest-capacity-note as everywhere else in
-BLUEPRINTS.md — budget for it per signup, not per eventual client.
+**Aligned (2026-10-13):** the cold emails, `starter-kit.html`, and the drip
+now deliver the DIY guides instead of promising done-for-you work.
 
----
-
-## 2. Auto Review-Request — the real template + link, not fake automation
-
-**The free deliverable:** a finished, personalized review-request message
-(email + text version) plus a direct link/QR code straight to their Google
-review box — ready to send after every hunt starting today.
-
-**Blueprint:**
-1. Pull their Google Business Profile place ID (requires step 1 above, or a
-   quick lookup if they already have a listing) to build the direct review
-   link: `https://search.google.com/local/writereview?placeid=<id>`.
-2. Generate a QR code image for that link (any QR library, free, no FAL
-   spend) — printable for camp, a card in the gear bag, whatever.
-3. Draft the actual send-after-trip message (short, two versions — text and
-   email), personalized with their business name and species, in the same
-   plain-written style as the retention sequence. One Claude call, same
-   pattern as `draft-retention-sequence.js`.
-4. Deliver both as a single page/PDF: "send this, point this" — no bracketed
-   placeholders, this one's finished because it costs them nothing to use
-   immediately, by hand, today.
-
-**Why this is honest, not overpromising:** real automation (auto-fired the
-day a trip ends) needs a trigger we don't have pre-signup — we don't know
-their trip calendar. The free version is the actual message + actual link,
-sent by their own hand for now. That's still the real deliverable, just
-manual until they're a client and `guide_client_contacts` has real trip
-dates to fire off of.
-
-**Cost/time:** ~10 min + one Claude call per business. Cheapest of the four.
-
----
-
-## 3. Email Sequence Set-Up — upgrade the existing demo to the real thing
-
-**The free deliverable:** a complete, real "book next season" email
-sequence with their actual name and actual facts — not the bracketed-
-placeholder demo BLUEPRINTS.md #5 currently uses for cold outreach.
-
-**Blueprint:**
-1. Signup confirmation includes a 3-question intake (trip dates/season,
-   one thing that makes their trips distinct, how most past clients found
-   them) — short enough to answer from a phone.
-2. Once answered:
-```bash
-ANTHROPIC_API_KEY='...' node scripts/draft-retention-sequence.js \
-  --website=<their-site-or-listing-url> --niche=elk_guide \
-  --name="Their Real Business Name" --facts="<their 3 answers>"
-```
-   (today's script only fills `[bracketed placeholders]` for the demo path —
-   needs a small change to accept real intake answers and drop the
-   placeholders entirely when they're supplied. Not built yet.)
-3. Deliver the finished sequence as a doc they can paste into their own
-   email tool right now, free, theirs to keep whether they sign or not.
-
-**Why this one scales best:** it was already the closest to automated — this
-is a one-script upgrade (accept real answers instead of leaving brackets),
-not a new build.
-
-**Cost/time:** one Claude call + reading their 3 answers. Nearly free.
-
----
-
-## 4. Campaign Calendar — a real, state-specific month-by-month plan
-
-**The free deliverable:** a one-page calendar mapped to their actual state's
-real tag-draw and season dates, saying what to post/send/run each month.
-
-**Blueprint:**
-1. Pull real season + application-deadline dates for their state. OR and ID
-   are already verified this session (ODFW: apply by May 15, results ~June
-   12; IDFG: apply May 1–June 5, results mid-June–early July, second draw
-   Aug 5-15/25). MT, WA, CA still need the same lookup — not done yet.
-2. Lay out a template calendar (reusable per state, dates swapped in):
-   - **Pre-draw (Apr-May):** "apply now" push to past clients.
-   - **Results window (Jun-Jul):** tag-holders feel real urgency — heaviest
-     push window for both new leads and past-client booking.
-   - **Pre-season (Aug-Sep):** proof-content ads live, service area GBP
-     fresh.
-   - **In-season (Sep-Nov):** light touch, let bookings run, collect proof
-     content for next year.
-   - **Post-season (Dec):** book-next-season retention sequence fires
-     (already automated via `niche_seasons` once they're a client).
-3. Deliver as a single finished page/PDF with their real state's real dates
-   filled in — not a generic template with blanks.
-
-**Why this one is the "proof we actually did the homework" piece:** every
-other kit item is a deliverable; this one is the one that visibly shows we
-know their specific season, not a copy-pasted hunting-industry template.
-
-**Cost/time:** a few minutes once each state's dates are looked up once and
-cached — MT/WA/CA lookups are the one-time cost, after that it's free reuse.
+**Date accuracy:** Oregon and Idaho dates are verified; Montana, Washington
+and California are sent to the agency sites in the guides rather than stated.
 
 ---
 
 ## The actual email + social copy
 
-**Cold outreach — 4 separate emails, one free item each** (not one email
-listing everything). The point is repeated, useful touches: the prospect sees
-our name four times, each time with a different free thing. Each email links
-to the same `/starter-kit?lead=<id>` page — one signup unlocks the whole kit.
-
-| # | Sent by | When | Subject | Pitches |
-|---|---------|------|---------|---------|
-| 1 | `api/send-outreach.js` | day 0 | a free rebooking email for {company} | the "book next season" email |
-| 2 | `api/send-followups.js` | day 3 | a free google profile set-up for {company} | Google Business Profile |
-| 3 | `api/send-followups.js` | day 6 | a free season calendar for {company} | campaign calendar |
-| 4 | `api/send-followups.js` | day 9 | a free review-request message for {company} | review-request template |
-
-- Emails 2-4 go out as new threads with their own subject (not "Re:") so each
-  lands as its own message in the inbox.
-- The sequence stops on reply, and stops when the lead signs up (the drip in
-  `send-starter-kit-drip.js` takes over, so they never get both).
-- Every email offers future work ("i'll write", "we'll claim") — none claims
-  something already exists.
-- No 5th pitch email on the cold side; the paid-plan pitch only goes to
-  people who signed up, as the last drip stage.
-- Copy lives in `PITCH_VARIANTS.guide` (email 1) and `buildGuideFollowup()`
-  (emails 2-4).
+**Cold outreach** — see the flow in the status block above. One email
+explains the free guides and has the CTA button; non-subscribers get a
+reminder and a breakup; subscribers get the guides via the drip. Links must
+use `.html` (the site has no clean-URL routing, so extensionless paths 404).
+Source of truth for the guide pages: `scripts/build-guides.js`.
 
 **Social media** — bio link + pinned post for Griffin Creative's own
 accounts (the one channel that reaches outfitters who never got a cold

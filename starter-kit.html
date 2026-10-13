@@ -73,15 +73,15 @@ footer p { font-size: 13px; color: #2e2e2e; }
   <div class="page-header-inner">
     <span class="sec-tag">// Free, No Catch</span>
     <h1>THE BOOKED OUT<br><span class="accent">STARTER KIT.</span></h1>
-    <p>Four things we'd normally charge a client for, done free, one every few days. No call required first — the signup is the whole ask.</p>
+    <p>Four step-by-step guides for elk outfitters. The first lands in your inbox the moment you sign up, and the other three follow over the next week. Follow them yourself and you'll be easier to find, better reviewed, and booked earlier. No call, no catch.</p>
   </div>
 </div>
 
 <div class="kit-list">
-  <div class="kit-item"><span class="kit-num">01</span><p>A real Google Business Profile set-up — the finished thing, not an audit.</p></div>
-  <div class="kit-item"><span class="kit-num">02</span><p>A "book next season" email sequence with your actual business on it.</p></div>
-  <div class="kit-item"><span class="kit-num">03</span><p>A campaign calendar built off your state's real tag-draw dates.</p></div>
-  <div class="kit-item"><span class="kit-num">04</span><p>A review-request template + your direct Google review link, ready to send.</p></div>
+  <div class="kit-item"><span class="kit-num">01</span><p>The rebooking emails past clients actually answer, with copy-and-paste templates.</p></div>
+  <div class="kit-item"><span class="kit-num">02</span><p>How to set up your Google Business Profile so hunters find you first.</p></div>
+  <div class="kit-item"><span class="kit-num">03</span><p>A month-by-month marketing calendar built around tag-draw timing.</p></div>
+  <div class="kit-item"><span class="kit-num">04</span><p>A simple system for getting reviews after every hunt, link and QR card included.</p></div>
 </div>
 
 <div class="form-section">
@@ -97,8 +97,11 @@ footer p { font-size: 13px; color: #2e2e2e; }
           <label class="field-label" for="email">Email</label>
           <input type="email" id="email" name="email" placeholder="you@yourbusiness.com" required>
         </div>
-        <button type="submit" class="btn-submit">Send Me The Kit</button>
-        <p class="submit-note">First thing lands within a few days. Nothing else required.</p>
+        <div style="position:absolute;left:-9999px" aria-hidden="true">
+          <label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+        <button type="submit" class="btn-submit">Send Me The Guides</button>
+        <p class="submit-note">The first guide lands in your inbox right away. Nothing else required.</p>
       </form>
     </div>
 
@@ -107,7 +110,7 @@ footer p { font-size: 13px; color: #2e2e2e; }
         <svg viewBox="0 0 24 24" fill="none" stroke="#ff4d00" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
       </div>
       <h2>YOU'RE <span>IN.</span></h2>
-      <p>First item from the kit is on its way. Check your inbox over the next few days — one real thing lands every few days, no spam, no catch.</p>
+      <p>Guide 1 is in your inbox now (check spam if you don't see it). The other three land over the next week, one every couple of days. No spam, no catch.</p>
     </div>
 
   </div>
@@ -117,40 +120,76 @@ footer p { font-size: 13px; color: #2e2e2e; }
   <p>Griffin Creative — griffincreativelab.com</p>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const db = window.supabase.createClient(
-  "https://gcatvqcntgizjsdoabva.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYXR2cWNudGdpempzZG9hYnZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NDIwNTIsImV4cCI6MjA5NDAxODA1Mn0.MvEWq_fB7UxfdSECOou5nnxG5y5qQ9LcYCeB_aXVJW4"
-);
+var SB = "https://gcatvqcntgizjsdoabva.supabase.co";
+var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYXR2cWNudGdpempzZG9hYnZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NDIwNTIsImV4cCI6MjA5NDAxODA1Mn0.MvEWq_fB7UxfdSECOou5nnxG5y5qQ9LcYCeB_aXVJW4";
+var params = new URLSearchParams(window.location.search);
+var leadParam = params.get('lead');
+var leadId = leadParam && /^[0-9]{1,12}$/.test(leadParam) ? leadParam : null;
 
-const urlParams = new URLSearchParams(window.location.search);
-const leadId = urlParams.get('lead') || null;
+// Warm signal: this lead clicked the CTA in the email (even if they never sign up).
+if (leadId) {
+  try {
+    fetch(SB + '/rest/v1/guide_views', {
+      method: 'POST', keepalive: true,
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ lead_id: Number(leadId), guide: 'signup-page' })
+    }).catch(function(){});
+  } catch (e) {}
+}
+
+// Last-resort path if the send endpoint is down: save the signup directly so
+// it's never lost. The daily cron then sends guide 1.
+async function saveDirect(name, email) {
+  var r = await fetch(SB + '/rest/v1/lead_magnet_signups', {
+    method: 'POST',
+    headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify({ name: name, email: email.toLowerCase(), outreach_lead_id: leadId ? Number(leadId) : null, source: leadId ? 'outreach_email' : 'social' })
+  });
+  // 409 = already subscribed, which is fine.
+  return r.ok || r.status === 409;
+}
 
 document.getElementById('signup-form').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const f = e.target;
-  const btn = f.querySelector('.btn-submit');
+  var f = e.target;
+  var btn = f.querySelector('.btn-submit');
+  var name = f['name'].value.trim();
+  var email = f['email'].value.trim();
+  if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    alert('Please enter your name and a valid email.');
+    return;
+  }
   btn.disabled = true;
   btn.textContent = 'Sending...';
 
-  const { error } = await db.from('lead_magnet_signups').insert({
-    name: f['name'].value,
-    email: f['email'].value,
-    outreach_lead_id: leadId,
-    source: leadId ? 'outreach_email' : 'social'
-  });
+  var ok = false;
+  try {
+    var r = await fetch('/api/send-starter-kit-drip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, email: email, lead: leadId, website: f['website'].value })
+    });
+    ok = r.ok;
+    if (r.status === 400) {
+      var j = await r.json().catch(function(){ return {}; });
+      alert(j.error || 'Please check your name and email.');
+      btn.disabled = false;
+      btn.textContent = 'Send Me The Guides';
+      return;
+    }
+  } catch (err) { ok = false; }
+  if (!ok) { try { ok = await saveDirect(name, email); } catch (err2) { ok = false; } }
 
-  if (error) {
-    alert('Error: ' + error.message);
-    console.error(error);
+  if (!ok) {
+    alert('Something went wrong. Please try again in a moment.');
     btn.disabled = false;
-    btn.textContent = 'Send Me The Kit';
+    btn.textContent = 'Send Me The Guides';
     return;
   }
 
   document.getElementById('form-wrap').style.display = 'none';
-  const ty = document.getElementById('thankyou');
+  var ty = document.getElementById('thankyou');
   ty.style.display = 'block';
   window.scrollTo({ top: ty.offsetTop - 100, behavior: 'smooth' });
 });

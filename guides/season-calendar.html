@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Elk Season Marketing Calendar — Griffin Creative</title>
+<meta name="description" content="A month-by-month marketing calendar for elk outfitters built around the tag-draw year, so you stop scrambling to fill September.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--black:#080808;--white:#f0ece3;--orange:#ff4d00;--gray:#a8a8a8;--card:#111;--card2:#171717;--border:#262626;--ok:#3ecf8e;--bad:#ff6b6b}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--white);font-size:18px;line-height:1.7;overflow-x:hidden}
+a{color:var(--orange)}
+nav{position:sticky;top:0;z-index:50;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;background:rgba(8,8,8,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.04em;text-decoration:none;color:var(--white)}
+.logo span{color:var(--orange)}
+.nav-r{font-size:13px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--gray)}
+.wrap{max-width:760px;margin:0 auto;padding:0 24px}
+.hero{padding-block:64px 40px;position:relative}
+.hero::before{content:'';position:absolute;inset:-40px 0 0;background:radial-gradient(ellipse 60% 60% at 40% 30%,rgba(255,77,0,.08),transparent 70%);pointer-events:none}
+.tag{font-family:'DM Mono',monospace;font-size:12px;color:var(--orange);letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:14px;position:relative}
+h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(48px,9vw,84px);line-height:.98;letter-spacing:.02em;margin-bottom:20px;position:relative}
+h1 em{font-style:normal;color:var(--orange)}
+.lede{font-size:20px;color:#d6d2c9;max-width:620px;position:relative}
+.pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;position:relative}
+.pill{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);border:1px solid var(--border);padding:7px 12px;border-radius:2px;background:var(--card)}
+.pill b{color:var(--white);font-weight:500}
+h2{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(32px,6vw,44px);letter-spacing:.03em;line-height:1.05;margin:56px 0 14px}
+h2 .n{color:var(--orange)}
+h3{font-size:19px;font-weight:600;margin:28px 0 8px}
+p{margin:0 0 16px;color:#dcd8cf}
+ul,ol{margin:0 0 18px 22px;color:#dcd8cf}
+li{margin-bottom:8px}
+.why{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--orange);padding:26px 28px;margin:8px 0 8px}
+.why p:last-child{margin-bottom:0}
+.toc{background:var(--card);border:1px solid var(--border);padding:22px 26px;margin:36px 0 0}
+.toc .tag{margin-bottom:10px}
+.toc ol{margin:0 0 0 20px}
+.toc a{color:var(--white);text-decoration:none;border-bottom:1px solid var(--border)}
+.toc a:hover{border-color:var(--orange)}
+.step{margin-top:60px;scroll-margin-top:80px}
+.step-h{display:flex;gap:16px;align-items:center;margin-bottom:14px}
+.num{flex:none;width:46px;height:46px;border:2px solid var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--orange);line-height:1}
+.step-h h2{margin:0}
+.callout{border-left:3px solid var(--orange);background:var(--card);padding:16px 20px;margin:18px 0;color:#dcd8cf}
+.callout.warn{border-color:var(--bad)}
+.callout.ok{border-color:var(--ok)}
+.callout b.k{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:4px;color:var(--orange)}
+.callout.warn b.k{color:var(--bad)} .callout.ok b.k{color:var(--ok)}
+.tpl{background:var(--card2);border:1px solid var(--border);margin:18px 0}
+.tpl-h{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray)}
+.tpl-h button{font:inherit;color:#fff;background:var(--orange);border:0;padding:7px 14px;border-radius:2px;cursor:pointer;letter-spacing:.08em}
+.tpl-h button:active{opacity:.8}
+.tpl-b{padding:18px 20px;white-space:pre-wrap;font-size:16.5px;color:#ece8df}
+.tpl-b .subj{display:block;font-weight:600;margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed var(--border)}
+figure.vis{margin:26px 0;background:#0d0d0d;border:1px solid var(--border);border-radius:6px;padding:18px;overflow-x:auto}
+figure.vis figcaption{font-size:13.5px;color:var(--gray);margin-top:14px;font-family:'DM Mono',monospace;letter-spacing:.02em}
+.screen{background:#fff;color:#202124;border-radius:8px;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.45;max-width:560px;margin:0 auto}
+.screen .s-search{border:1px solid #dadce0;border-radius:24px;padding:10px 16px;color:#3c4043;margin-bottom:12px}
+.screen .s-card{border:1px solid #dadce0;border-radius:8px;padding:14px}
+.screen .s-title{font-size:18px;font-weight:600;color:#1a0dab}
+.screen .s-sub{color:#5f6368;font-size:14px}
+.screen .s-stars{color:#e8710a;margin:2px 0 8px}.screen .s-stars span{color:#5f6368}
+.screen .s-links{display:flex;gap:8px;flex-wrap:wrap}
+.screen .s-links span{border:1px solid #dadce0;border-radius:16px;padding:5px 12px;font-size:14px;color:#1a73e8}
+.screen .s-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0 14px;border-bottom:1px solid #e8eaed;margin-bottom:12px}
+.screen .s-label{font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:#5f6368;margin-bottom:8px;font-weight:600}
+.screen .s-chips{display:flex;flex-wrap:wrap;gap:8px}
+.screen .s-chips span{background:#e8f0fe;color:#174ea6;border-radius:16px;padding:5px 12px;font-size:14px}
+.screen .s-chips .add{background:#fff;border:1px dashed #9aa0a6;color:#5f6368}
+.toggle{width:44px;height:24px;border-radius:12px;background:#9aa0a6;position:relative;flex:none}
+.toggle i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff}
+.toggle.on{background:#1a73e8}.toggle.on i{left:23px}
+.s-result{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #eee}
+.s-result:last-child{border:0}
+.s-result b{color:#1a0dab;font-weight:600}
+.s-textarea{border:1px solid #dadce0;border-radius:6px;padding:12px;color:#3c4043;min-height:92px}
+.s-count{text-align:right;color:#5f6368;font-size:13px;margin-top:6px}
+.s-btn{display:inline-block;background:#1a73e8;color:#fff;border-radius:4px;padding:9px 16px;font-weight:600}
+.s-link{margin-top:12px;border:1px solid #dadce0;border-radius:6px;padding:10px 12px;color:#1a73e8;word-break:break-all}
+.hl{outline:3px solid var(--orange);outline-offset:3px;border-radius:4px}
+.note{color:var(--orange);font-family:'DM Mono',monospace;font-size:13px;margin-top:12px;text-align:center}
+.shots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.shot{aspect-ratio:1;background:linear-gradient(145deg,#1b1b1b,#101010);border:1px solid var(--border);border-radius:4px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;font-size:13px;line-height:1.3}
+.shot b{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:26px;color:var(--orange);line-height:1}
+.shot span{color:#d6d2c9}
+.cardprint{background:#f5f1e8;color:#1b1b1b;max-width:300px;margin:0 auto;border-radius:6px;padding:20px;text-align:center;font-family:Arial,Helvetica,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.cardprint h4{font-size:18px;margin-bottom:6px}.cardprint p{color:#333;font-size:14px;margin:0 0 12px}.cardprint small{color:#555;font-size:12px}
+.phone{background:#e9eef5;color:#111;max-width:340px;margin:0 auto;border-radius:22px;padding:18px 14px;font-family:Arial,Helvetica,sans-serif;font-size:15.5px;line-height:1.4;border:6px solid #1c1c1c}
+.phone .bubble{background:#2f80ed;color:#fff;border-radius:18px 18px 4px 18px;padding:12px 14px;margin-left:34px}
+.phone .meta{color:#666;font-size:12px;text-align:center;margin-bottom:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:15px;min-width:460px}
+.tbl th,.tbl td{border:1px solid var(--border);padding:10px 12px;text-align:left}
+.tbl th{background:var(--card2);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gray)}
+.tbl td input{width:100%;background:#0d0d0d;border:1px solid var(--border);color:var(--white);padding:8px 10px;font:inherit;border-radius:2px}
+.tbl td input:focus{outline:none;border-color:var(--orange)}
+.year{min-width:640px;display:grid;grid-template-columns:repeat(12,1fr);gap:4px;font-size:13px}
+.year .m{text-align:center;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--gray);padding-bottom:4px;letter-spacing:.06em}
+.year .band{padding:10px 8px;border-radius:3px;font-size:13px;line-height:1.3;color:#fff;font-weight:600}
+.b1{background:#7a3b10}.b2{background:#8a5a00}.b3{background:#b83c00}.b4{background:#5b4a99}.b5{background:#1f6f54}
+.phases{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.phase{background:var(--card2);border:1px solid var(--border);padding:16px 18px;border-radius:4px}
+.phase b{display:block;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:24px;letter-spacing:.04em;color:var(--orange)}
+.phase p{margin:4px 0 0;font-size:16px}
+.line{display:flex;gap:0;flex-wrap:wrap;margin:6px 0}
+.line div{flex:1 1 150px;border-top:3px solid var(--orange);padding:12px 12px 0 0;font-size:15px;line-height:1.4}
+.line b{display:block;font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);margin-bottom:4px;font-weight:500}
+.mist li{list-style:none;position:relative;padding-left:30px}
+.mist{margin-left:0}
+.mist li::before{content:'✕';position:absolute;left:0;color:var(--bad);font-weight:700}
+.check{background:var(--card);border:1px solid var(--border);padding:26px 28px;margin-top:56px}
+.check .bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:12px 0 18px}
+.check .bar i{display:block;height:100%;width:0;background:var(--orange);transition:width .25s}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.chk:last-child{border:0}
+.chk input{margin-top:6px;width:20px;height:20px;accent-color:var(--orange);flex:none}
+.cta{margin:56px 0 0;background:linear-gradient(145deg,#1a0b04,#111);border:1px solid #3a1d0c;padding:34px 30px}
+.cta h2{margin:0 0 8px}
+.cta p{color:#e3ded4}
+.btn{display:inline-block;background:var(--orange);color:#fff;text-decoration:none;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:15px;padding:15px 28px;border-radius:2px;margin-top:6px}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--white)}
+.pn{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:36px 0 0}
+.pn a{color:var(--white);text-decoration:none;border:1px solid var(--border);padding:12px 16px;border-radius:2px;font-size:15px;background:var(--card)}
+.pn a:hover{border-color:var(--orange)}
+footer{border-top:1px solid var(--border);margin-top:72px;padding:36px 24px;text-align:center;color:#4a4a4a;font-size:14px}
+.cards{display:grid;gap:16px;margin-top:28px}
+.gc{display:block;background:var(--card);border:1px solid var(--border);padding:24px 26px;text-decoration:none;color:var(--white);border-radius:2px;transition:border-color .2s}
+.gc:hover{border-color:var(--orange)}
+.gc .tag{margin-bottom:6px}
+.gc h3{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:32px;letter-spacing:.03em;margin:0 0 6px}
+.gc p{margin:0;color:var(--gray);font-size:16.5px}
+@media(max-width:640px){
+ body{font-size:17px}
+ .hero{padding-block:44px 28px}
+ .shots{grid-template-columns:repeat(2,1fr)}
+ .phases{grid-template-columns:1fr}
+ .why,.check,.cta{padding:22px 20px}
+ .step-h{gap:12px}
+ .num{width:40px;height:40px;font-size:23px}
+}
+@media print{nav,.cta,.pn,footer,.tpl-h button{display:none}body{background:#fff;color:#000}p,li,.tpl-b{color:#000}}
+</style>
+</head>
+<body data-guide="season-calendar">
+<nav>
+  <a href="/index.html" class="logo">GRIFFIN<span>CREATIVE</span></a>
+  <a href="/guides/index.html" class="nav-r">All 4 guides</a>
+</nav>
+
+<header class="hero wrap"><span class="tag">// Free Guide 3 of 4</span><h1>YOUR ELK SEASON <em>MARKETING CALENDAR.</em></h1><p class="lede">Stop scrambling to fill September in August. Show up at the same moments every year, when hunters are deciding.</p><div class="pills"><span class="pill">Time: <b>30 min</b></span><span class="pill">Then: <b>Follow it all year</b></span><span class="pill">Cost: <b>Free</b></span></div></header>
+<main class="wrap">
+<div class="why">
+<p><b>Why most outfitters scramble every August.</b> You're busy guiding from September through November. You come home tired in December and don't think about next year. Spring is when you finally notice three open spots in September, and now you're discounting, posting on Facebook, and calling old clients you haven't spoken to in a year.</p>
+<p>The fix is to stop marketing when you feel behind. Elk hunters follow a predictable year: they apply in spring, find out in early summer, book in the months around it, and hunt in the fall. If you show up at the same predictable moments every year, you're in front of them when they're deciding.</p>
+</div>
+<h3 style="margin-top:36px">One idea that changes how you plan</h3>
+<p>In a state where elk tags come from a draw, a hunter often <b>can't commit to you until they know whether they drew.</b> That splits your year in two:</p>
+<figure class="vis"><div class="phases">
+<div class="phase"><b>Before results</b><p>You're selling: “apply, and if you draw I'm holding dates for you.”</p></div>
+<div class="phase"><b>After results</b><p>You're selling to people with a tag in hand and a week of leave to spend. The most motivated hunter you'll ever talk to.</p></div>
+</div><figcaption>Most outfitters treat these as one phase and talk to everyone the same way. Don't.</figcaption></figure>
+<div class="toc"><span class="tag">// What you'll do</span><ol><li><a href="#s1">Fill in your four dates</a></li><li><a href="#s2">See your year at a glance</a></li><li><a href="#s3">Follow the year, month by month</a></li><li><a href="#s4">Put it on your actual calendar</a></li></ol></div>
+
+<section class="step" id="s1"><div class="step-h"><div class="num">1</div><h2>Fill in your four dates</h2></div>
+<p>Look these up on your state agency's site (<b>ODFW, IDFG, Montana FWP, WDFW, or CDFW</b>) and type them in. They save in this browser so you don't lose them.</p>
+<figure class="vis"><table class="tbl"><thead><tr><th>Date</th><th>Yours</th></tr></thead><tbody>
+<tr><td>Application deadline</td><td><input data-save="deadline" placeholder="e.g. May 15"></td></tr>
+<tr><td>Draw results</td><td><input data-save="results" placeholder="e.g. mid-June"></td></tr>
+<tr><td>Season opens</td><td><input data-save="open" placeholder="e.g. Sep 1 (archery)"></td></tr>
+<tr><td>Season closes</td><td><input data-save="close" placeholder="e.g. Nov 30"></td></tr>
+</tbody></table><figcaption>Archery and rifle often run different dates. Note both.</figcaption></figure>
+<div class="callout "><b class="k">Tip</b><b>For reference:</b> Oregon’s elk application deadline is May 15, with results around mid-June. Idaho’s window runs May 1 to June 5, with results from mid-June to early July and a second drawing in August. Dates shift, so confirm yours every year.</div>
+</section>
+
+<section class="step" id="s2"><div class="step-h"><div class="num">2</div><h2>See your year at a glance</h2></div>
+<figure class="vis"><div class="year">
+<div class="m">JAN</div><div class="m">FEB</div><div class="m">MAR</div><div class="m">APR</div><div class="m">MAY</div><div class="m">JUN</div><div class="m">JUL</div><div class="m">AUG</div><div class="m">SEP</div><div class="m">OCT</div><div class="m">NOV</div><div class="m">DEC</div>
+<div class="band b1" style="grid-column:1 / 3">Rebook</div><div class="band b2" style="grid-column:3 / 5">Remind</div><div class="band b3" style="grid-column:5 / 7">Deadline + results</div><div class="band b4" style="grid-column:7 / 9">Confirm + prep</div><div class="band b5" style="grid-column:9 / 12">In season</div><div class="band b1" style="grid-column:12 / 13">Rebook</div>
+</div><figcaption>Five phases, one repeating year. Scroll sideways on a phone.</figcaption></figure>
+</section>
+
+<section class="step" id="s3"><div class="step-h"><div class="num">3</div><h2>Follow the year, month by month</h2></div>
+<h3>December: the thank-you and the rebook</h3>
+<p>Send thank-you emails to this year's hunters, then the rebooking email (see Guide 1). Look at which dates sold out and which didn't. That tells you what to push.</p>
+<h3>January and February: the quiet push</h3>
+<p>Update your website and Google profile with next season's dates, prices, and your best photos. Email anyone who didn't answer.</p>
+<div class="tpl"><div class="tpl-h"><span>Example post</span><button type="button" data-copy="t11">Copy</button></div><div class="tpl-b" id="t11">2026 dates are open. Archery and rifle weeks available. Past clients get first pick through January.</div></div>
+<h3>March and April: the application reminder</h3>
+<p>A few weeks before your state's deadline, email every past client. You're helping them whether they book or not, and the ones who apply remember who reminded them.</p>
+<h3>May and June: the deadline and the results</h3>
+<p>Every hunter is paying attention. Post on your profile around the deadline. The week results come out, reach out to everyone who drew. <b>This is your highest-converting week of the year.</b></p>
+<div class="tpl"><div class="tpl-h"><span>Message to a hunter who drew</span><button type="button" data-copy="t12">Copy</button></div><div class="tpl-b" id="t12">Congrats on the tag, [first name]. I'm holding [dates] for you. Want me to send details?</div></div>
+<h3>July and August: the confirmation</h3>
+<p>Confirm your hunters, send prep info (gear list, fitness, what to expect), post pre-season photos, and check for leftover or second-draw tags to fill any openings that are left.</p>
+<h3>September through November: the season</h3>
+<p>Take photos as you go (ask permission). Send review requests within a few days of each hunt (see Guide 4). Note any cancellations, because a late opening can be filled with a quick post and a call to your list.</p>
+<p>Then it starts over in December.</p>
+</section>
+
+<section class="step" id="s4"><div class="step-h"><div class="num">4</div><h2>Put it on your actual calendar</h2></div>
+<p>A guide in a folder doesn't help you. Open your calendar and create a <b>recurring reminder for each month's task</b>, with the email or post you need attached. Twenty minutes now means you don't have to remember any of it.</p>
+</section>
+
+<section class="check"><span class="tag">// Check yourself</span><div class="cnt" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gray)"></div><div class="bar"><i></i></div><label class="chk"><input type="checkbox"><span>Your four dates written down for your state</span></label><label class="chk"><input type="checkbox"><span>Every month’s task on your calendar with a reminder</span></label><label class="chk"><input type="checkbox"><span>Past client list ready by December</span></label><label class="chk"><input type="checkbox"><span>You know which of your hunts sell out and which don’t</span></label></section>
+<section class="cta"><span class="tag">// Rather not do this yourself?</span><h2>That's what <em style="font-style:normal;color:var(--orange)">Booked Out</em> is.</h2><p>Everything in this guide, done for you and kept running all season. We build it, we keep it fresh, and we send it on schedule while you're out guiding.</p><a class="btn" href="/index.html#pricing">See how Booked Out works</a></section>
+<div class="pn"><a href="/guides/google-business-profile.html">← Guide 2: Google Business Profile</a><a href="/guides/review-requests.html">Guide 4: Reviews After Every Hunt →</a></div>
+</main>
+<footer>Griffin Creative · griffincreativelab.com</footer>
+<script>
+// Warm-lead signal: when a guide is opened from an email link (?lead=<id> or
+// ?s=<signup uuid>), log one view. Insert-only via the public anon key; the
+// guide_engagement view reads it back server-side. Anonymous visits log nothing.
+(function(){
+  try {
+    var q = new URLSearchParams(location.search);
+    var lead = q.get('lead'), sid = q.get('s');
+    var body = { guide: document.body.getAttribute('data-guide') };
+    if (lead && /^[0-9]{1,12}$/.test(lead)) body.lead_id = Number(lead);
+    else if (sid && /^[0-9a-f-]{36}$/i.test(sid)) body.signup_id = sid;
+    else return;
+    var SB = 'https://gcatvqcntgizjsdoabva.supabase.co';
+    var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYXR2cWNudGdpempzZG9hYnZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NDIwNTIsImV4cCI6MjA5NDAxODA1Mn0.MvEWq_fB7UxfdSECOou5nnxG5y5qQ9LcYCeB_aXVJW4';
+    fetch(SB + '/rest/v1/guide_views', {
+      method: 'POST', keepalive: true,
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify(body)
+    }).catch(function(){});
+  } catch (e) {}
+})();
+(function(){
+  var KEY = 'gc-guide-' + document.body.getAttribute('data-guide');
+  function load(){ try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e){ return {}; } }
+  function save(s){ try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
+  var state = load();
+  var boxes = document.querySelectorAll('.check input[type=checkbox]');
+  var bar = document.querySelector('.check .bar i');
+  var cnt = document.querySelector('.check .cnt');
+  function paint(){
+    var done = 0;
+    boxes.forEach(function(b){ if (b.checked) done++; });
+    if (bar) bar.style.width = boxes.length ? (done / boxes.length * 100) + '%' : '0';
+    if (cnt) cnt.textContent = done + ' of ' + boxes.length + ' done';
+  }
+  boxes.forEach(function(b, i){
+    b.checked = !!state['c' + i];
+    b.addEventListener('change', function(){ state['c' + i] = b.checked; save(state); paint(); });
+  });
+  paint();
+  document.querySelectorAll('input[data-save]').forEach(function(inp){
+    inp.value = state['f_' + inp.getAttribute('data-save')] || '';
+    inp.addEventListener('input', function(){ state['f_' + inp.getAttribute('data-save')] = inp.value; save(state); });
+  });
+  document.querySelectorAll('button[data-copy]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var el = document.getElementById(btn.getAttribute('data-copy'));
+      var text = el.innerText.replace(/\n{3,}/g, '\n\n').trim();
+      function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1800); }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else { fallback(); }
+      function fallback(){
+        var r = document.createRange(); r.selectNodeContents(el);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        try { document.execCommand('copy'); } catch(e){}
+        s.removeAllRanges(); done();
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

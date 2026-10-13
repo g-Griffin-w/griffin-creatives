@@ -5,8 +5,8 @@ const { createClient } = require('@supabase/supabase-js');
 // Follow-up sender
 // Sends threaded follow-ups to leads that were emailed but haven't replied.
 // DTC: two touches — stage 0 -> follow-up #1 (bump), stage 1 -> follow-up #2 (breakup).
-// Guide niches: three touches, each a separate email pitching the next free kit
-// item (see GUIDE_* constants and buildGuideFollowup below).
+// Guide niches: the same two touches, but both are reminders of the opt-in ask
+// (a CTA button to /starter-kit.html) — see buildGuideFollowup below.
 // Auto-stops the moment a reply is logged (reply_received=true), because the
 // check-replies job flips that flag and this query excludes it.
 //
@@ -37,16 +37,17 @@ const DELAY_MS_MAX = 7000;
 const DAYS_TO_FOLLOWUP_2 = 4;
 const MAX_STAGE = 2; // stop after two follow-ups
 
-// Guide niches (elk_guide / salmon_guide) run a different play: the initial
-// email pitches ONE free kit item, and each follow-up pitches the next one as
-// its own email (new thread, new subject) so the prospect sees our name four
-// times with something useful each time — 4 emails total, 3 days apart.
-// The sequence stops on reply (same as DTC) and when the lead signs up at
-// /starter-kit, since the drip in send-starter-kit-drip.js takes over then.
+// Guide niches (elk_guide / salmon_guide): the guide play is opt-in. Email 1
+// (send-outreach.js) explains the four free guides and has a CTA button to
+// /starter-kit.html. Follow-ups here are just reminders of that ask, sent to
+// people who haven't signed up: a reminder, then a breakup. Same cadence as
+// DTC. Once someone signs up the follow-ups stop (below) and the drip in
+// send-starter-kit-drip.js delivers the guides.
 const GUIDE_NICHES = new Set(['elk_guide', 'salmon_guide']);
-const GUIDE_MAX_STAGE = 3;
-const GUIDE_DAYS_BETWEEN = 3;
 const isGuideLead = (lead) => GUIDE_NICHES.has(lead.niche);
+// Follow-ups are guide-niche only by default. ~680 stale DTC leads have been
+// overdue since July; set FOLLOWUP_INCLUDE_DTC=1 to deliberately include them.
+const INCLUDE_DTC = process.env.FOLLOWUP_INCLUDE_DTC === '1';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -108,61 +109,48 @@ function buildFollowupBody(lead, stage) {
   );
 }
 
-// Guide follow-ups. Email 1 (the rebooking email) is written by send-outreach.js;
-// stage 0/1/2 here are emails 2/3/4. Each pitches exactly one free item and
-// links to the same signup page — one signup unlocks the whole kit. Copy only
-// offers work we'll do after signup; nothing claims it's already done.
+// Guide follow-ups: reminders of the opt-in ask. The guides themselves are
+// never sent here — only to people who sign up. The guides are written for elk
+// outfitters; salmon_guide has none yet, so those leads are skipped in the
+// handler.
 const GUIDE_SIGNATURE = '\n\ngabriel\ngriffincreative\ngriffincreativelab.com';
+const GUIDE_CTA_LABEL = 'Get the 4 free guides';
+const signupUrl = (lead) => `https://www.griffincreativelab.com/starter-kit.html?lead=${lead.id}`;
+// Leads emailed before Oct 12 2026 got the old ask-first pitch, which never
+// explained the guides. Their first follow-up is the explanation.
+const sawGuideIntro = (lead) => (lead.email_body || '').includes('starter-kit');
 
 function buildGuideFollowup(lead, stage) {
   const first = firstName(lead);
-  const co = companyName(lead);
-  const link = `https://www.griffincreativelab.com/starter-kit?lead=${lead.id}`;
-  const salmon = lead.niche === 'salmon_guide';
+  const url = signupUrl(lead);
+  const list = 'rebooking past clients, your google business profile, a season marketing calendar, and reviews after every hunt';
 
-  if (stage === 0) {
-    const search = salmon ? 'a guided fishing trip' : 'an elk hunt';
-    return {
-      subject: `a free google profile set-up for ${co}`,
-      body:
-        `hi ${first},\n\n` +
-        `gabriel from griffincreative again — different free thing this time.\n\n` +
-        `when someone searches for ${search}, your google business profile is usually the first thing they see. ` +
-        `we'll claim it, fill it out, and set your service area to the country you actually work — ` +
-        `the finished thing, not an audit.\n\n` +
-        `it's free, and all we need from you is to add us as a manager (two minutes). start here: ${link}` +
-        GUIDE_SIGNATURE,
-    };
-  }
-  if (stage === 1) {
-    const plan = salmon
-      ? `your runs come in two windows a year, and most guides don't have anything ready to send when one opens. ` +
-        `we'll map out your whole year around them — pre-run, in-run, off-season — with what to send past clients and when.`
-      : `draw results land once a year and it's the one week every tag-holder is paying attention. ` +
-        `we'll map out your whole year around it — application window, results week, pre-season, post-season — ` +
-        `with what to send past clients and when.`;
-    return {
-      subject: `a free season calendar for ${co}`,
-      body:
-        `hi ${first},\n\n` +
-        `griffincreative again — another free one, no strings.\n\n` +
-        `${plan}\n\n` +
-        `yours either way: ${link}` +
-        GUIDE_SIGNATURE,
-    };
-  }
-  // stage 2 — fourth and last
-  return {
-    subject: `a free review-request message for ${co}`,
-    body:
+  if (stage === 0 && !sawGuideIntro(lead)) {
+    return (
       `hi ${first},\n\n` +
-      `griffincreative, last free one.\n\n` +
-      `guests are happiest the week they get home, and that's the best moment to ask for a review — ` +
-      `as long as it takes one tap. we'll write you the message and set up your direct google review link ` +
-      `so it's ready for your next trip.\n\n` +
-      `free, yours either way: ${link}` +
-      GUIDE_SIGNATURE,
-  };
+      `following up on my note — here's the simpler version of what i offered. we put together four free ` +
+      `step-by-step guides for elk outfitters: ${list}.\n\n` +
+      `sign up with your name and email and the first one lands right away, with the other three over the next week. no catch:\n\n` +
+      `${url}` +
+      GUIDE_SIGNATURE
+    );
+  }
+  if (stage === 0) {
+    return (
+      `hi ${first} — floating this back up.\n\n` +
+      `the four free guides are still yours if you want them: ${list}. ` +
+      `just your name and email, and the first one lands right away:\n\n` +
+      `${url}` +
+      GUIDE_SIGNATURE
+    );
+  }
+  return (
+    `hey ${first}, last note from me on this.\n\n` +
+    `if the guides aren't useful, no worries at all — i won't keep landing in your inbox. ` +
+    `if they are, it takes about ten seconds:\n\n` +
+    `${url}` +
+    GUIDE_SIGNATURE
+  );
 }
 
 // ============================================================
@@ -191,9 +179,34 @@ function generateMessageId(fromEmail) {
   return `<${Date.now()}.${rand}@${domain}>`;
 }
 
+// Plain text -> a minimal HTML email, turning the one CTA url into a button.
+// The plain-text part is always sent too, so text-only clients see the url.
+function textToHtml(body, cta) {
+  const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const para = (t) => `<p style="margin:0 0 14px">${esc(t).replace(/\n/g, '<br>')}</p>`;
+  const button =
+    `<p style="margin:22px 0"><a href="${esc(cta.url)}" ` +
+    `style="background:#ff4d00;color:#ffffff;text-decoration:none;font-weight:bold;` +
+    `padding:13px 24px;border-radius:4px;display:inline-block;font-size:15px">${esc(cta.label)}</a></p>`;
+  const html = body
+    .split(/\n{2,}/)
+    .map((p) => {
+      if (p.includes(cta.url)) {
+        const rest = p.replace(cta.url, '').trim();
+        return (rest ? para(rest) : '') + button;
+      }
+      return para(p);
+    })
+    .join('');
+  return `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#222222;max-width:560px">${html}</div>`;
+}
+
+const b64 = (str) => Buffer.from(str, 'utf-8').toString('base64').match(/.{1,76}/g).join('\r\n');
+
 // Send an in-thread follow-up. Threads via Gmail threadId + RFC
 // In-Reply-To/References headers so it lands as a reply, not a new email.
-async function sendFollowup({ to, subject, body, threadId, inReplyTo }) {
+// With `cta` ({url, label}) it goes out multipart/alternative with a button.
+async function sendFollowup({ to, subject, body, threadId, inReplyTo, cta }) {
   const fromEmail = process.env.GMAIL_FROM_EMAIL;
   const fromName = process.env.GMAIL_FROM_NAME;
 
@@ -207,8 +220,6 @@ async function sendFollowup({ to, subject, body, threadId, inReplyTo }) {
     `Subject: ${subjectHeader}`,
     `Message-ID: ${newMessageId}`,
     'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset=utf-8',
-    'Content-Transfer-Encoding: base64',
   ];
   // Threading headers — only add when we actually have the original id.
   if (inReplyTo) {
@@ -216,12 +227,19 @@ async function sendFollowup({ to, subject, body, threadId, inReplyTo }) {
     headers.push(`References: ${inReplyTo}`);
   }
 
-  const bodyEncoded = Buffer.from(body, 'utf-8')
-    .toString('base64')
-    .match(/.{1,76}/g)
-    .join('\r\n');
-
-  const message = headers.join('\r\n') + '\r\n\r\n' + bodyEncoded;
+  let message;
+  if (cta) {
+    const boundary = `=_gc_${Math.random().toString(36).slice(2)}`;
+    headers.push(`Content-Type: multipart/alternative; boundary="${boundary}"`);
+    message =
+      headers.join('\r\n') + '\r\n\r\n' +
+      `--${boundary}\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b64(body)}\r\n` +
+      `--${boundary}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b64(textToHtml(body, cta))}\r\n` +
+      `--${boundary}--`;
+  } else {
+    headers.push('Content-Type: text/plain; charset=utf-8', 'Content-Transfer-Encoding: base64');
+    message = headers.join('\r\n') + '\r\n\r\n' + b64(body);
+  }
 
   const encoded = Buffer.from(message)
     .toString('base64')
@@ -289,16 +307,18 @@ module.exports = async (req, res) => {
     // Pull sent, un-replied leads whose follow-up is due and who still have
     // touches left. reply_received=false is the auto-stop.
     const nowIso = new Date().toISOString();
-    const { data: leads, error: fetchError } = await supabase
+    let q = supabase
       .from('outreach_leads')
       .select('*')
       .eq('status', 'sent')
       .eq('reply_received', false)
-      .lt('followup_stage', GUIDE_MAX_STAGE) // widest cap; per-lead cap enforced below
+      .lt('followup_stage', MAX_STAGE)
       .not('next_followup_at', 'is', null)
       .lte('next_followup_at', nowIso)
       .order('next_followup_at', { ascending: true })
       .limit(batchLimit);
+    if (!INCLUDE_DTC) q = q.in('niche', Array.from(GUIDE_NICHES));
+    const { data: leads, error: fetchError } = await q;
 
     if (fetchError) {
       return res.status(500).json({ error: 'Supabase fetch failed', detail: fetchError.message });
@@ -333,7 +353,15 @@ module.exports = async (req, res) => {
     for (const lead of leads) {
       try {
         const guide = isGuideLead(lead);
-        const maxStage = guide ? GUIDE_MAX_STAGE : MAX_STAGE;
+        const maxStage = MAX_STAGE;
+
+        // No salmon guides exist yet — never send elk guides to a salmon lead.
+        if (lead.niche === 'salmon_guide') {
+          if (!dryRun) {
+            await supabase.from('outreach_leads').update({ next_followup_at: null }).eq('id', lead.id);
+          }
+          continue;
+        }
 
         // A DTC lead already at its cap shouldn't be here, but never send past it.
         if ((lead.followup_stage || 0) >= maxStage) {
@@ -370,18 +398,13 @@ module.exports = async (req, res) => {
         }
 
         const stage = lead.followup_stage || 0;
-        // Guide follow-ups are their own emails (fresh subject, new thread);
-        // DTC follow-ups stay in-thread "Re:" bumps.
-        let subject;
-        let body;
-        if (guide) {
-          ({ subject, body } = buildGuideFollowup(lead, stage));
-        } else {
-          subject = replySubject(lead.email_subject);
-          body = buildFollowupBody(lead, stage);
-        }
+        // Follow-ups stay in-thread "Re:" replies to email 1. Guide leads get
+        // the opt-in reminder (with a CTA button); DTC keeps its own copy.
+        const subject = replySubject(lead.email_subject);
+        const body = guide ? buildGuideFollowup(lead, stage) : buildFollowupBody(lead, stage);
+        const cta = guide ? { url: signupUrl(lead), label: GUIDE_CTA_LABEL } : null;
         const newStage = stage + 1;
-        const gapDays = guide ? GUIDE_DAYS_BETWEEN : DAYS_TO_FOLLOWUP_2;
+        const gapDays = DAYS_TO_FOLLOWUP_2;
         // Schedule the next touch only if we haven't hit the cap.
         const nextAt =
           newStage < maxStage
@@ -404,10 +427,9 @@ module.exports = async (req, res) => {
             to: lead.email,
             subject,
             body,
-            // Guide emails go out as new threads so each shows up as its own
-            // message in the inbox instead of collapsing under email 1.
-            threadId: guide ? null : lead.gmail_thread_id,
-            inReplyTo: guide ? null : lead.rfc_message_id,
+            threadId: lead.gmail_thread_id,
+            inReplyTo: lead.rfc_message_id,
+            cta,
           });
 
           const { error: updateError } = await supabase
