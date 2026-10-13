@@ -162,7 +162,7 @@ async function findEmailFor(siteUrl) {
     all.set(e, { mailto: (prev && prev.mailto) || meta.mailto });
   }
   const best = pickBest(all, siteUrl.hostname);
-  return { email: best ? best[0] : null, candidates: [...all.keys()], pages: pages.length };
+  return { email: best ? best[0] : null, candidates: [...all.keys()], pages: pages.length, html: pages.map((p) => p.html) };
 }
 
 async function main() {
@@ -224,4 +224,8 @@ async function main() {
   console.log(`Queued ${results.length} lead(s).`);
 }
 
-main().catch((e) => die(e.message));
+module.exports = { get, normalizeSite, robotsAllows, extractEmails, pickBest, findEmailFor, sleep, UA };
+
+if (require.main === module) {
+  main().catch((e) => die(e.message));
+}
