@@ -170,6 +170,12 @@ async function process1(c) {
       const ok = await readListing(c);
       if (!ok) return { ...out, status: 'listing-unreachable' };
       out.name = c.name;
+      // Sweeping a whole tourism directory: most listings are lodging, golf,
+      // restaurants. Don't touch an outside website unless the listing itself
+      // talks about hunting, guiding or outfitting.
+      if (c.sweep && !/hunt|outfitt|\bguide|elk/i.test(c.listingText || '')) {
+        return { ...out, status: 'not-outfitter' };
+      }
     }
     const site = await resolveWebsite(c);
     if (!site && !c.listingText) return { ...out, status: 'no-website' };
@@ -185,7 +191,15 @@ async function process1(c) {
     out.website = site.url.href;
     out.how = site.how;
     const r = await E.findEmailFor(site.url);
-    if (r.skipped) return { ...out, status: 'skipped', reason: r.skipped };
+    if (r.skipped) {
+      // Their own site can't be read (down, or robots disallows crawling). If
+      // the directory listing already gave an email and describes elk hunting,
+      // judge it from the listing alone instead of dropping a real outfitter.
+      if (c.listingText && c.email && isElkOutfitter(c.listingText)) {
+        return { ...out, mentionsElk: true, email: c.email, phone: c.phone || null, status: 'ok', how: 'listing-only' };
+      }
+      return { ...out, status: 'skipped', reason: r.skipped };
+    }
     const text = r.html.map(plain).join(' ') + ' ' + (c.listingText || '');
     if (!out.name || out.name.length < 3) {
       const h = r.html[0] || '';
@@ -256,8 +270,8 @@ async function main() {
       const c = fresh[next++];
       const r = await process1(c);
       results.push(r);
-      const tag = { ok: '✓', 'no-website': '·', 'no-elk': '–', 'no-email': '?', 'wrong-state': 'x', skipped: '!', error: '!' }[r.status];
-      console.log(`${tag} ${r.name.padEnd(42)} ${r.status}${r.email ? ' ' + r.email : ''}${r.reason ? ' (' + r.reason + ')' : ''}${r.how === 'guessed' ? ' [guessed ' + domainOf(r.website) + ']' : ''}`);
+      const tag = { ok: '✓', 'no-website': '·', 'no-elk': '–', 'no-email': '?', 'wrong-state': 'x', 'not-outfitter': ' ', skipped: '!', error: '!' }[r.status];
+      if (r.status !== 'not-outfitter') console.log(`${tag} ${(r.name || r.listing || '').slice(0, 42).padEnd(42)} ${r.status}${r.email ? ' ' + r.email : ''}${r.reason ? ' (' + r.reason + ')' : ''}${r.how === 'guessed' ? ' [guessed ' + domainOf(r.website) + ']' : ''}`);
       await E.sleep(400);
     }
   }
