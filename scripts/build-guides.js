@@ -527,6 +527,7 @@ ${warn('Only say “first pick” and the spot count if they’re true. Your cli
 
 ${step(4, 'Email 3: the application reminder', `
 <p><b>Send it in spring, for draw states only.</b> This is the email that earns trust. You're helping them even if they don't book.</p>
+${tip('<b>Timing:</b> send this two to three weeks before your state’s deadline. In Montana that means mid-March (deadline April 1). In Oregon, mid-April (May 15). In California, mid-May (June 2).')}
 ${emailTpl('Template', 'Tag deadline is [date]', "Hi [first name],\n\nQuick heads up: the [state] elk application deadline is [date]. [Link to your agency's application page]\n\nIf you draw, I'm holding [dates] for you. If you don't, let me know and we'll figure out next year.\n\n[Your name]")}
 `)}
 
@@ -537,7 +538,14 @@ ${tpl('Follow-up line', "Wanted to make sure this didn't get buried. Dates are s
 
 ${step(6, 'Get your dates right', `
 <p>Deadlines move year to year, so always confirm them on the agency's own site.</p>
-${list(['<b>Oregon (ODFW):</b> controlled elk hunt applications are due May 15, with results around mid-June.', '<b>Idaho (IDFG):</b> the application window runs May 1 to June 5, with results from mid-June to early July, and a second drawing in August for leftover tags.', '<b>Montana, Washington, California:</b> check Montana FWP, WDFW, or CDFW directly. License types and deadlines differ, so don’t guess.'])}
+${list([
+  '<b>Oregon (ODFW):</b> controlled elk hunt applications are due May 15, with results around mid-June.',
+  '<b>Idaho (IDFG):</b> the application window runs May 1 to June 5, with results from mid-June to early July, and a second drawing in August for leftover tags.',
+  '<b>Montana (FWP):</b> applications open March 1. Elk combination licenses and elk permits are due <b>April 1</b> (11:45 pm Mountain), with the drawing in mid-April. The Elk B drawing is due June 1, with results in mid-June. Montana runs earlier than Oregon or Idaho.',
+  '<b>Washington (WDFW):</b> special hunt permits, including elk, opened April 20 and closed May 27 in 2026, with results in June. Multi-season deer and elk tags are sold December 1 through March 31, with results in April. Applications for 2027 open December 1, 2026.',
+  '<b>California (CDFW):</b> elk tags come from the Big Game Drawing, which opens April 15 and is due midnight <b>June 2</b> every year, with results ten business days later (about mid-June).'
+])}
+<p>These are the 2026 cycle dates, checked on each agency's own site in October 2026. Montana and California haven't posted 2027 dates yet, so confirm yours each year.</p>
 <h3>Mistakes to avoid</h3>
 ${mist(['Writing like a brochure. “We offer premier guided hunting experiences” gets deleted. “I keep thinking about that bull on day four” gets read.', 'Making Email 1 a sales email. The thank-you has to be a thank-you.', 'Sending the rebook email in May. By then they’ve booked, or drawn somewhere else.', 'Burying the deposit and dates. Say the number and the month.'])}
 `)}
@@ -587,7 +595,13 @@ ${step(1, 'Fill in your four dates', `
 <tr><td>Season opens</td><td><input data-save="open" placeholder="e.g. Sep 1 (archery)"></td></tr>
 <tr><td>Season closes</td><td><input data-save="close" placeholder="e.g. Nov 30"></td></tr>
 </tbody></table><figcaption>Archery and rifle often run different dates. Note both.</figcaption></figure>
-${tip('<b>For reference:</b> Oregon’s elk application deadline is May 15, with results around mid-June. Idaho’s window runs May 1 to June 5, with results from mid-June to early July and a second drawing in August. Dates shift, so confirm yours every year.')}
+<figure class="vis"><table class="tbl"><thead><tr><th>State</th><th>Apply by</th><th>Results</th></tr></thead><tbody>
+<tr><td>Oregon (ODFW)</td><td>May 15</td><td>Mid-June</td></tr>
+<tr><td>Idaho (IDFG)</td><td>May 1 – June 5</td><td>Mid-June to early July (second drawing in August)</td></tr>
+<tr><td>Montana (FWP)</td><td>Apr 1 (elk combination and elk permits)<br>Jun 1 (Elk B)</td><td>Mid-April<br>Mid-June</td></tr>
+<tr><td>Washington (WDFW)</td><td>May 27 in 2026 (special hunts)<br>Multi-season tags sold Dec 1 – Mar 31</td><td>June<br>April</td></tr>
+<tr><td>California (CDFW)</td><td>Midnight June 2, every year</td><td>About ten business days later (mid-June)</td></tr>
+</tbody></table><figcaption>The 2026 cycle, checked on each agency's own site. Dates shift, so confirm yours every year.</figcaption></figure>
 `)}
 
 ${step(2, 'See your year at a glance', `
@@ -605,8 +619,10 @@ ${step(3, 'Follow the year, month by month', `
 ${tpl('Example post', "2026 dates are open. Archery and rifle weeks available. Past clients get first pick through January.")}
 <h3>March and April: the application reminder</h3>
 <p>A few weeks before your state's deadline, email every past client. You're helping them whether they book or not, and the ones who apply remember who reminded them.</p>
+${tip('<b>Montana outfitters, shift this earlier.</b> Your elk combination and permit deadline is April 1 and results come mid-April. Send the reminder in February or early March, and treat mid-April as your results week. The Elk B drawing closes June 1 with results in mid-June, which gives you a second window.', '', 'Montana')}
 <h3>May and June: the deadline and the results</h3>
 <p>Every hunter is paying attention. Post on your profile around the deadline. The week results come out, reach out to everyone who drew. <b>This is your highest-converting week of the year.</b></p>
+${tip('<b>Washington and California</b> sit squarely in this window: Washington\'s special hunt deadline was late May in 2026, and California\'s is June 2 every year with results about ten business days later. Oregon is May 15, Idaho May 1 to June 5.', '', 'Your state')}
 ${tpl('Message to a hunter who drew', "Congrats on the tag, [first name]. I'm holding [dates] for you. Want me to send details?")}
 <h3>July and August: the confirmation</h3>
 <p>Confirm your hunters, send prep info (gear list, fitness, what to expect), post pre-season photos, and check for leftover or second-draw tags to fill any openings that are left.</p>

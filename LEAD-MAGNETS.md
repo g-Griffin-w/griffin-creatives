@@ -2,8 +2,7 @@
 
 **The flow (opt-in):**
 1. **Cold email** (`send-outreach.js`): explains the four free guides, with a
-   CTA **button** to `/starter-kit.html?lead=<id>`. Subject: "4 free guides
-   for {company}". Sent as text + HTML (multipart) so the button renders.
+   CTA **button** to `/starter-kit.html?lead=<id>`. Subject: "4 free marketing guides for elk outfitters in the NW". Sent as text + HTML (multipart) so the button renders.
 2. **Signup page**: name + email only. `POST /api/send-starter-kit-drip` saves
    the subscriber and sends **guide 1 immediately**. If that send fails the
    daily cron sends it, so a signup is never lost.
@@ -122,7 +121,7 @@ offer and was removed.
 **Aligned (2026-10-13):** the cold emails, `starter-kit.html`, and the drip
 now deliver the DIY guides instead of promising done-for-you work.
 
-**Date accuracy:** Oregon and Idaho dates are verified; Montana, Washington
+**Date accuracy (verified 2026-10-13):** the guides state the 2026-cycle elk application and results dates for Oregon, Idaho, Montana, Washington and California, each checked against the agency's own site (ODFW, IDFG, Montana FWP, WDFW, CDFW). Montana runs about 6-8 weeks earlier than Oregon/Idaho (deadline Apr 1, results mid-April), and the calendar guide calls that out. Montana and California 2027 dates aren't posted yet; re-check each February.
 and California are sent to the agency sites in the guides rather than stated.
 
 ---

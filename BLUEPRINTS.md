@@ -96,28 +96,21 @@ node scripts/import-guide-contacts.js <their-past-clients.csv> --guide-client-id
 ---
 
 ### 6. Referral Program
-**What it is:** a trackable link each past client can send to friends, with a real incentive attached — a two-sided "give $200, get $200" split: the referred friend gets a discount on their first booking, the referring client gets a credit toward next season, released only after the friend actually pays a deposit (self-funding, not a flat cost).
+**Status: not building the script. Not a lead magnet.** (Decided 2026-10-13.)
 
-The tracking tech already exists (same `/api/lp` + `landing_page_events` system as the ad samples). What's new is a page template + a script that fills it in per business, same shape as #5's demo pattern below.
+This started as a cheap demo lead magnet: a generated referral landing page with a placeholder referrer, scoped as `scripts/draft-referral-page.js`. The cold-outreach lead magnets are now the four free guides (see `LEAD-MAGNETS.md`), so a generated referral page isn't part of the funnel. The script was never written and shouldn't be until there's a reason.
 
-**LEAD MAGNET** — cheaper than #1 (no FAL spend — it reuses one real scraped photo as a background image, not an AI composite) and doesn't need real past-client data, just a placeholder referrer:
-```bash
-# Not built yet — scope for scripts/draft-referral-page.js:
-#   1. Reuse draft-prospect-config.js's photo-scrape step (one real hero/trip photo).
-#   2. Fill the referral-page HTML template (see mockup) with the business's real
-#      name + photo, a placeholder referrer: "[Past Client Name]", and the standard
-#      $200/$200 copy as a DEMO default — never a number we haven't confirmed with them.
-#   3. Insert one landing_pages row:
-node scripts/draft-referral-page.js <their-website-or-directory-url> --niche=elk_guide --slug=<slug>
-```
-→ one tracked link: `https://www.griffincreativelab.com/api/lp?c=<slug>-referral-demo`. Pitch: "here's what a referral page for your past clients could look like" — same no-reply-required logic as #1, and since there's no real referrer or real incentive terms yet, the bracketed placeholder is what makes it honest, not a bug to hide.
-
-**CLIENT** — once their past-client list is loaded (#5) and they've confirmed a real incentive (captured on the onboarding form now), generate one real page per actual past client with their real name:
+**What it is, as a Booked Out deliverable:** a trackable link a past client can send to friends, with an incentive attached. Build it per client, by hand, when a client asks for it:
 ```sql
 insert into landing_pages (slug, client, html, cta_url, concept_id)
 values ('<client-slug>-referral-<friend-code>', '<Business Name>', '<referral page html, real referrer name, real incentive>', '<their booking link>', null);
 ```
-Share `https://www.griffincreativelab.com/api/lp?c=<slug>` with the referring client. Clicks land in `landing_page_events`. Applying the referrer's credit at booking is still a manual step today — no script watches for "friend paid deposit" and auto-credits the original client.
+Share `https://www.griffincreativelab.com/api/lp?c=<slug>` with the referring client. Clicks land in `landing_page_events`, the same tracking the ad samples use.
+
+**Caveats to keep in mind**
+- Crediting the referrer when a friend books is manual. Nothing watches for "friend paid a deposit."
+- The "$200 off for them, $200 credit for you" split was an illustration, never validated. Set the real incentive with the client, against their own margins.
+- Build the generator script only once several clients want this regularly; until then a single SQL insert is cheaper than maintaining a tool.
 
 ---
 

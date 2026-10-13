@@ -140,7 +140,7 @@ sign up with your name and email and the first one lands in your inbox right awa
 const NICHE_PITCH = { salmon_guide: 'guide', elk_guide: 'guide' };
 const SUBJECT_VARIANTS = {
   dtc: 'a couple free ads for {{company_name}}?',
-  guide: '4 free guides for {{company_name}}',
+  guide: '4 free marketing guides for elk outfitters in the NW',
 };
 const GUIDE_CTA_LABEL = 'Get the 4 free guides';
 // Links use the .html path: the site has no clean-URL routing, so
