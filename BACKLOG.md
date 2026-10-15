@@ -15,3 +15,16 @@ Add to this as ideas come up. Not a sprint plan, just a place so good ideas don'
   they'd need a website-discovery step before `enrich-emails-from-sites.js`.
   Not worth building until we see reply/signup rates on the ~108 already
   queued (about 4 days of sending at 25/day).
+- **Honor "stop" replies from starter-kit subscribers (raised 2026-10-14).** Every
+  outbound email now carries a footer with our postal address and "reply stop".
+  For cold-outreach leads a reply already halts follow-ups (`check-replies` sets
+  `reply_received`). For *subscribers* in `lead_magnet_signups` nothing reads
+  replies yet, so a "stop" has to be honored by hand (delete or flag the row)
+  until we build it: add an `unsubscribed` flag to `lead_magnet_signups`, have
+  `send-starter-kit-drip` skip flagged rows, and teach `check-replies` to match
+  inbound mail from a subscriber's address. Do it before subscriber volume grows;
+  CAN-SPAM requires honoring opt-outs within 10 business days.
+- **Mailing address in the footer is a home address.** `EMAIL_FOOTER` in the
+  three sender files uses 203 SE 7th St, Sublimity, OR 97385. If a PO box or
+  mail-receiving address is set up later, change the constant in
+  `send-outreach.js`, `send-followups.js` and `send-starter-kit-drip.js`.

@@ -462,12 +462,22 @@ function textToHtml(body, cta) {
 
 const b64 = (str) => Buffer.from(str, 'utf-8').toString('base64').match(/.{1,76}/g).join('\r\n');
 
+// Compliance footer appended to every outbound message (text + HTML parts):
+// who we are, a real postal address, and a working opt-out. A reply of "stop"
+// (or any negative reply) is honored: cold leads stop via check-replies'
+// reply_received flag; starter-kit subscribers are removed by hand from the
+// hello@ inbox (see CLAUDE notes / BACKLOG).
+const EMAIL_FOOTER =
+  '\n\n\u2014\nGriffin Creative Labs \u00b7 203 SE 7th St, Sublimity, OR 97385\n' +
+  'Not for you? Just reply "stop" and I won\'t email you again.';
+
 // Build raw RFC 2822 email and send via Gmail API. With `cta` ({url, label})
 // the message is multipart/alternative (text + HTML with a button); without it
 // it stays plain text exactly as before.
 // Returns { id, threadId, rfcMessageId } so the caller can persist the thread
 // + message id for later in-thread follow-ups.
 async function sendEmail({ to, subject, body, cta }) {
+  body = body + EMAIL_FOOTER;
   const fromEmail = process.env.GMAIL_FROM_EMAIL;
   const fromName = process.env.GMAIL_FROM_NAME;
 

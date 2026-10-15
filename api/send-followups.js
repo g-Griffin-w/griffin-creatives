@@ -203,10 +203,20 @@ function textToHtml(body, cta) {
 
 const b64 = (str) => Buffer.from(str, 'utf-8').toString('base64').match(/.{1,76}/g).join('\r\n');
 
+// Compliance footer appended to every outbound message (text + HTML parts):
+// who we are, a real postal address, and a working opt-out. A reply of "stop"
+// (or any negative reply) is honored: cold leads stop via check-replies'
+// reply_received flag; starter-kit subscribers are removed by hand from the
+// hello@ inbox (see CLAUDE notes / BACKLOG).
+const EMAIL_FOOTER =
+  '\n\n\u2014\nGriffin Creative Labs \u00b7 203 SE 7th St, Sublimity, OR 97385\n' +
+  'Not for you? Just reply "stop" and I won\'t email you again.';
+
 // Send an in-thread follow-up. Threads via Gmail threadId + RFC
 // In-Reply-To/References headers so it lands as a reply, not a new email.
 // With `cta` ({url, label}) it goes out multipart/alternative with a button.
 async function sendFollowup({ to, subject, body, threadId, inReplyTo, cta }) {
+  body = body + EMAIL_FOOTER;
   const fromEmail = process.env.GMAIL_FROM_EMAIL;
   const fromName = process.env.GMAIL_FROM_NAME;
 
