@@ -336,9 +336,32 @@ footer p { font-size: 13px; color: #2e2e2e; }
         <div class="form-section-label">Online Presence</div>
 
         <div class="field-group">
+          <label class="field-label" for="gbp-exists">Do you have a Google Business Profile?</label>
+          <select id="gbp-exists" name="gbp-exists">
+            <option value="">Choose one</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+            <option value="not_sure">Not sure</option>
+          </select>
+          <p class="field-hint">It's the listing that shows up on Google Maps when someone searches your outfit. Not sure? Search your business name on Google and see if a box with your photos and reviews appears.</p>
+        </div>
+
+        <div class="field-group">
           <label class="field-label" for="gbp-link">Google Business Profile Link</label>
           <input type="url" id="gbp-link" name="gbp-link" placeholder="https://g.co/kgs/... or search your business on Google Maps and paste the link">
-          <p class="field-hint">If you already have one. If not, leave blank — setting one up is part of Get Found.</p>
+          <p class="field-hint">If you have one. If not, leave blank &mdash; we'll walk you through setting one up on our call.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="gbp-manager-added">Have you added hello@griffincreativelab.com as a Manager on it?</label>
+          <select id="gbp-manager-added" name="gbp-manager-added">
+            <option value="">Choose one</option>
+            <option value="yes">Yes, already added</option>
+            <option value="no">Not yet</option>
+            <option value="not_sure">Not sure how</option>
+            <option value="na">No profile yet</option>
+          </select>
+          <p class="field-hint">In your profile: menu &rarr; Business Profile settings &rarr; People and access &rarr; Add &rarr; pick <strong>Manager</strong>. You stay the owner and can remove us any time. Skip it for now and we'll do it together.</p>
         </div>
 
         <div class="field-group">
@@ -633,6 +656,8 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
     logo_url: uploadedPaths.logo[0] || '',
     brand_colors: f['brand-colors'].value,
     gbp_link: f['gbp-link'].value,
+    gbp_exists: f['gbp-exists'].value,
+    gbp_manager_added: f['gbp-manager-added'].value,
     platforms: f['social-handles'].value,
     booking_link: f['booking-link'].value,
     notes: f['notes'].value,
