@@ -1,0 +1,20 @@
+{
+  "slug": "2026-10-16-starter-kit-intro",
+  "slides": [
+    { "layout": "hook", "white": ["4 FREE GUIDES."], "orange": ["WRITTEN FOR", "ELK", "OUTFITTERS."] },
+    { "layout": "text", "label": "WHY WE MADE THEM", "firstBig": true,
+      "lines": ["Next year's bookings are decided between hunts.", "You're busy guiding, so the follow-up work gets skipped. We wrote it down step by step, with the exact words to use."] },
+    { "layout": "bullets", "label": "GUIDE 1 · REBOOKING", "title": "Three emails that bring past clients back",
+      "items": ["Build one past-client list", "The thank-you email (no ask)", "The rebook email, with dates and deposit", "The application reminder", "One 10-day follow-up line"] },
+    { "layout": "bullets", "label": "GUIDE 2 · GOOGLE PROFILE", "title": "The free listing hunters check before they call",
+      "items": ["Claim it and clear out duplicates", "Service area, not a storefront", "Categories and a real description", "Each hunt listed as a service", "Real photos, matching contact details"] },
+    { "layout": "bullets", "label": "GUIDE 3 · SEASON CALENDAR", "title": "Show up when hunters are deciding",
+      "items": ["Fill in your four key dates", "Before results vs. after results", "A month-by-month year plan", "Application dates for OR, ID, MT, WA and CA"] },
+    { "layout": "bullets", "label": "GUIDE 4 · REVIEW REQUESTS", "title": "A two-minute habit after every hunt",
+      "items": ["Get your direct review link", "Turn it into a QR code", "The message to send, ready to copy", "How to reply to every review", "The rules that keep you in Google's good graces"] },
+    { "layout": "steps", "label": "HOW IT WORKS",
+      "items": [["Enter your name and email", "That's all. No card, no call."], ["Guide 1 lands right away", "Three emails that bring past clients back."], ["Guides 2, 3 and 4 follow every other day", "Google profile, season calendar, reviews."], ["Use what helps", "It's free. Keep it or ignore it."]] },
+    { "layout": "cta", "headline": ["GET THE", "4 FREE GUIDES."],
+      "body": "Name and email. Guide 1 arrives right away.", "button": "LINK IN BIO", "foot": "griffincreativelab.com/starter-kit.html" }
+  ]
+}
