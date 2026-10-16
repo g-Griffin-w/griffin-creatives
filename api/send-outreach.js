@@ -136,6 +136,16 @@ want me to make you 2 free samples? you send nothing — i'll pull a product fro
   guide: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — rebooking past clients, setting up your google business profile, a season marketing calendar, and getting reviews after every hunt.
 
 sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
+  // Wyoming variant (2026-10-15): nonresident elk applications there are due
+  // Feb 2, ahead of Montana, Oregon and Idaho, so a December rebooking email is
+  // what catches clients before they apply. Verified on wgfd.wyo.gov (2026-27
+  // announcement). Re-check the date each January when the new cycle posts.
+  // No inner quotes: Claude returns this inside JSON.
+  guide_wy: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — rebooking past clients, setting up your google business profile, a season marketing calendar, and getting reviews after every hunt.
+
+one thing worth knowing in wyoming: nonresident elk applications are due feb 2, ahead of montana, oregon and idaho. december is when a rebooking email catches your clients before they apply, and the first guide is exactly that email.
+
+sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
 };
 const NICHE_PITCH = { salmon_guide: 'guide', elk_guide: 'guide' };
 const SUBJECT_VARIANTS = {
@@ -155,8 +165,11 @@ function subjectForNiche(niche, companyName) {
 // NOTE: the guides are written for elk outfitters. NICHE_PITCH maps
 // salmon_guide here too, but salmon is dormant — it needs its own guides
 // before any salmon lead is queued.
-function pitchForNiche(niche, leadId, companyName) {
-  const block = PITCH_VARIANTS[NICHE_PITCH[niche] || 'dtc'];
+function pitchForNiche(niche, leadId, companyName, state) {
+  let key = NICHE_PITCH[niche] || 'dtc';
+  // Wyoming leads get the Feb 2 deadline line (see PITCH_VARIANTS.guide_wy).
+  if (key === 'guide' && /^(wy|wyoming)$/i.test(String(state || '').trim())) key = 'guide_wy';
+  const block = PITCH_VARIANTS[key];
   return block
     .replace(/{{company_name}}/g, companyName || 'your business')
     .replace('{{signup_link}}', signupUrl(leadId));
@@ -372,7 +385,7 @@ function buildPrompt(lead, { productContext = '', resolvedNiche = '' } = {}) {
     .replace(/{{company_state}}/g, lead.company_state || '')
     .replace(/{{niche}}/g, niche)
     .replace(/{{product_context}}/g, productContext || '(none found — use the niche hook)')
-    .replace('{{pitch_block}}', pitchForNiche(niche, lead.id, cleanCompany));
+    .replace('{{pitch_block}}', pitchForNiche(niche, lead.id, cleanCompany, lead.company_state));
 }
 
 // Parse Claude's JSON response (strip any markdown fences if Claude adds them)

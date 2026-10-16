@@ -62,7 +62,7 @@ Each guide gets 3 spotlights across the 13 weeks (rotating).
 | 7 | Mon Nov 2 | IG+FB | Carousel | E | Mock teardown: a made-up elk outfitter's Google listing, 5 fixes | Save |
 | 8 | Wed Nov 4 | IG+FB | Text | M | One extra booked client at ~$4–7k covers ~1.5 months of Booked Out. Verify the range with real outfitter quotes before using | — |
 | 9 | Fri Nov 6 | IG+FB+GBP | Carousel | G | Guide 2 spotlight: Google Business Profile in 20 minutes | Link |
-| 10 | Mon Nov 9 | IG+FB | Carousel | S | "What to send before each state's deadline": one email idea per state (MT first, it's earliest). Reuses the deadline list from #1; add Wyoming only once WGFD dates are verified | Save + guide 3 |
+| 10 | Mon Nov 9 | IG+FB | Carousel | S | "What to send before each state's deadline": one email idea per state (MT first, it's earliest). Use the six-state slide (Wyoming now verified, earliest deadline Feb 2) | Save + guide 3 |
 | 11 | Wed Nov 11 | IG+FB | Reel | B | We pulled every public outfitter registry in the NW — what we learned about who's findable online | — |
 | 12 | Fri Nov 13 | IG+FB+GBP | Single image | G | Guide 1 spotlight: the 3-email rebooking sequence | Link |
 | 13 | Mon Nov 16 | IG+FB | Carousel | E | "Why your past clients are the cheapest bookings you'll ever get" | Save |
@@ -108,9 +108,14 @@ to keep 39, move those two into the following Mondays.
 | **Feb 11–14, 2027** | Western Hunting & Conservation Expo, Salt Lake City | Next calendar |
 | **Mar 4–6, 2027** | NW Hunt Expo, Hillsboro, OR (Idaho Sportsman Show Mar 4–7, Boise) | Next calendar |
 
-Known gap: **Wyoming has no verified draw dates yet** (our biggest lead pool).
-Verify with Wyoming Game & Fish, then add a Wyoming row to the deadline slide
-and the calendar guide.
+**Wyoming dates (verified Oct 15 from Wyoming Game & Fish's 2026-27 announcement,
+wgfd.wyo.gov):** applications opened Jan 2; **nonresident elk due Feb 2**
+(modify/withdraw through May 8); **resident elk due June 1**; deer/pronghorn
+June 1; moose/sheep/goat Apr 30. Wyoming is the earliest deadline of any state
+we cover, which is a strong hook for WY outfitters: a December rebooking email
+catches clients before Feb 2. 2027-28 dates aren't posted yet (re-check in
+January). Slide ready: `content-posts/deadlines-2026-27/slide-01.png`
+(six states, WY first). Use it for row 10 (Nov 9).
 
 ## Reusable caption templates
 

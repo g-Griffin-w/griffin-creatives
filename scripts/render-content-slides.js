@@ -48,7 +48,7 @@ function frame(i, total, body, foot) {
           h('span', { color: C.white }, 'GRIFFIN\u00A0'),
           h('span', { color: C.orange }, 'CREATIVE LABS'),
         ]),
-        div({ fontSize: 24, color: C.gray, letterSpacing: 2 }, `${i} / ${total}`),
+        div({ fontSize: 24, color: C.gray, letterSpacing: 2 }, i && total ? `${i} / ${total}` : ''),
       ]),
       div({ flexDirection: 'column', width: '100%' }, body),
       div({ height: 60, alignItems: 'center', justifyContent: 'space-between', width: '100%' }, [
@@ -112,18 +112,18 @@ function render(slide, i, total) {
     case 'dates':
       return frame(i, total, [
         label(slide.label),
-        line(slide.title, { fontSize: 44, fontWeight: 900, color: C.white, marginBottom: 34, lineHeight: 1.2 }),
+        line(slide.title, { fontSize: slide.compact ? 38 : 44, fontWeight: 900, color: C.white, marginBottom: slide.compact ? 24 : 34, lineHeight: 1.2 }),
         ...slide.rows.map((r) =>
           div(
-            { justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '2px solid #222222', paddingBottom: 14, marginBottom: 18 },
+            { justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '2px solid #222222', paddingBottom: slide.compact ? 8 : 14, marginBottom: slide.compact ? 12 : 18 },
             [
-              div({ fontFamily: 'DIN', fontSize: 74, color: C.white, letterSpacing: 2 }, r[0]),
-              div({ fontFamily: 'DIN', fontSize: 86, color: C.orange, letterSpacing: 2 }, r[1]),
+              div({ fontFamily: 'DIN', fontSize: slide.compact ? 62 : 74, color: C.white, letterSpacing: 2 }, r[0]),
+              div({ fontFamily: 'DIN', fontSize: slide.compact ? 72 : 86, color: C.orange, letterSpacing: 2 }, r[1]),
             ]
           )
         ),
-        line(slide.note, { fontSize: 32, color: C.gray, marginTop: 16, lineHeight: 1.35 }),
-        line(slide.closer, { fontSize: 40, color: '#d6d2c8', marginTop: 20, lineHeight: 1.35 }),
+        line(slide.note, { fontSize: slide.compact ? 28 : 32, color: C.gray, marginTop: 12, lineHeight: 1.35 }),
+        line(slide.closer, { fontSize: slide.compact ? 36 : 40, color: '#d6d2c8', marginTop: 16, lineHeight: 1.35 }),
       ]);
     case 'cta':
       return frame(

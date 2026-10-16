@@ -1,27 +1,39 @@
-# To-do — Thursday Oct 15, 2026 (lead focus)
+# To-do — Friday Oct 16, 2026 (lead focus)
 
-## Where we are (as of Oct 14 evening)
-- **Sent:** 105 elk cold emails (Oct 10–14), 34 follow-ups out, 24 more due in the next 24h.
-- **Queued:** 432 (WY 228 · OR 93 · MT 75 · ID 32 · WA 4). At 25/day that's ~17 days.
-- **Phone-only:** 7 skipped in the table + ~29 in `phone-leads.csv`.
-- **Results so far:** 0 real replies (1 auto-reply: Buck Horn is in the backcountry), 0 bounces in 7 days, 0 real signups (the 1 signup + 3 guide views are our own tests).
-- **Read on it:** the sample is tiny (4–5 days) and rifle season is live, so low engagement is expected. Don't judge the funnel until early December.
+## Where we are (Oct 15 evening)
+- **Cold email:** 105+ sent since Oct 10, ~430 queued (WY ~228 · OR ~93 · MT ~75 · ID ~32 · WA ~4). 0 real replies, 0 bounces, 0 real signups.
+- **Associations:** emailed IOGA, WYOGA, MOGA today (Oct 15). No replies yet.
+- **Content:** slot #1 posted Oct 15. Wyoming dates now verified (nonresident elk due **Feb 2**).
+- **Warm leads:** none confirmed. Two "engaged" leads were email scanners; the cleaned view shows one unexplained guide view (Deep in the Bush Adventures).
 
 ## Do tomorrow, in order
-1. **After the 9am send (16:00 UTC):** open one sent email in Gmail and confirm the new footer (address + "reply stop") renders. 5 min.
-2. **Check replies and bounces** (hello@ inbox; search `mailer-daemon`). Reply to any real response same day. 5 min.
-3. **Check signups:** `select * from guide_engagement order by last_view desc;`. Anyone who opened a guide is the warmest lead we have. 2 min.
-4. **Send the 3 association emails** (IOGA, WYOGA, MOGA) from `ASSOCIATION-OUTREACH.md`. Verify each contact first. This is the highest-leverage lead action: one yes reaches many outfitters. 30 min.
-5. **Call 8–10 phone-only outfitters** from `phone-leads.csv` (early morning or evening; they're in the field). Script is in `ASSOCIATION-OUTREACH.md`. 30 min.
-6. **Join 2 outfitter Facebook groups** and comment helpfully for 15 min; no pitching. Feeds the content calendar.
-7. **Post content calendar slot #1** (Mon Oct 19 starts the calendar; draft the first carousel tomorrow).
 
-## Decisions I need from you
-- **Send rate:** keep 25/day or raise to ~40? My recommendation: keep 25 for now. Zero bounces is good, but the real response window is Dec–Mar, so a faster burn just sends more emails to people in the backcountry.
-- **Widen past the NW?** Colorado and Utah have public outfitter registries and the biggest elk outfitter markets. You said NW only (WY allowed), so this is your call.
-- **Subscriber unsubscribe flag:** build only once real signups appear.
+### Morning (about 1.5 hours)
+1. **9:00 — Call IOGA, (208) 342-1438** (reminder set). Their annual meeting and exhibitor fair is **Nov 30 – Dec 4 at Tamarack, vendor fair Dec 1**; vendor registration is open now.
+   - Ask: who handles vendors, the best email, booth price and deadline, and whether they got our email.
+   - Ask for the vendor packet (goes back to "Hardy").
+2. **After the 9am send (16:00 UTC):** open one sent email and confirm the new footer renders (address + "reply stop").
+3. **Inbox sweep (10 min):** replies, `mailer-daemon` bounces, anything from ioga.org / wyoga.org / mogamt.org. Answer any real reply the same day.
+4. **Check results:** `select * from guide_engagement order by last_view desc;` and `lead_magnet_signups` where `source='social'`. Any signup from the Oct 15 post is a real lead.
 
-## Parked / on a reminder
-- **Oct 20:** Google Places API key decision (reminder set).
-- **Oct 21:** Google Business Profile verification (reminder set).
-- **December:** re-check expo exhibitor lists (Salt Lake expo is the one worth it).
+### Midday (about 1 hour)
+5. **Phone block: 8–10 calls** from `phone-leads.csv` (elk outfitters with no email). Script is in `ASSOCIATION-OUTREACH.md`. Start with the Idaho ones from the licensing list.
+6. **Facebook groups, 15 min:** answer questions, comment on posts. Post the group-safe question ("when do you start talking to last year's clients about next season?"). No links.
+7. **Reply to comments/DMs** on yesterday's post.
+
+### Lead-building (30 min)
+8. **Wyoming hook for the 228 WY leads.** Their clients' nonresident elk deadline is **Feb 2**, the earliest of any state. Decide: add a one-line Wyoming variant to the guide email for `company_state='WY'` leads (e.g., "your nonresident clients apply by Feb 2; a December rebooking email catches them"). I can build it; it's a small change in `send-outreach.js`.
+9. **Prep Wed Oct 21 post (#2):** "why we only work with elk outfitters." Draft the text tomorrow.
+
+## Decisions waiting on you
+- **Wyoming hook in the cold email** (item 8): yes or no.
+- **Send rate:** keep 25/day (my recommendation) or raise to ~40.
+- **Widen to Colorado/Utah?** Biggest elk outfitter markets, public registries. You said NW + WY only.
+- **Subscriber unsubscribe flag:** build only once real signups show up.
+
+## Already scheduled
+- **Fri Oct 16, 9:00 AM:** IOGA call reminder.
+- **Tue Oct 20:** Google Places API key decision.
+- **Wed Oct 21:** Google Business Profile verification, plus post #2.
+- **Thu Oct 22:** follow up with IOGA / WYOGA / MOGA (non-responders).
+- **Nov 30 – Dec 4:** IOGA annual meeting + vendor fair.

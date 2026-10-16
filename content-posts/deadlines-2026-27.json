@@ -1,0 +1,10 @@
+{
+  "slug": "deadlines-2026-27",
+  "slides": [
+    { "layout": "dates", "compact": true, "pos": [0, 0], "label": "ELK DEADLINES BY STATE",
+      "title": "When your clients have to apply (2026 cycle):",
+      "rows": [["WYOMING (NONRES.)", "FEB 2"], ["MONTANA", "APRIL 1"], ["OREGON", "MAY 15"], ["WASHINGTON*", "MAY 27"], ["CALIFORNIA", "JUNE 2"], ["IDAHO", "JUNE 5"]],
+      "note": "*Washington special permits. Wyoming resident elk is due June 1. Next cycle's dates aren't posted yet. Check each agency.",
+      "closer": "Your rebooking email goes out before these." }
+  ]
+}
