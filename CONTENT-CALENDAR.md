@@ -1,6 +1,9 @@
 # Griffin Creative — Content Calendar
 **13 weeks · Mon Oct 19, 2026 → Fri Jan 15, 2027 · 3 posts/week (39 total)**
 
+**Status (updated Oct 15):** slot #1 posted Thu Oct 15 (ahead of schedule). Next: #2 on Wed Oct 21.
+Renderer: `scripts/render-content-slides.js` (spec JSON in `content-posts/`).
+
 Purpose: give a cold stranger (an elk outfitter in the NW) a reason to follow us
 and click the free-guides link, so the social channel feeds the same funnel as
 cold email: `post → starter-kit.html → guide 1 now, guides 2–4 on days 2/4/6 →
@@ -50,7 +53,7 @@ Each guide gets 3 spotlights across the 13 weeks (rotating).
 
 | # | Date | Channel | Format | Pillar | Topic / hook | CTA |
 |---|---|---|---|---|---|---|
-| 1 | Mon Oct 19 | IG+FB | Carousel | E | "Your elk hunt is loudest in October. Your *next-year bookings* happen quietly in January." 5 slides on the booking-window gap | Follow |
+| 1 | ~~Mon Oct 19~~ **POSTED Thu Oct 15** | IG+FB | Carousel | E | 6-slide carousel "Elk season is loud. Next year's bookings are quiet." (slide 4 = all-states deadline list, 2026 cycle) | Link in bio |
 | 2 | Wed Oct 21 | IG+FB | Reel/text | B | Why we only work with elk outfitters (one niche, one offer, no contracts) | — |
 | 3 | Fri Oct 23 | IG+FB+GBP | Single image | G | Intro the Starter Kit: 4 free guides, 1 every few days, name + email only | Link |
 | 4 | Mon Oct 26 | IG+FB | Carousel | E | 5 things hunters Google before they book an outfitter (reviews, photos, hours, "near me", price) | Save |
@@ -59,7 +62,7 @@ Each guide gets 3 spotlights across the 13 weeks (rotating).
 | 7 | Mon Nov 2 | IG+FB | Carousel | E | Mock teardown: a made-up elk outfitter's Google listing, 5 fixes | Save |
 | 8 | Wed Nov 4 | IG+FB | Text | M | One extra booked client at ~$4–7k covers ~1.5 months of Booked Out. Verify the range with real outfitter quotes before using | — |
 | 9 | Fri Nov 6 | IG+FB+GBP | Carousel | G | Guide 2 spotlight: Google Business Profile in 20 minutes | Link |
-| 10 | Mon Nov 9 | IG+FB | Carousel | S | "Elk outfitters: here's your 2027 marketing calendar in one image" (OR/ID/MT/WA/CA draw windows) | Save + guide 3 |
+| 10 | Mon Nov 9 | IG+FB | Carousel | S | "What to send before each state's deadline": one email idea per state (MT first, it's earliest). Reuses the deadline list from #1; add Wyoming only once WGFD dates are verified | Save + guide 3 |
 | 11 | Wed Nov 11 | IG+FB | Reel | B | We pulled every public outfitter registry in the NW — what we learned about who's findable online | — |
 | 12 | Fri Nov 13 | IG+FB+GBP | Single image | G | Guide 1 spotlight: the 3-email rebooking sequence | Link |
 | 13 | Mon Nov 16 | IG+FB | Carousel | E | "Why your past clients are the cheapest bookings you'll ever get" | Save |
@@ -86,7 +89,7 @@ Each guide gets 3 spotlights across the 13 weeks (rotating).
 | 34 | Mon Jan 4 | IG+FB | Carousel | E | The off-season is the on-season: 5 things to do in January | Save |
 | 35 | Wed Jan 6 | IG+FB | Reel | G | Guide 1 again: the rebooking email, word for word | Link |
 | 36 | Fri Jan 8 | IG+FB+GBP | Carousel | M | Honest comparison: DIY with the free guides vs. having it done for you | Link / Book a call |
-| 37 | Mon Jan 11 | IG+FB | Carousel | S | OR/ID/MT/WA/CA draw dates, updated for 2027 (verify Jan 2027 dates first) | Save |
+| 37 | Mon Jan 11 | IG+FB | Carousel | S | OR/ID/MT/WA/CA draw dates, updated for 2027 (verify Jan 2027 dates first; replaces the 2026-cycle list from #1) | Save |
 | 38 | Wed Jan 13 | IG+FB | Reel | B | 90-day recap: what the funnel produced (real numbers only) | — |
 | 39 | Fri Jan 15 | IG+FB+GBP | Single image | G | Free guides, still free — 4 guides, 1 every few days | Link |
 
@@ -94,6 +97,20 @@ Rows 30 and 33 are skipped holidays, so the live count is 37 posts. If you want
 to keep 39, move those two into the following Mondays.
 
 ---
+
+## Events to tie content to (checked Oct 15)
+
+| Date | Event | Use |
+|---|---|---|
+| **Nov 30 – Dec 4** | IOGA annual meeting + exhibitor fair (vendor fair Dec 1), Tamarack, ID | Rows 19–20 (Nov 30, Dec 2): post the Idaho-relevant rebooking tip; mention the guides if IOGA shares them |
+| **Dec 1** | Washington multi-season tag applications open | Row 19 |
+| **Jan 29, 2027** | MOGA winter convention, Helena, MT | Just past this calendar; draft Montana content for the week of Jan 25 |
+| **Feb 11–14, 2027** | Western Hunting & Conservation Expo, Salt Lake City | Next calendar |
+| **Mar 4–6, 2027** | NW Hunt Expo, Hillsboro, OR (Idaho Sportsman Show Mar 4–7, Boise) | Next calendar |
+
+Known gap: **Wyoming has no verified draw dates yet** (our biggest lead pool).
+Verify with Wyoming Game & Fish, then add a Wyoming row to the deadline slide
+and the calendar guide.
 
 ## Reusable caption templates
 

@@ -1,0 +1,17 @@
+{
+  "slug": "post-01",
+  "slides": [
+    { "layout": "hook", "white": ["ELK SEASON", "IS LOUD."], "orange": ["NEXT YEAR'S", "BOOKINGS", "ARE QUIET."] },
+    { "layout": "text", "label": "RIGHT NOW", "firstBig": true,
+      "lines": ["Camp. Cooks. Guides. Clients.", "Every hour is going to this season, as it should."] },
+    { "layout": "text", "label": "MEANWHILE", "firstBig": true,
+      "lines": ["Your past clients are already thinking about next year.", "When was the last time one of them heard from you without asking first?"] },
+    { "layout": "big", "label": "THE QUIET WINDOW", "big": "APRIL 1",
+      "lines": ["Montana elk applications are due April 1. Idaho opens May 1.", "From your last hunt to the deadline is when next year gets decided."] },
+    { "layout": "list", "label": "WHAT TO DO ABOUT IT",
+      "items": ["A thank-you.", "The photos.", "How to book next year."], "note": "Three emails. Done before the holidays." },
+    { "layout": "cta", "headline": ["WE WROTE", "THEM FOR YOU."],
+      "body": "Free: the rebooking emails, a Google profile guide, a review-request guide, and a draw calendar.",
+      "button": "LINK IN BIO", "foot": "griffincreativelab.com/starter-kit.html" }
+  ]
+}

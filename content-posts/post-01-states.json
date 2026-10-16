@@ -1,0 +1,10 @@
+{
+  "slug": "post-01-states",
+  "slides": [
+    { "layout": "dates", "pos": [4, 6], "label": "THE QUIET WINDOW",
+      "title": "Elk application deadlines, 2026 cycle:",
+      "rows": [["MONTANA", "APRIL 1"], ["OREGON", "MAY 15"], ["WASHINGTON*", "MAY 27"], ["CALIFORNIA", "JUNE 2"], ["IDAHO", "JUNE 5"]],
+      "note": "*Washington special permits. 2027 dates not posted yet. Check each agency.",
+      "closer": "From your last hunt to these dates is when next year gets decided." }
+  ]
+}
