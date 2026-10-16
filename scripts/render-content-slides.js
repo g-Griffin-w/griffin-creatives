@@ -277,13 +277,19 @@ function render(slide, i, total) {
               backgroundColor: C.orange,
               color: C.white,
               fontFamily: 'DIN',
-              fontSize: 76,
+              fontSize: slide.buttonSize || 76,
               letterSpacing: 3,
               padding: '26px 54px',
               alignSelf: 'flex-start',
             },
             slide.button
           ),
+          slide.shortlink
+            ? div({ flexDirection: 'column', marginTop: 44 }, [
+                div({ fontSize: 30, color: C.gray, letterSpacing: 2, marginBottom: 6 }, 'OR TYPE IT IN'),
+                div({ fontFamily: 'DIN', fontSize: 78, color: C.white, letterSpacing: 2 }, slide.shortlink),
+              ])
+            : '',
         ],
         slide.foot
       );

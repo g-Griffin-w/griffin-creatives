@@ -1,26 +1,122 @@
 {
   "slug": "2026-10-19-rebook-monday-1",
   "slides": [
-    { "layout": "hook", "white": ["THE CHEAPEST"], "orange": ["BOOKING YOU'LL", "EVER GET."] },
-    { "layout": "text", "label": "A HUNTER WHO ALREADY TRUSTS YOU", "firstBig": true,
-      "lines": ["They found you, paid you, hunted your country and slept in your camp.", "A new hunter takes ads and weeks of back and forth. This one takes one honest email at the right time."] },
-    { "layout": "timeline", "label": "THE WHOLE SEQUENCE",
-      "rows": [["WITHIN A WEEK OF THE HUNT", "Email 1: the thank-you"], ["DEC – JAN", "Email 2: the rebook"], ["~10 DAYS LATER", "One short follow-up"], ["SPRING", "Email 3: the application reminder"]] },
-    { "layout": "template", "label": "EMAIL 1 · THE THANK-YOU", "sub": "Send within a week of the hunt ending. No ask in this one.",
+    {
+      "layout": "hook",
+      "white": [
+        "THE CHEAPEST"
+      ],
+      "orange": [
+        "BOOKING YOU'LL",
+        "EVER GET."
+      ]
+    },
+    {
+      "layout": "text",
+      "label": "A HUNTER WHO ALREADY TRUSTS YOU",
+      "firstBig": true,
+      "lines": [
+        "They found you, paid you, hunted your country and slept in your camp.",
+        "A new hunter takes ads and weeks of back and forth. This one takes one honest email at the right time."
+      ]
+    },
+    {
+      "layout": "timeline",
+      "label": "THE WHOLE SEQUENCE",
+      "rows": [
+        [
+          "WITHIN A WEEK OF THE HUNT",
+          "Email 1: the thank-you"
+        ],
+        [
+          "DEC – JAN",
+          "Email 2: the rebook"
+        ],
+        [
+          "~10 DAYS LATER",
+          "One short follow-up"
+        ],
+        [
+          "SPRING",
+          "Email 3: the application reminder"
+        ]
+      ]
+    },
+    {
+      "layout": "template",
+      "label": "EMAIL 1 · THE THANK-YOU",
+      "sub": "Send within a week of the hunt ending. No ask in this one.",
       "subject": "Thank you from [Camp name]",
-      "body": ["Hi [first name],", "Thanks for hunting with us. I keep coming back to [one specific moment: the bull at first light on day four, the long pack out].", "I'm sorting through photos and will send you the good ones this week. Safe travels home."] },
-    { "layout": "template", "label": "EMAIL 2 · THE REBOOK", "sub": "Send in December or January, before they've booked elsewhere.",
+      "body": [
+        "Hi [first name],",
+        "Thanks for hunting with us. I keep coming back to [one specific moment: the bull at first light on day four, the long pack out].",
+        "I'm sorting through photos and will send you the good ones this week. Safe travels home."
+      ]
+    },
+    {
+      "layout": "template",
+      "label": "EMAIL 2 · THE REBOOK",
+      "sub": "Send in December or January, before they've booked elsewhere.",
       "subject": "Next season at [Camp name]: dates are open",
-      "body": ["Hi [first name],", "Dates for [year] are open. I've got [number] spots in [month range] and I'm giving past clients first pick.", "A [deposit amount] deposit holds your spot. Reply here and I'll send details."],
-      "note": "Only say \"first pick\" and the spot count if they're true. Your clients will notice." },
-    { "layout": "template", "label": "EMAIL 3 · THE APPLICATION REMINDER", "sub": "Spring, draw states only. Send 2–3 weeks before your state's deadline.",
+      "body": [
+        "Hi [first name],",
+        "Dates for [year] are open. I've got [number] spots in [month range] and I'm giving past clients first pick.",
+        "A [deposit amount] deposit holds your spot. Reply here and I'll send details."
+      ],
+      "note": "Only say \"first pick\" and the spot count if they're true. Your clients will notice."
+    },
+    {
+      "layout": "template",
+      "label": "EMAIL 3 · THE APPLICATION REMINDER",
+      "sub": "Spring, draw states only. Send 2–3 weeks before your state's deadline.",
       "subject": "Tag deadline is [date]",
-      "body": ["Hi [first name],", "Quick heads up: the [state] elk application deadline is [date]. [Link to the agency's page]", "If you draw, I'm holding [dates] for you. If you don't, let me know and we'll figure out next year."] },
-    { "layout": "text", "label": "THE ONE FOLLOW-UP", "firstBig": true,
-      "lines": ["Ten days of silence? Send one line, then stop.", "\"Wanted to make sure this didn't get buried. Dates are still open if you're thinking about [year].\""] },
-    { "layout": "checklist", "label": "FOUR MISTAKES TO AVOID",
-      "items": [["Writing like a brochure", "\"Premier guided experiences\" gets deleted. \"That bull on day four\" gets read."], ["Making email 1 a sales email", "The thank-you has to be a thank-you."], ["Sending the rebook in May", "By then they've booked, or drawn somewhere else."], ["Burying the deposit and dates", "Say the number and the month."]] },
-    { "layout": "cta", "headline": ["WANT THE", "FULL GUIDE?"],
-      "body": "Free. The list template, all three emails filled in, state dates, and a checklist.", "button": "LINK IN BIO", "foot": "griffincreativelab.com/starter-kit.html" }
+      "body": [
+        "Hi [first name],",
+        "Quick heads up: the [state] elk application deadline is [date]. [Link to the agency's page]",
+        "If you draw, I'm holding [dates] for you. If you don't, let me know and we'll figure out next year."
+      ]
+    },
+    {
+      "layout": "text",
+      "label": "THE ONE FOLLOW-UP",
+      "firstBig": true,
+      "lines": [
+        "Ten days of silence? Send one line, then stop.",
+        "\"Wanted to make sure this didn't get buried. Dates are still open if you're thinking about [year].\""
+      ]
+    },
+    {
+      "layout": "checklist",
+      "label": "FOUR MISTAKES TO AVOID",
+      "items": [
+        [
+          "Writing like a brochure",
+          "\"Premier guided experiences\" gets deleted. \"That bull on day four\" gets read."
+        ],
+        [
+          "Making email 1 a sales email",
+          "The thank-you has to be a thank-you."
+        ],
+        [
+          "Sending the rebook in May",
+          "By then they've booked, or drawn somewhere else."
+        ],
+        [
+          "Burying the deposit and dates",
+          "Say the number and the month."
+        ]
+      ]
+    },
+    {
+      "layout": "cta",
+      "headline": [
+        "WANT THE",
+        "FULL GUIDE?"
+      ],
+      "body": "Free. The list template, all three emails filled in, state dates, and a checklist.",
+      "button": "TAP “FREE GUIDES!” IN OUR BIO ↑",
+      "foot": "griffincreativelab.com/starter-kit.html",
+      "buttonSize": 60
+    }
   ]
 }
