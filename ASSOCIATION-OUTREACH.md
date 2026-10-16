@@ -21,7 +21,7 @@ Contacts (verify each is current before sending):
 
 > Hi {{first name}},
 >
-> I'm Gabe with Griffin Creative Labs. We're a small marketing shop that works
+> I'm Gabriel with Griffin Creative Labs. We're a small marketing shop that works
 > only with elk outfitters in the Northwest.
 >
 > We built four free guides for outfitters: how to set up a Google Business
@@ -42,7 +42,7 @@ Contacts (verify each is current before sending):
 > https://www.griffincreativelab.com/starter-kit.html
 >
 > Thanks,
-> Gabe Wigginton
+> Gabriel Wigginton
 > Griffin Creative Labs · hello@griffincreativelab.com · (503) 779-8493
 
 ---
@@ -57,13 +57,13 @@ Contacts (verify each is current before sending):
 > your members, and a free session if you'd like one. Happy to send the
 > webinar outline or a one-page summary. Would that help?
 >
-> Gabe
+> Gabriel
 
 ---
 
 ## Phone script (60 seconds)
 
-> "Hi, this is Gabe with Griffin Creative Labs. We make free marketing guides
+> "Hi, this is Gabriel with Griffin Creative Labs. We make free marketing guides
 > for elk outfitters. Google profile, reviews, rebooking emails, a tag-draw
 > calendar. I'd like to offer them to {{Association}} members, and a free
 > session if you do member events. Who's the right person to talk to?"
@@ -120,3 +120,75 @@ Takeaway: the NW Hunt Expo list is mostly gear, so it's a weak lead source. The
 bigger outfitter crowd is at the Salt Lake expo. Re-check each show's exhibitor
 page in December and January, when 2027 lists usually get posted, then pull
 outfitters through `scripts/discover-outfitters.js`.
+
+
+---
+
+## Tailored emails (final drafts, 2026-10-15)
+
+Send order: IOGA first, WYOGA second, MOGA only after seeing early replies.
+Send Tue–Thu morning from hello@griffincreativelab.com. Follow up in 7 days, then call.
+
+### 1. IOGA (most likely to reply)
+**To:** Office@ioga.org (2023 listing — verify)
+**Subject:** Free marketing guides for IOGA members (and a vendor table?)
+
+> Hi,
+>
+> I'm Gabriel Wigginton with Griffin Creative Labs. We're a small marketing shop that works only with elk outfitters in the Northwest, and I'm writing to IOGA before your conference.
+>
+> We built four free guides for outfitters: setting up a Google Business Profile, asking for reviews after a hunt, a three-email rebooking sequence, and a season calendar with the Idaho controlled-hunt dates. Members just enter a name and email. No catch.
+>
+> Two things I'd like to ask:
+> 1. Is there a vendor table or sponsor slot still open at your December conference? We'd happily cover the fee, and we'd have the guides on printed handouts.
+> 2. Could you share the guides in a member email or newsletter? I'll write the blurb.
+>
+> You can see them here: https://www.griffincreativelab.com/starter-kit.html
+>
+> Does a 10-minute call this week make sense?
+>
+> Thanks,
+> Gabriel Wigginton
+> Griffin Creative Labs · hello@griffincreativelab.com · (503) 779-8493
+
+### 2. WYOGA (likely)
+**To:** wyoga@wyoga.org · (307) 265-2376
+**Subject:** Free marketing guides for WYOGA members
+
+> Hi,
+>
+> I'm Gabriel with Griffin Creative Labs, a small marketing shop for elk outfitters. I read through your recent newsletters and saw how WYOGA runs the vendor session at convention. That's why I'm writing.
+>
+> We have four free guides for outfitters: Google Business Profile setup, review requests, a rebooking email sequence, and a season calendar.
+>
+> What I'd like to ask:
+> 1. A short slot (or a vendor table) at your next convention to walk through the four systems.
+> 2. A mention in the WYOGA newsletter. I'll write a two-line blurb you can paste.
+>
+> Everything is free. We're a small shop, and I'll be upfront that we also offer paid done-for-you marketing if anyone asks.
+>
+> https://www.griffincreativelab.com/starter-kit.html
+>
+> Could we find 10 minutes to talk?
+>
+> Gabriel Wigginton
+> Griffin Creative Labs · hello@griffincreativelab.com · (503) 779-8493
+
+### 3. MOGA (long shot, biggest upside)
+**To:** MOGA executive director (Will Israel) via the contact form on moga.org, plus a phone call
+**Subject:** Four free guides for MOGA members: Montana dates included
+
+> Hi Will,
+>
+> Short version: we made four free marketing guides for elk outfitters, and the season calendar has Montana's real dates. Elk combination and permit applications are due April 1, results come mid-April, and Elk B is due June 1. That's six to eight weeks ahead of Oregon and Idaho, and most generic marketing advice misses it.
+>
+> Would MOGA share them with members? Here's a two-line blurb you can paste:
+>
+> *"Free for MOGA members: four step-by-step marketing guides for elk outfitters (Google profile, reviews, rebooking emails, and a Montana season calendar). Sign up at griffincreativelab.com/starter-kit.html."*
+>
+> If it helps, we'd also like to be a vendor at the Montana Outdoor Expo. We'll gladly pay the fee. Is there a vendor contact I should reach out to?
+>
+> Thanks for your time.
+>
+> Gabriel Wigginton
+> Griffin Creative Labs · hello@griffincreativelab.com · (503) 779-8493
