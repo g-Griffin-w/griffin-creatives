@@ -66,7 +66,7 @@ through May 8); resident elk due **Jun 1**; deer/pronghorn Jun 1; moose/sheep/go
 | # | Date | Series | Format | Pillar | Topic |
 |---|---|---|---|---|---|
 | 1 | Fri Oct 16 | Free Guide Friday | Carousel, 8 slides | G | Starter Kit intro: the 4 guides (READY) |
-| 2 | Sat Oct 17 | Camp Notes | Single image or text | B/M | Why we only work with elk outfitters |
+| 2 | Sat Oct 17 | Camp Notes | Single image or text | B/M | One-line tip: send the thank-you within a week of the hunt (READY, single image) |
 | 3 | Mon Oct 19 | Rebook Monday | Carousel, 9 slides | E/G | The three-email rebooking sequence (READY) |
 | 4 | Tue Oct 20 | Draw Dates Tuesday | Carousel, 6–8 slides | S | Montana timeline: Mar 1 open, Apr 1 due, mid-April results, Elk B Jun 1 |
 | 5 | Wed Oct 21 | Teardown Wednesday | Carousel, 8–10 slides | E | Mock Google listing teardown: the 5 questions hunters answer in 20 seconds |
@@ -84,7 +84,7 @@ through May 8); resident elk due **Jun 1**; deer/pronghorn Jun 1; moose/sheep/go
 | 17 | Wed Nov 4 | Teardown Wednesday | Carousel, 8–10 slides | E | Hunt page teardown: dates, price, what's included |
 | 18 | Thu Nov 5 | Outfitter Question | Text or short Reel | B | How do you collect past clients' emails today? |
 | 19 | Fri Nov 6 | Free Guide Friday | Carousel, 8 slides | G | Guide 3 · Calendar: fill in your four key dates |
-| 20 | Sat Nov 7 | Camp Notes | Single image or text | B/M | One-line tip: send the thank-you within a week |
+| 20 | Sat Nov 7 | Camp Notes | Single image or text | B/M | One-line tip: add one real detail to every email (the "remember this" column) |
 | 21 | Mon Nov 9 | Rebook Monday | Carousel, 9 slides | E/G | Email 2 deep-dive: dates, spots and deposit, said plainly |
 | 22 | Tue Nov 10 | Draw Dates Tuesday | Carousel, 6–8 slides | S | Washington: special permits (Apr 20 to May 27 in 2026) and multi-season tags (Dec 1 to Mar 31) |
 | 23 | Wed Nov 11 | Teardown Wednesday | Carousel, 8–10 slides | E | The 8 photos every outfitter page needs |
