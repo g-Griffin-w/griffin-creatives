@@ -1,17 +1,27 @@
 # Founding clients — offer, where to find them, call script
 
-Goal: sign **3 founding clients** this off-season. We have no case studies, so the first clients also give us proof.
+Goal: sign **6 founding clients** this off-season (the first 3 get a free month, the next 3 get half off their first month). We have no case studies, so the first clients also give us proof.
 
-## The offer (DRAFT — you set the price)
+## The offer
 
-> **Founding client: 3 spots.** Booked Out is $2,800/mo and covers both new hunters (Google profile, reviews, proof content, local ads) and past hunters (rebooking emails, referrals). Founding clients get **half off for the first 3 months ($1,400/mo)**, no contract, cancel anytime. In return: an honest testimonial after 60 days, and permission to share your results (numbers only, no hunter names) as a case study.
+> **Founding clients: 6 spots.** Booked Out is $2,800/mo and covers both new hunters (Google profile, reviews, proof content, local ads) and past hunters (rebooking emails, referrals).
+> - **Clients 1–3: your first month is free.**
+> - **Clients 4–6: your first month is half price ($1,400).**
+>
+> After the first month it's the regular $2,800/mo. No contract, cancel anytime. In return: an honest testimonial after 60 days, and permission to share your results (numbers only, no hunter names) as a case study.
 
 Why this shape:
-- Cheap enough to say yes to, but not free (free clients don't take it seriously).
+- A free or half-price first month makes the first yes easy, with a real price right behind it.
+- It's honest and simple: one month to see the work, then they decide, no contract.
 - A capped number of spots is true and creates a reason to decide.
-- We say plainly that we're new and that they're getting proof-building pricing. No fake credentials.
+- We say plainly that we're new and that this is proof-building pricing. No fake credentials.
 
-Decide before the first call: the discount (half off 3 months is my suggestion; a free first month is the alternative) and the number of spots.
+Track the count in the call sheet's notes: spots 1–3 are "free month," spots 4–6 are "half-price month." Once three have signed, switch the pitch to the half-off offer.
+
+Still to decide before the first call:
+- **Who pays the ad budget** (the money paid to Google for the local search ads). Our fee is free in month one, but ads cost real money. A simple fix: the client pays the ad spend from day one and we only waive our fee.
+- **What the first month includes.** All of Booked Out, or a smaller set.
+- **A deadline** for the founding offer.
 
 ## Who is a good founding client
 - **Small operation:** one owner, 1–4 guides. They make the decision on the call.
@@ -51,7 +61,7 @@ Decide before the first call: the discount (half off 3 months is my suggestion; 
 - **"We send something":** "What do you send, and does it bring bookings back?" Listen for the gap, then offer the guides.
 - **"I'm busy":** "Totally. I'll send one email you can read after the season. What's the best address?"
 
-If they ask **what we do and what it costs**: "We run both for you. For new hunters: your Google profile, review requests after every hunt, real photos from your own hunts, and local ads aimed at people ready to book. For past hunters: a rebooking email sequence and a referral program. It's $2,800 a month, no contract, cancel anytime. We're new, so I'm taking three founding clients at a lower rate for the first three months in return for a testimonial. I'd rather start with the free guides and see if they're useful."
+If they ask **what we do and what it costs**: "We run both for you. For new hunters: your Google profile, review requests after every hunt, real photos from your own hunts, and local ads aimed at people ready to book. For past hunters: a rebooking email sequence and a referral program. It's $2,800 a month, no contract, cancel anytime. We're new, so I'm taking six founding clients: the first three get a free first month, and the next three get half off their first month, in return for a testimonial. I'd rather start with the free guides and see if they're useful."
 
 ## Voicemail (20 seconds)
 > "Hi [name], this is Gabriel with Griffin Creative Labs. I help elk outfitters get found by new hunters and bring past ones back. I've got four free guides you can use whether or not we ever talk. My number is (503) 779-8493. Have a great season."
@@ -69,7 +79,7 @@ If they ask **what we do and what it costs**: "We run both for you. For new hunt
 > Griffin Creative Labs · (503) 779-8493
 
 ## Objections
-- **"How much?"** Say $2,800/mo, no contract, and the founding rate. Don't hide the number.
+- **"How much?"** Say $2,800/mo, no contract, and the founding offer (a free or half-price first month). Don't hide the number.
 - **"We tried ads and it didn't work."** "What did you try? Ads without a booking page and an email follow-up usually don't. That's why we start with your past clients and your Google profile before any ad spend."
 - **"Send me info."** "Sure. What's the best email? I'll send the free guides, since they show how we work."
 - **"We don't need marketing, we're booked."** "Great. Are you booked for 2027 too? Most outfitters I talk to are full this year and have open dates next year."

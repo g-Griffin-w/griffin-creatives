@@ -14,7 +14,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` not started
    - [x] Script, voicemail and objections written ([FOUNDING-CLIENTS.md](FOUNDING-CLIENTS.md)).
    - [x] Call sheet built (`call-sheet.csv`, local only): warm leads first, then phone-only leads, then new Colorado/Utah numbers.
    - [ ] Make 15 calls a day. Log every outcome.
-2. **[~] Founding-client offer.** 3 spots at half price for 3 months, for a testimonial and results.
+2. **[~] Founding-client offer.** 6 spots: clients 1–3 get a free first month, clients 4–6 get half off their first month, for a testimonial and results.
    - [x] Offer drafted.
    - [ ] You approve the price and number of spots.
    - [ ] Pitch it on every call where they ask what we do.

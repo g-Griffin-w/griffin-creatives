@@ -22,7 +22,7 @@ Ratings: **Effort** L/M/H · **Cost** $0 / $ / $$ · **Speed** = how soon it cou
 |---|---|---|---|---|---|
 | State associations | IOGA, WYOGA and MOGA were emailed Oct 15. Call them, ask for one member to talk to, and a newsletter mention. OR/WA/CA associations next. | M | $0 | Med | ON |
 | Booking agents | Pitch as "fill your outfitters' open dates," not direct rebooking. See [BOOKING-AGENTS.md](BOOKING-AGENTS.md). | M | $0 | Med | READY |
-| Founding-client offer | 3 spots at half price for 3 months, in exchange for a testimonial and results. | L | $$ (discount) | Fast once there's a yes | READY (needs your price) |
+| Founding-client offer | 6 spots: clients 1–3 get a free first month, clients 4–6 get half off their first month, in exchange for a testimonial and results. | L | $$ (discount) | Fast once there's a yes | READY (needs your price) |
 | Hunters and friends | Ask who their guide was. Hunter-to-outfitter intros are warm. | L | $0 | Fast | TODO |
 | Referrals from first clients | A real incentive for any outfitter who introduces another (credit toward their month). | L | $ | Slow | After client #1 |
 | Supplier partners | Anyone who sells to outfitters: insurance brokers, accountants, taxidermists, gear and horse-tack sellers, booking-software companies. Offer to co-promote. | M | $0 | Med | TODO |
