@@ -1,8 +1,8 @@
 # Griffin Creative — Content Calendar
 **Fri Oct 16, 2026 → Sat Jan 16, 2027 · Mon–Sat, 6 posts a week · 77 posts**
 
-**Status (updated Oct 15):** slot #0 posted Thu Oct 15 (the "Elk season is loud" carousel). Assets ready for **Fri Oct 16** and **Mon Oct 19**
-(see `content-posts/`). Every carousel is rendered by `scripts/render-content-slides.js` from a spec JSON.
+**Status (updated Oct 19):** posted: Oct 15 (slot #0), Fri Oct 16, Sat Oct 17, Mon Oct 19. Next: **Tue Oct 20** Montana Reel (script in `content-posts/2026-10-20-montana-reel.md`).
+Assets live in `content-posts/`. Every carousel is rendered by `scripts/render-content-slides.js` from a spec JSON.
 
 Purpose: give a cold stranger (an elk outfitter in the NW) a reason to follow us and click the free-guides link, so social feeds the same
 funnel as cold email: `post → starter-kit.html → guide 1 now, guides 2–4 on days 2/4/6 → Booked Out pitch day 8`.
@@ -74,10 +74,10 @@ through May 8); resident elk due **Jun 1**; deer/pronghorn Jun 1; moose/sheep/go
 ## The calendar
 | # | Date | Series | Format | Pillar | Topic |
 |---|---|---|---|---|---|
-| 1 | Fri Oct 16 | Free Guide Friday | Carousel, 8 slides | G | Starter Kit intro: the 4 guides (READY) |
-| 2 | Sat Oct 17 | Camp Notes | Single image or text | B/M | One-line tip: send the thank-you within a week of the hunt (READY, single image) |
-| 3 | Mon Oct 19 | Rebook Monday | Carousel, 9 slides | E/G | The three-email rebooking sequence (READY) |
-| 4 | Tue Oct 20 | Draw Dates Tuesday | Reel, 20–30 sec | S | Montana timeline: Mar 1 open, Apr 1 due, mid-April results, Elk B Jun 1 |
+| 1 | Fri Oct 16 | Free Guide Friday | Carousel, 8 slides | G | Starter Kit intro: the 4 guides (POSTED) |
+| 2 | Sat Oct 17 | Camp Notes | Single image or text | B/M | One-line tip: send the thank-you within a week of the hunt (POSTED, single image) |
+| 3 | Mon Oct 19 | Rebook Monday | Carousel, 9 slides | E/G | The three-email rebooking sequence (POSTED) |
+| 4 | Tue Oct 20 | Draw Dates Tuesday | Reel, 20–30 sec | S | Montana timeline: Mar 1 open, Apr 1 due, mid-April results, Elk B Jun 1 (script READY) |
 | 5 | Wed Oct 21 | Teardown Wednesday | Carousel, 8–10 slides | E | Mock Google listing teardown: the 5 questions hunters answer in 20 seconds |
 | 6 | Thu Oct 22 | Outfitter Question | Reel, 15–30 sec | B | When do you start talking to last year's clients about next season? |
 | 7 | Fri Oct 23 | Free Guide Friday | Carousel, 8 slides | G | Guide 4 · Reviews: your direct link and QR code |
