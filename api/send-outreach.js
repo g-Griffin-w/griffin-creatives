@@ -88,7 +88,7 @@ NICHE HOOKS (fallback for paragraph 2 ONLY when PRODUCT CONTEXT is empty — use
   "found {{company_name}} while looking at guides who actually know the oregon coast — and i know how brutal the stretch between runs can be when every booking lives or dies by word of mouth."
 
 - elk_guide:
-  "found {{company_name}} while looking at serious elk outfitters — and i know how hard it is keeping tags filled every season with nothing pulling past clients back."
+  "found {{company_name}} while looking at serious elk outfitters — and i know a guided hunt isn't something most hunters can book every year, so keeping tags filled means finding new hunters as much as bringing past ones back."
 
 - anything else, missing, or "dtc_general":
   "found {{company_name}} while looking at fast-growing e-commerce brands — and your product photos are honestly too good to only be running a handful of ad variations."
@@ -133,32 +133,32 @@ want me to make you 2 free samples? you send nothing — i'll pull a product fro
   // that drip. Follow-ups to
   // non-subscribers (send-followups.js) are just reminders of this ask.
   // No inner quotes: Claude returns this inside JSON.
-  guide: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — rebooking past clients, setting up your google business profile, a season marketing calendar, and getting reviews after every hunt.
+  guide: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back.
 
 sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
   // Wyoming variant (2026-10-15): nonresident elk applications there are due
-  // Feb 2, ahead of Montana, Oregon and Idaho, so a December rebooking email is
-  // what catches clients before they apply. Verified on wgfd.wyo.gov (2026-27
+  // Feb 2, ahead of Montana, Oregon and Idaho, so December is when new hunters
+  // pick an outfitter and when a note to past clients catches them. Verified on wgfd.wyo.gov (2026-27
   // announcement). Re-check the date each January when the new cycle posts.
   // No inner quotes: Claude returns this inside JSON.
-  guide_wy: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — rebooking past clients, setting up your google business profile, a season marketing calendar, and getting reviews after every hunt.
+  guide_wy: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back.
 
-one thing worth knowing in wyoming: nonresident elk applications are due feb 2, ahead of montana, oregon and idaho. december is when a rebooking email catches your clients before they apply, and the first guide is exactly that email.
+one thing worth knowing in wyoming: nonresident elk applications are due feb 2, so december is when hunters pick an outfitter, and when a note to past clients catches them before they apply.
 
 sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
   // Colorado variant (2026-10-19): CPW's 2026 primary draw ran Mar 1 to Apr 7
   // (cpw.state.co.us/activities/hunting/big-game/primary-draw). Re-check each
   // spring when the new cycle posts. No inner quotes: Claude returns this inside JSON.
-  guide_co: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — rebooking past clients, setting up your google business profile, a season marketing calendar, and getting reviews after every hunt
+  guide_co: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back
 
-one thing worth knowing in colorado: the primary draw closed april 7 this year, so a february or march rebooking email reaches your clients right before they apply, and the first guide is exactly that email.
+one thing worth knowing in colorado: the primary draw closed april 7 this year, so the winter before it is when hunters pick an outfitter, and when a note to past clients lands before they apply.
 
 sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
   // Utah variant (2026-10-19): the 2026 big game drawing ran Mar 19 to Apr 23
   // (wildlife.utah.gov). Re-check each spring. No inner quotes.
-  guide_ut: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — rebooking past clients, setting up your google business profile, a season marketing calendar, and getting reviews after every hunt
+  guide_ut: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back
 
-one thing worth knowing in utah: the big game drawing ran march 19 to april 23 this year, so a rebooking email in february or early march reaches your clients before they apply, and the first guide is exactly that email.
+one thing worth knowing in utah: the big game drawing ran march 19 to april 23 this year, so the winter before it is when hunters pick an outfitter, and when a note to past clients lands before they apply.
 
 sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
 };

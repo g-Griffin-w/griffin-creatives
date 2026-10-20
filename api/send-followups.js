@@ -123,7 +123,7 @@ const sawGuideIntro = (lead) => (lead.email_body || '').includes('starter-kit');
 function buildGuideFollowup(lead, stage) {
   const first = firstName(lead);
   const url = signupUrl(lead);
-  const list = 'rebooking past clients, your google business profile, a season marketing calendar, and reviews after every hunt';
+  const list = 'getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back';
 
   if (stage === 0 && !sawGuideIntro(lead)) {
     return (

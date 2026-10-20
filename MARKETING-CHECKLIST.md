@@ -4,6 +4,9 @@ Ranked by how likely each is to produce a **first paying client**, given: no cas
 This is my judgment from how outfitters buy, not tested results. Re-rank after 4 weeks using real responses.
 Details for each strategy are in [MARKETING-STRATEGIES.md](MARKETING-STRATEGIES.md).
 
+## Positioning (updated Oct 19): new hunters first, past hunters second
+A guided hunt is a big spend, and a hunter can't always draw the same unit again, so outfitters can't count on repeat clients alone. Every pitch (calls, cold email, posts, site) leads with **getting found by new hunters** (Google profile, reviews, real photos, local ads) and uses **bringing past hunters back** as the second hook. We do both.
+
 Legend: `[x]` done · `[~]` in progress · `[ ]` not started
 
 ## Do these first (highest odds)

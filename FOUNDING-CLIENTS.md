@@ -4,7 +4,7 @@ Goal: sign **3 founding clients** this off-season. We have no case studies, so t
 
 ## The offer (DRAFT — you set the price)
 
-> **Founding client: 3 spots.** Booked Out is $2,800/mo. Founding clients get **half off for the first 3 months ($1,400/mo)**, no contract, cancel anytime. In return: an honest testimonial after 60 days, and permission to share your results (numbers only, no hunter names) as a case study.
+> **Founding client: 3 spots.** Booked Out is $2,800/mo and covers both new hunters (Google profile, reviews, proof content, local ads) and past hunters (rebooking emails, referrals). Founding clients get **half off for the first 3 months ($1,400/mo)**, no contract, cancel anytime. In return: an honest testimonial after 60 days, and permission to share your results (numbers only, no hunter names) as a case study.
 
 Why this shape:
 - Cheap enough to say yes to, but not free (free clients don't take it seriously).
@@ -32,28 +32,36 @@ Decide before the first call: the discount (half off 3 months is my suggestion; 
 7. **Booking agents.** Agents work with dozens of outfitters and know which ones want help. Call two and ask for one intro.
 8. **The December window.** The outfitters we've already emailed will start thinking about next season in December. Keep sending the cold email so we're already in their inbox then.
 
-## Call script (about 90 seconds)
+## Call script (about 90 seconds): new hunters first, past hunters second
 
-> "Hi, is this [name]? This is Gabriel with Griffin Creative Labs. I'll be quick. I know it's the middle of season. We help elk outfitters fill their next season by bringing past clients back. I'm not selling anything on this call. Can I ask you one question?
+> "Hi, is this [name]? This is Gabriel with Griffin Creative Labs. I'll be quick. I know it's the middle of season. We help elk outfitters two ways: getting found by new hunters, and bringing past hunters back. I'm not selling anything on this call. Can I ask you one question?
 >
-> "When your hunters leave camp, what happens with them? Do you email them again before next year?"
+> "Where do most of your new hunters come from right now?"
 
-Listen. Then, depending on the answer:
-- **"Not really":** "That's the most common answer, and it's the cheapest booking you'll ever get. We built four free guides on exactly that. Can I send them to you? What's the best email?" (Get the email. That's a lead.)
-- **"Yeah, we send something":** "What do you send, and does it bring bookings back?" Listen for the gap, then offer the guides.
+**Why new hunters lead:** a guided hunt is a big spend, and a hunter can't always draw the same unit again, so outfitters can't count on repeat clients alone.
+
+**Hook 1: new hunters**
+- **"Word of mouth or referrals":** "That works for most outfitters. The hard part is a guided hunt is a big spend, and a hunter can't always draw the same unit again, so you can't count on repeat clients alone. When a new hunter hears your name, the first thing they do is Google you. Have you looked at what comes up?" Then offer the free Google profile audit.
+- **"Agents, a website or ads":** "What does that cost you, and does it fill your dates?" Listen, then offer the audit.
+- **"We're booked":** "Great. Are you booked for 2027 too? Most outfitters I talk to are full this year and have open dates next year."
+
+**Hook 2: past hunters**
+> "And what happens with last year's hunters after they leave camp? Do you email them again before next year?"
+- **"Not really":** "Most outfitters don't. A hunter may not come back every year, but one good email keeps you the first outfitter they think of and the one they tell friends about. We built four free guides covering both: getting found, reviews, your season calendar and the rebooking email. Can I send them? What's the best email?" (Get the email. That's a lead.)
+- **"We send something":** "What do you send, and does it bring bookings back?" Listen for the gap, then offer the guides.
 - **"I'm busy":** "Totally. I'll send one email you can read after the season. What's the best address?"
 
-If they ask **what we do and what it costs**: "We run the whole rebooking system for you: your Google profile, review requests, a rebooking email sequence, and local ads. It's $2,800 a month, no contract, cancel anytime. We're new, so I'm taking three founding clients at half price for the first three months in return for a testimonial. I'd rather start with the free guides and see if they're useful."
+If they ask **what we do and what it costs**: "We run both for you. For new hunters: your Google profile, review requests after every hunt, real photos from your own hunts, and local ads aimed at people ready to book. For past hunters: a rebooking email sequence and a referral program. It's $2,800 a month, no contract, cancel anytime. We're new, so I'm taking three founding clients at a lower rate for the first three months in return for a testimonial. I'd rather start with the free guides and see if they're useful."
 
 ## Voicemail (20 seconds)
-> "Hi [name], this is Gabriel with Griffin Creative Labs. I help elk outfitters fill their next season by bringing back past clients. I've got four free guides you can use whether or not we ever talk. My number is (503) 779-8493. Have a great season."
+> "Hi [name], this is Gabriel with Griffin Creative Labs. I help elk outfitters get found by new hunters and bring past ones back. I've got four free guides you can use whether or not we ever talk. My number is (503) 779-8493. Have a great season."
 
 ## Short email after a yes
 **Subject:** The free guides, as promised
 
 > Hi [name],
 >
-> Thanks for the call. Here are the four free guides: https://www.griffincreativelab.com/starter-kit.html (name and email, no card). The rebooking one is the quickest win: three emails you can send to last season's clients.
+> Thanks for the call. Here are the four free guides: https://www.griffincreativelab.com/starter-kit.html (name and email, no card). The Google profile one is the quickest way to get found by new hunters. The rebooking one gives you three emails for last season's clients.
 >
 > If you'd like me to look at your Google profile and tell you what I'd fix, I'm happy to. It's free.
 >
