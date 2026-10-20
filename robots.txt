@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /guides/
+Disallow: /api/
+Disallow: /onboarding.html
+
+Sitemap: https://www.griffincreativelab.com/sitemap.xml

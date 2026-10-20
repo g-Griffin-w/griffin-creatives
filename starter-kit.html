@@ -128,7 +128,7 @@ var params = new URLSearchParams(window.location.search);
 var leadParam = params.get('lead');
 var leadId = leadParam && /^[0-9]{1,12}$/.test(leadParam) ? leadParam : null;
 // Paid traffic: Google Ads links add ?src=gads so those signups are counted separately.
-var SRC_MAP = { gads: 'google_ads', web: 'website', scorecard: 'scorecard' };
+var SRC_MAP = { gads: 'google_ads', web: 'website', scorecard: 'scorecard', meta: 'meta_ads' };
 var srcParam = SRC_MAP[params.get('src')] ? params.get('src') : null;
 
 // Warm signal: this lead clicked the CTA in the email (even if they never sign up).

@@ -21,10 +21,10 @@ Competitor ideas are adapted, not copied. "Source" shows where the idea came fro
 6. **[ ] State associations.** (ours; Riverrise lists MOGA, RMEF and Mule Deer Foundation memberships) Call IOGA, WYOGA, MOGA. Ask about joining as a vendor or member.
 
 ### Do these next
-7. **[ ] "Book direct, we don't rent you leads" message.** (from OxBow and Mallard Bay) Use it in the call script, the cold email and the site. It fits our rebooking and referral work and our agents research.
-8. **[ ] Weekly useful post or email.** (from Outfitter Marketing Pros' weekly blog and bi-weekly newsletter) A short draw-dates or season note every two weeks to everyone who signed up. We already have the data.
-9. **[ ] Testimonial video from the first founding client.** (from the Outfitter Marketing Pros and Mallard Bay ads) Once we have one, it's our best proof.
-10. **[ ] Regional pages.** (from Riverrise's town pages) One page per state with that state's dates, built from the draw-dates data. Do after the main page gets traffic.
+7. **[x] "Everything stays yours, we don't rent you leads" message.** (from OxBow and Mallard Bay) Added to the call script and the homepage. Still to add to the cold email.
+8. **[~] Biweekly useful email.** (from Outfitter Marketing Pros' weekly blog and bi-weekly newsletter) Issue #1 is drafted in `newsletters/`. Needs a working "stop" path before the first send.
+9. **[~] Testimonial video from the first founding client.** (from the Outfitter Marketing Pros and Mallard Bay ads) Kit built: `TESTIMONIAL-KIT.md`. Use it once there's a client.
+10. **[x] Regional pages.** (from Riverrise's town pages) Built: one page per state (`elk-application-dates-<state>.html`), a sitemap and robots.txt. Regenerate with `node scripts/build-state-pages.js` each spring.
 11. **[~] Instagram and Facebook.** (ours) Keep posting. Add a short testimonial Reel when we have one.
 12. **[ ] Trade shows and booking agents.** (ours) IOGA Dec 1, Western Expo Feb 11–14, agents only softly.
 
@@ -34,7 +34,7 @@ Competitor ideas are adapted, not copied. "Source" shows where the idea came fro
 
 ### Later
 15. **[ ] Own Google Ads practice.** (ours) Spec in `GOOGLE-ADS-OWN-CAMPAIGN.md`. You create the account.
-16. **[ ] Meta ads to outfitters, small test.** (Mallard Bay is the only one doing it) After the Google test.
+16. **[~] Meta ads to outfitters, small test.** (Mallard Bay is the only one doing it) Plan written: `META-ADS-TEST.md`. After the Google test. You create the ad account.
 17. **[ ] Retargeting pixel and AI-search content.** (Outfitter Marketing Pros has a pixel; AI search is its main topic) Only once there's steady traffic. Tie any AI content to elk and draw dates.
 
 ### Skip
