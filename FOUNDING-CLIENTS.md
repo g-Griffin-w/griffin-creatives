@@ -4,7 +4,7 @@ Goal: sign **6 founding clients** this off-season (the first 3 get a free month,
 
 ## The offer
 
-> **Founding clients: 6 spots.** Booked Out is $2,800/mo and covers both new hunters (Google profile, reviews, proof content, local ads) and past hunters (rebooking emails, referrals).
+> **Founding clients: 6 spots.** Booked Out is $2,800/mo and covers both new hunters (Google profile, reviews, proof content, listings and site tuned for search) and past hunters (rebooking emails, referrals).
 > - **Clients 1–3: your first month is free.**
 > - **Clients 4–6: your first month is half price ($1,400).**
 >
@@ -61,7 +61,7 @@ Still to decide before the first call:
 - **"We send something":** "What do you send, and does it bring bookings back?" Listen for the gap, then offer the guides.
 - **"I'm busy":** "Totally. I'll send one email you can read after the season. What's the best address?"
 
-If they ask **what we do and what it costs**: "We run both for you. For new hunters: your Google profile, review requests after every hunt, real photos from your own hunts, and local ads aimed at people ready to book. For past hunters: a rebooking email sequence and a referral program. It's $2,800 a month, no contract, cancel anytime. We're new, so I'm taking six founding clients: the first three get a free first month, and the next three get half off their first month, in return for a testimonial. I'd rather start with the free guides and see if they're useful."
+If they ask **what we do and what it costs**: "We run both for you. For new hunters: your Google profile, review requests after every hunt, and real photos from your own hunts. Paid Google ads are an optional add-on. For past hunters: a rebooking email sequence and a referral program. It's $2,800 a month, no contract, cancel anytime. We're new, so I'm taking six founding clients: the first three get a free first month, and the next three get half off their first month, in return for a testimonial. I'd rather start with the free guides and see if they're useful."
 
 ## Voicemail (20 seconds)
 > "Hi [name], this is Gabriel with Griffin Creative Labs. I help elk outfitters get found by new hunters and bring past ones back. I've got four free guides you can use whether or not we ever talk. My number is (503) 779-8493. Have a great season."

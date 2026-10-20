@@ -3,6 +3,13 @@
 How we run Search ads for a client, how to price it, how to explain ad spend, how we start with our own account, and what we can automate.
 Status: **plan, not yet tested.** We have not run a Google Ads campaign for an outfitter. Every number marked *(guess)* is a placeholder to replace with real data from Keyword Planner and our first campaigns.
 
+## 0. Status: parked (decided Oct 20, 2026)
+- **Managed Google Ads for clients is on hold.** It is not on the homepage and not part of any offer. Revisit around **Nov 20, 2026**, after the practice campaign below has real numbers.
+- **Now:** we practice with our own ad spend ([GOOGLE-ADS-OWN-CAMPAIGN.md](GOOGLE-ADS-OWN-CAMPAIGN.md)).
+- **Booked Out ($2,800/mo) does not include paid ads.** It covers managed local search: Google Business Profile, reviews, listings and site changes so hunters find the outfitter without ad spend.
+- **When we revisit:** ads would be an optional add-on, with ad spend paid by the client directly to Google. Set the management fee from the fee calculator once we have real hours: a flat monthly fee with a minimum is likely better than a percentage of spend at small budgets.
+- Questions to bring to that review: Did Google approve the hunting wording? What did clicks and signups cost? How many hours did our own campaign take?
+
 ## 1. Google's ad policy for hunting services (checked Oct 20, 2026)
 
 **What I found**

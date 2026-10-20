@@ -126,6 +126,8 @@ var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6
 var params = new URLSearchParams(window.location.search);
 var leadParam = params.get('lead');
 var leadId = leadParam && /^[0-9]{1,12}$/.test(leadParam) ? leadParam : null;
+// Paid traffic: Google Ads links add ?src=gads so those signups are counted separately.
+var fromAds = params.get('src') === 'gads';
 
 // Warm signal: this lead clicked the CTA in the email (even if they never sign up).
 if (leadId) {
@@ -144,7 +146,7 @@ async function saveDirect(name, email) {
   var r = await fetch(SB + '/rest/v1/lead_magnet_signups', {
     method: 'POST',
     headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-    body: JSON.stringify({ name: name, email: email.toLowerCase(), outreach_lead_id: leadId ? Number(leadId) : null, source: leadId ? 'outreach_email' : 'social' })
+    body: JSON.stringify({ name: name, email: email.toLowerCase(), outreach_lead_id: leadId ? Number(leadId) : null, source: leadId ? 'outreach_email' : (fromAds ? 'google_ads' : 'social') })
   });
   // 409 = already subscribed, which is fine.
   return r.ok || r.status === 409;
@@ -168,7 +170,7 @@ document.getElementById('signup-form').addEventListener('submit', async function
     var r = await fetch('/api/send-starter-kit-drip', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, email: email, lead: leadId, website: f['website'].value })
+      body: JSON.stringify({ name: name, email: email, lead: leadId, src: fromAds ? 'gads' : null, website: f['website'].value })
     });
     ok = r.ok;
     if (r.status === 400) {

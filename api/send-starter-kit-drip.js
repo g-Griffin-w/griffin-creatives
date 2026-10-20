@@ -261,7 +261,7 @@ async function handleSignup(req, res) {
     name,
     email,
     outreach_lead_id: leadId,
-    source: leadId ? 'outreach_email' : 'social',
+    source: leadId ? 'outreach_email' : (body.src === 'gads' ? 'google_ads' : 'social'),
     drip_stage: 0,
     next_drip_at: new Date().toISOString(),
   };
