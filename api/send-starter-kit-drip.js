@@ -240,6 +240,9 @@ async function deliverNextStage(signup, { dryRun = false } = {}) {
 // ============================================================
 // Public signup (POST { name, email, lead?, website? })
 // ============================================================
+// Where a signup came from, when it isn't an outreach email (?src= on the signup page).
+const SRC_MAP = { gads: 'google_ads', web: 'website', scorecard: 'scorecard' };
+
 async function handleSignup(req, res) {
   let body = req.body;
   if (typeof body === 'string') {
@@ -261,7 +264,7 @@ async function handleSignup(req, res) {
     name,
     email,
     outreach_lead_id: leadId,
-    source: leadId ? 'outreach_email' : (body.src === 'gads' ? 'google_ads' : 'social'),
+    source: leadId ? 'outreach_email' : (SRC_MAP[body.src] || 'social'),
     drip_stage: 0,
     next_drip_at: new Date().toISOString(),
   };

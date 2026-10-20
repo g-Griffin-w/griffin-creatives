@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elk Outfitter Booking Scorecard — Griffin Creative</title>
+<meta name="description" content="A two-minute scorecard for elk outfitters: how easy you are to find, trust and rebook, and the three fixes that matter most.">
+<link rel="canonical" href="https://www.griffincreativelab.com/scorecard.html">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --black: #080808; --white: #f0ece3; --orange: #ff4d00; --gray: #888; --card: #111; --border: #1e1e1e; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--white); overflow-x: hidden; }
+
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: rgba(8,8,8,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.04em; text-decoration: none; color: var(--white); }
+.logo span { color: var(--orange); }
+
+.page-header { padding: 160px 40px 60px; position: relative; overflow: hidden; }
+.page-header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,77,0,0.06) 0%, transparent 70%); pointer-events: none; }
+.page-header-inner { max-width: 720px; margin: 0 auto; }
+.sec-tag { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--orange); letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 16px; }
+.page-header h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(44px, 7vw, 76px); line-height: 1.0; letter-spacing: 0.02em; margin-bottom: 20px; }
+.page-header h1 .accent { color: var(--orange); }
+.page-header p { font-size: 17px; color: var(--gray); font-weight: 300; line-height: 1.7; max-width: 560px; }
+
+.kit-list { max-width: 720px; margin: 0 auto; padding: 0 40px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.kit-item { background: var(--card); border: 1px solid var(--border); border-radius: 2px; padding: 20px 22px; }
+.kit-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--orange); letter-spacing: 0.1em; }
+.kit-item p { font-size: 14px; color: var(--white); font-weight: 400; margin-top: 6px; line-height: 1.5; }
+
+.form-section { padding: 20px 40px 120px; }
+.form-inner { max-width: 480px; margin: 0 auto; }
+.form-card { background: var(--card); border: 1px solid var(--border); padding: 40px; }
+.field-group { margin-bottom: 24px; }
+.field-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--orange); letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 8px; }
+input[type="text"], input[type="email"] {
+  width: 100%; background: #0d0d0d; border: 1px solid var(--border); border-radius: 2px;
+  padding: 14px 16px; color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 14px;
+  font-weight: 300; outline: none; transition: border-color 0.2s, background 0.2s;
+}
+input:focus { border-color: var(--orange); background: #100a07; }
+input::placeholder { color: #333; }
+.btn-submit { width: 100%; padding: 16px 0; background: var(--orange); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; border: none; border-radius: 2px; cursor: pointer; transition: opacity 0.2s; margin-top: 8px; }
+.btn-submit:hover { opacity: 0.85; }
+.submit-note { font-size: 12px; color: #333; font-weight: 300; margin-top: 14px; text-align: center; }
+
+.thankyou { display: none; text-align: center; padding: 60px 40px 100px; }
+.thankyou-icon { width: 64px; height: 64px; border: 2px solid var(--orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; }
+.thankyou-icon svg { width: 28px; height: 28px; }
+.thankyou h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 6vw, 52px); letter-spacing: 0.02em; margin-bottom: 16px; }
+.thankyou h2 span { color: var(--orange); }
+.thankyou p { font-size: 16px; color: var(--gray); font-weight: 300; line-height: 1.7; max-width: 440px; margin: 0 auto; }
+
+footer { border-top: 1px solid var(--border); padding: 40px; text-align: center; }
+footer p { font-size: 13px; color: #2e2e2e; }
+
+@media(max-width: 700px) {
+  nav { padding: 16px 20px; }
+  .page-header { padding: 120px 20px 40px; }
+  .kit-list { grid-template-columns: 1fr; padding: 0 20px 10px; }
+  .form-section { padding: 10px 20px 80px; }
+  .form-card { padding: 28px 22px; }
+}
+
+.wrap { max-width: 820px; margin: 0 auto; padding: 0 40px 40px; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--border); background: var(--card); }
+table.dates { border-collapse: collapse; width: 100%; min-width: 640px; }
+table.dates th, table.dates td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: top; line-height: 1.5; }
+table.dates th { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--orange); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+table.dates td.state { font-weight: 600; white-space: nowrap; }
+table.dates td small { color: var(--gray); display: block; font-size: 12px; margin-top: 4px; }
+table.dates a { color: var(--orange); text-decoration: none; }
+.note { font-size: 13px; color: var(--gray); font-weight: 300; line-height: 1.7; margin: 18px 0; }
+.cta-box { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--orange); padding: 28px; margin: 36px 0 0; }
+.cta-box h2 { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 0.02em; margin-bottom: 10px; }
+.cta-box p { color: var(--gray); font-weight: 300; line-height: 1.7; margin-bottom: 18px; font-size: 15px; }
+.cta-btn { display: inline-block; background: var(--orange); color: #fff; padding: 14px 26px; text-decoration: none; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; font-size: 14px; }
+@media(max-width: 700px) { .wrap { padding: 0 20px 40px; } }
+</style>
+</head>
+<body>
+<nav><a href="index.html" class="logo">GRIFFIN<span>CREATIVE</span></a></nav>
+<div class="page-header"><div class="page-header-inner">
+<span class="sec-tag">// Free Scorecard</span>
+<h1>ELK OUTFITTER<br><span class="accent">BOOKING SCORECARD.</span></h1>
+<p>Ten yes-or-no questions. Two minutes. See how easy you are to find, trust and rebook, and the three fixes that matter most.</p>
+</div></div>
+<div class="wrap">
+<form id="quiz"><div id="questions"></div>
+<button type="submit" class="btn-submit" style="margin-top:20px;">See my score</button></form>
+<div id="result" style="display:none;">
+<div class="cta-box" style="border-left-color:var(--orange);margin-top:0;"><h2 id="score">0 / 10</h2><p id="verdict"></p>
+<p style="margin-bottom:8px;color:var(--white);"><b>Your top fixes</b></p><ol id="fixes" style="color:var(--gray);font-weight:300;line-height:1.8;padding-left:20px;margin-bottom:6px;"></ol></div>
+<div class="form-card" id="form-wrap" style="margin-top:24px;"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:30px;margin-bottom:8px;">GET THE GUIDES THAT FIX THESE</h2>
+<p class="note" style="margin-top:0;">Four free step-by-step guides. The first lands right away, the rest follow every other day.</p>
+<form id="signup-form"><div class="field-group"><label class="field-label" for="name">Name</label><input type="text" id="name" name="name" autocomplete="name" required></div>
+<div class="field-group"><label class="field-label" for="email">Email</label><input type="email" id="email" name="email" autocomplete="email" required></div>
+<input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true">
+<button type="submit" class="btn-submit">Send me the guides</button><p class="submit-note">No card. No catch.</p></form></div>
+<div id="thanks" style="display:none;text-align:center;padding:40px 0;"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:42px;">CHECK YOUR <span style="color:var(--orange);">INBOX.</span></h2><p class="note">The first guide is on its way.</p></div>
+</div></div>
+<footer><p>Griffin Creative — griffincreativelab.com</p></footer>
+<script>
+var Q = [{"id": "found", "q": "Your Google Business Profile is claimed, and the name, phone, website and service area are correct.", "fix": "Claim and clean up your Google Business Profile", "guide": "Guide 2: Google Business Profile"}, {"id": "photos", "q": "Your Google profile has 10 or more real photos of camp, hunts, country and guides.", "fix": "Add 10+ real photos to your Google profile", "guide": "Guide 2: Google Business Profile"}, {"id": "reviews", "q": "You have 10 or more Google reviews, and at least one from this year.", "fix": "Ask every client for a review, with a direct link", "guide": "Guide 4: Reviews"}, {"id": "replies", "q": "You reply to every review, good or bad.", "fix": "Reply to every review within a few days", "guide": "Guide 4: Reviews"}, {"id": "site", "q": "Your website shows hunt dates, what's included, and exactly how to book.", "fix": "Put dates, what's included and how to book on your site", "guide": "Guide 3: Season Calendar"}, {"id": "mobile", "q": "Your website loads fast and reads well on a phone.", "fix": "Check your site on a phone and fix what's hard to read", "guide": "Guide 3: Season Calendar"}, {"id": "proof", "q": "You post real photos or video from your own hunts at least a few times a month.", "fix": "Post real photos from your hunts every month", "guide": "Guide 3: Season Calendar"}, {"id": "thanks", "q": "You email every client within a week of the hunt with a personal thank-you.", "fix": "Send a thank-you within a week of the hunt", "guide": "Guide 1: Rebooking Emails"}, {"id": "rebook", "q": "You email past clients when next season's dates open.", "fix": "Send a rebooking email when dates open", "guide": "Guide 1: Rebooking Emails"}, {"id": "dates", "q": "You know your state's application dates and remind clients before the deadline.", "fix": "Send a reminder 2\u20133 weeks before your state's deadline", "guide": "Guide 3: Season Calendar"}];
+var qs = document.getElementById('questions');
+Q.forEach(function(q, i) {
+  var d = document.createElement('div'); d.className = 'kit-item'; d.style.marginBottom = '12px';
+  var n = document.createElement('span'); n.className = 'kit-num'; n.textContent = 'QUESTION ' + (i + 1);
+  var p = document.createElement('p'); p.textContent = q.q;
+  var w = document.createElement('div'); w.style.marginTop = '12px';
+  ['yes','no'].forEach(function(v) {
+    var l = document.createElement('label'); l.style.cssText = 'margin-right:22px;font-size:14px;cursor:pointer;';
+    var r = document.createElement('input'); r.type = 'radio'; r.name = q.id; r.value = v; r.required = true; r.style.cssText = 'accent-color:#ff4d00;margin-right:6px;';
+    l.appendChild(r); l.appendChild(document.createTextNode(v === 'yes' ? 'Yes' : 'Not yet')); w.appendChild(l);
+  });
+  d.appendChild(n); d.appendChild(p); d.appendChild(w); qs.appendChild(d);
+});
+document.getElementById('quiz').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var yes = 0, misses = [];
+  Q.forEach(function(q) { var v = document.querySelector('input[name="' + q.id + '"]:checked'); if (v && v.value === 'yes') yes++; else misses.push(q); });
+  document.getElementById('score').textContent = yes + ' / 10';
+  var v = yes >= 9 ? 'You are in strong shape. Small improvements will matter more than big ones.' : yes >= 6 ? 'A solid base with clear gaps. Fixing the items below is the fastest way to pick up bookings.' : yes >= 3 ? 'There is a lot of easy ground to gain. Start with the first fix below.' : 'Most of the basics are still open, which means the biggest wins are also the simplest.';
+  document.getElementById('verdict').textContent = v;
+  var ol = document.getElementById('fixes'); ol.textContent = '';
+  misses.slice(0, 3).forEach(function(m) { var li = document.createElement('li'); li.textContent = m.fix + ' (' + m.guide + ')'; ol.appendChild(li); });
+  if (!misses.length) { var li = document.createElement('li'); li.textContent = 'Nothing missing. Keep the reviews and rebooking emails going every season.'; ol.appendChild(li); }
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+document.getElementById('signup-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  var f = e.target, btn = f.querySelector('.btn-submit');
+  var name = f['name'].value.trim(), email = f['email'].value.trim();
+  if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please enter your name and a valid email.'); return; }
+  btn.disabled = true; btn.textContent = 'Sending...';
+  var ok = false;
+  try {
+    var r = await fetch('/api/send-starter-kit-drip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, email: email, src: 'scorecard', website: f['website'].value }) });
+    ok = r.ok;
+  } catch (err) { ok = false; }
+  if (!ok) { alert('Something went wrong. Please try again in a moment.'); btn.disabled = false; btn.textContent = 'Send me the guides'; return; }
+  document.getElementById('form-wrap').style.display = 'none';
+  document.getElementById('thanks').style.display = 'block';
+});
+</script>
+</body>
+</html>

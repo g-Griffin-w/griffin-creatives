@@ -9,43 +9,36 @@ A guided hunt is a big spend, and a hunter can't always draw the same unit again
 
 Legend: `[x]` done · `[~]` in progress · `[ ]` not started
 
-## Do these first (highest odds)
-1. **[~] Phone calls.** Outfitters answer phones, and a call turns a stranger into a conversation in minutes.
-   - [x] Script, voicemail and objections written ([FOUNDING-CLIENTS.md](FOUNDING-CLIENTS.md)).
-   - [x] Call sheet built (`call-sheet.csv`, local only): warm leads first, then phone-only leads, then new Colorado/Utah numbers.
-   - [ ] Make 15 calls a day. Log every outcome.
-2. **[~] Founding-client offer.** 6 spots: clients 1–3 get a free first month, clients 4–6 get half off their first month, for a testimonial and results.
-   - [x] Offer drafted.
-   - [ ] You approve the price and number of spots.
-   - [ ] Pitch it on every call where they ask what we do.
-3. **[~] Free Google-profile audit.** The easiest "yes" on a call. Costs us 15 minutes and shows the work.
-   - [x] One-page audit checklist built ([GOOGLE-AUDIT.md](GOOGLE-AUDIT.md)).
-   - [ ] Offer on every call and in every reply.
-   - [ ] Do the first 3 audits and send them.
-4. **[ ] State associations.** One introduction from each is worth many cold emails.
-   - [ ] Call IOGA (208-342-1438). Ask about the Dec 1 vendor fair and one member to talk to.
-   - [ ] Follow up with WYOGA and MOGA (Oct 22).
-   - [ ] Find and contact the Colorado and Utah associations (Colorado Outfitters Association, uoga.org).
+## Merged plan: our strategies plus the best of what competitors do
+Competitor ideas are adapted, not copied. "Source" shows where the idea came from. Details in [COMPETITORS.md](COMPETITORS.md).
 
-## Do these next
-5. **[ ] Hunters and friends.** Ask anyone who has hunted with an outfitter for an introduction. Warm and free.
-6. **[ ] Personalized audit videos.** A 2-minute recording of one outfitter's Google profile with 3 fixes, sent to the 10 best-fit leads.
-7. **[ ] Facebook groups.** Answer questions for a few weeks. No links, no pitch. DM only if asked.
-8. **[~] Instagram and Facebook page.** Keep posting (Reels Tue/Thu, carousels Mon/Wed/Fri). Engage 20 outfitter accounts a day.
-9. **[ ] Trade shows.** IOGA fair Dec 1. Western Hunting & Conservation Expo Feb 11–14. Ask for exhibitor lists in December.
+### Do these first
+1. **[~] Phone calls.** (ours) Script, call sheet and tracker are ready. 15 a day, log every outcome.
+2. **[~] Founding-client offer.** (ours) 6 spots: clients 1–3 get a free first month, clients 4–6 get half off their first month.
+3. **[x] Free scorecard.** (from Riverrise's "2027 Booking Scorecard" and Outfitter Marketing Pros' AI score) Built: `scorecard.html`, ten yes/no questions, top-3 fixes, then an email signup that feeds the guides. Saved with source `scorecard`.
+4. **[x] Public draw-dates page.** (from Riverrise's state-calendar pages and the Coutts Agency's "page for each location" advice) Built: `draw-dates.html`, eight states, 2026 cycle, a clear reminder date for past clients. Links to the guides with source `website`.
+5. **[~] Free Google-profile audit.** (ours; Riverrise offers a 100-point version) Checklist is in `GOOGLE-AUDIT.md`. Offer it on every call.
+6. **[ ] State associations.** (ours; Riverrise lists MOGA, RMEF and Mule Deer Foundation memberships) Call IOGA, WYOGA, MOGA. Ask about joining as a vendor or member.
 
-## Keep running, don't add effort
-10. **[~] Booking agents.** Pitch them on filling their outfitters' dates, never on direct rebooking. See [BOOKING-AGENTS.md](BOOKING-AGENTS.md).
-11. **[~] Cold email → free guides.** 23 a day. Now includes Wyoming, Colorado and Utah lines. Expect replies mostly after season ends.
-12. **[ ] Direct mail.** A postcard in early December to the best 50–100 leads.
+### Do these next
+7. **[ ] "Book direct, we don't rent you leads" message.** (from OxBow and Mallard Bay) Use it in the call script, the cold email and the site. It fits our rebooking and referral work and our agents research.
+8. **[ ] Weekly useful post or email.** (from Outfitter Marketing Pros' weekly blog and bi-weekly newsletter) A short draw-dates or season note every two weeks to everyone who signed up. We already have the data.
+9. **[ ] Testimonial video from the first founding client.** (from the Outfitter Marketing Pros and Mallard Bay ads) Once we have one, it's our best proof.
+10. **[ ] Regional pages.** (from Riverrise's town pages) One page per state with that state's dates, built from the draw-dates data. Do after the main page gets traffic.
+11. **[~] Instagram and Facebook.** (ours) Keep posting. Add a short testimonial Reel when we have one.
+12. **[ ] Trade shows and booking agents.** (ours) IOGA Dec 1, Western Expo Feb 11–14, agents only softly.
 
-## Build slowly in the background
-13. **[ ] Supplier partners.** Insurance brokers, accountants, booking-software companies.
-14. **[ ] Small paid test.** A $5–10 a day boosted post. Only after the message is working.
-15. **[ ] Newsletter, SEO, free tools, YouTube Shorts.** Compounding but slow.
+### Keep running, don't add effort
+13. **[~] Cold email → free guides.** (ours) 23 a day. New-hunters-first copy is live.
+14. **[ ] Direct mail in December.** (ours)
 
-## Skip for now
-- LinkedIn (outfitters aren't there), cold texting (legal risk), Google Search ads (tiny audience, high cost per click), hunting forums (hunters, not outfitters), buying email lists.
+### Later
+15. **[ ] Own Google Ads practice.** (ours) Spec in `GOOGLE-ADS-OWN-CAMPAIGN.md`. You create the account.
+16. **[ ] Meta ads to outfitters, small test.** (Mallard Bay is the only one doing it) After the Google test.
+17. **[ ] Retargeting pixel and AI-search content.** (Outfitter Marketing Pros has a pixel; AI search is its main topic) Only once there's steady traffic. Tie any AI content to elk and draw dates.
+
+### Skip
+- Following 1,400+ accounts on Instagram to get noticed. LinkedIn. Cold texting. Buying lists. Anyone's claim that ads can avoid platform rules.
 
 ## This week
 - [ ] Mon: call warm leads (Rugg's, Deep in the Bush), then the phone-only list.
