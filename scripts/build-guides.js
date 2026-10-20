@@ -527,7 +527,7 @@ ${warn('Only say “first pick” and the spot count if they’re true. Your cli
 
 ${step(4, 'Email 3: the application reminder', `
 <p><b>Send it in spring, for draw states only.</b> This is the email that earns trust. You're helping them even if they don't book.</p>
-${tip('<b>Timing:</b> send this two to three weeks before your state’s deadline. In Montana that means mid-March (deadline April 1). In Oregon, mid-April (May 15). In California, mid-May (June 2).')}
+${tip('<b>Timing:</b> send this two to three weeks before your state’s deadline. In Wyoming that means mid-January (nonresident deadline Feb 2). In Montana, mid-March (April 1). In Colorado, mid-March (April 7 in 2026). In Utah, early April (April 23 in 2026). In Oregon, mid-April (May 15). In California, mid-May (June 2).')}
 ${emailTpl('Template', 'Tag deadline is [date]', "Hi [first name],\n\nQuick heads up: the [state] elk application deadline is [date]. [Link to your agency's application page]\n\nIf you draw, I'm holding [dates] for you. If you don't, let me know and we'll figure out next year.\n\n[Your name]")}
 `)}
 
@@ -543,9 +543,12 @@ ${list([
   '<b>Idaho (IDFG):</b> the application window runs May 1 to June 5, with results from mid-June to early July, and a second drawing in August for leftover tags.',
   '<b>Montana (FWP):</b> applications open March 1. Elk combination licenses and elk permits are due <b>April 1</b> (11:45 pm Mountain), with the drawing in mid-April. The Elk B drawing is due June 1, with results in mid-June. Montana runs earlier than Oregon or Idaho.',
   '<b>Washington (WDFW):</b> special hunt permits, including elk, opened April 20 and closed May 27 in 2026, with results in June. Multi-season deer and elk tags are sold December 1 through March 31, with results in April. Applications for 2027 open December 1, 2026.',
-  '<b>California (CDFW):</b> elk tags come from the Big Game Drawing, which opens April 15 and is due midnight <b>June 2</b> every year, with results ten business days later (about mid-June).'
+  '<b>California (CDFW):</b> elk tags come from the Big Game Drawing, which opens April 15 and is due midnight <b>June 2</b> every year, with results ten business days later (about mid-June).',
+  '<b>Wyoming (WGFD):</b> applications opened January 2. Nonresident elk applications are due <b>February 2</b>, the earliest of any state here. Resident elk applications are due June 1.',
+  '<b>Colorado (CPW):</b> the 2026 primary draw opened March 1 and closed <b>April 7</b> at 8 pm Mountain. Unfilled licenses go to a secondary draw, due the last business day of June.',
+  '<b>Utah (DWR):</b> the 2026 big game drawing ran March 19 to <b>April 23</b>, with results by May 31. Remaining permits went on sale July 7.'
 ])}
-<p>These are the 2026 cycle dates, checked on each agency's own site in October 2026. Montana and California haven't posted 2027 dates yet, so confirm yours each year.</p>
+<p>These are the 2026 cycle dates, checked on each agency's own site in October 2026. Montana, California, Colorado and Utah haven't posted 2027 dates yet, so confirm yours each year.</p>
 <h3>Mistakes to avoid</h3>
 ${mist(['Writing like a brochure. “We offer premier guided hunting experiences” gets deleted. “I keep thinking about that bull on day four” gets read.', 'Making Email 1 a sales email. The thank-you has to be a thank-you.', 'Sending the rebook email in May. By then they’ve booked, or drawn somewhere else.', 'Burying the deposit and dates. Say the number and the month.'])}
 `)}
@@ -588,7 +591,7 @@ ${hero(g, 'YOUR ELK SEASON <em>MARKETING CALENDAR.</em>', 'Stop scrambling to fi
 ${toc(steps)}
 
 ${step(1, 'Fill in your four dates', `
-<p>Look these up on your state agency's site (<b>ODFW, IDFG, Montana FWP, WDFW, or CDFW</b>) and type them in. They save in this browser so you don't lose them.</p>
+<p>Look these up on your state agency's site (<b>ODFW, IDFG, Montana FWP, WDFW, CDFW, Wyoming Game &amp; Fish, Colorado Parks &amp; Wildlife, or Utah DWR</b>) and type them in. They save in this browser so you don't lose them.</p>
 <figure class="vis"><table class="tbl"><thead><tr><th>Date</th><th>Yours</th></tr></thead><tbody>
 <tr><td>Application deadline</td><td><input data-save="deadline" placeholder="e.g. May 15"></td></tr>
 <tr><td>Draw results</td><td><input data-save="results" placeholder="e.g. mid-June"></td></tr>
@@ -601,6 +604,9 @@ ${step(1, 'Fill in your four dates', `
 <tr><td>Montana (FWP)</td><td>Apr 1 (elk combination and elk permits)<br>Jun 1 (Elk B)</td><td>Mid-April<br>Mid-June</td></tr>
 <tr><td>Washington (WDFW)</td><td>May 27 in 2026 (special hunts)<br>Multi-season tags sold Dec 1 – Mar 31</td><td>June<br>April</td></tr>
 <tr><td>California (CDFW)</td><td>Midnight June 2, every year</td><td>About ten business days later (mid-June)</td></tr>
+<tr><td>Wyoming (WGFD)</td><td>Feb 2 (nonresident elk)<br>Jun 1 (resident elk)</td><td>Spring (nonresident)<br>Summer (resident)</td></tr>
+<tr><td>Colorado (CPW)</td><td>Apr 7 in 2026 (primary draw)<br>Last business day of June (secondary draw)</td><td>After the deadline; check CPW</td></tr>
+<tr><td>Utah (DWR)</td><td>Apr 23 in 2026 (big game drawing)</td><td>By May 31</td></tr>
 </tbody></table><figcaption>The 2026 cycle, checked on each agency's own site. Dates shift, so confirm yours every year.</figcaption></figure>
 `)}
 
@@ -619,10 +625,11 @@ ${step(3, 'Follow the year, month by month', `
 ${tpl('Example post', "2026 dates are open. Archery and rifle weeks available. Past clients get first pick through January.")}
 <h3>March and April: the application reminder</h3>
 <p>A few weeks before your state's deadline, email every past client. You're helping them whether they book or not, and the ones who apply remember who reminded them.</p>
+${tip('<b>Wyoming outfitters, shift this earlier still.</b> Nonresident elk applications are due February 2, so your reminder goes out in December or early January, right after the thank-you.', '', 'Wyoming')}
 ${tip('<b>Montana outfitters, shift this earlier.</b> Your elk combination and permit deadline is April 1 and results come mid-April. Send the reminder in February or early March, and treat mid-April as your results week. The Elk B drawing closes June 1 with results in mid-June, which gives you a second window.', '', 'Montana')}
 <h3>May and June: the deadline and the results</h3>
 <p>Every hunter is paying attention. Post on your profile around the deadline. The week results come out, reach out to everyone who drew. <b>This is your highest-converting week of the year.</b></p>
-${tip('<b>Washington and California</b> sit squarely in this window: Washington\'s special hunt deadline was late May in 2026, and California\'s is June 2 every year with results about ten business days later. Oregon is May 15, Idaho May 1 to June 5.', '', 'Your state')}
+${tip('<b>Washington and California</b> sit squarely in this window: Washington\'s special hunt deadline was late May in 2026, and California\'s is June 2 every year with results about ten business days later. Oregon is May 15, Idaho May 1 to June 5. Colorado (April 7) and Utah (April 23) close a little earlier, with results by the end of May.', '', 'Your state')}
 ${tpl('Message to a hunter who drew', "Congrats on the tag, [first name]. I'm holding [dates] for you. Want me to send details?")}
 <h3>July and August: the confirmation</h3>
 <p>Confirm your hunters, send prep info (gear list, fitness, what to expect), post pre-season photos, and check for leftover or second-draw tags to fill any openings that are left.</p>

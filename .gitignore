@@ -21,3 +21,4 @@ CLAUDE_GLOBAL_PASTE.md
 
 # Scraped lead contact lists (live in Supabase; keep out of the repo)
 *-leads.csv
+call-sheet.csv

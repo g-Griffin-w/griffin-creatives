@@ -146,11 +146,26 @@ sign up with your name and email and the first one lands in your inbox right awa
 one thing worth knowing in wyoming: nonresident elk applications are due feb 2, ahead of montana, oregon and idaho. december is when a rebooking email catches your clients before they apply, and the first guide is exactly that email.
 
 sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
+  // Colorado variant (2026-10-19): CPW's 2026 primary draw ran Mar 1 to Apr 7
+  // (cpw.state.co.us/activities/hunting/big-game/primary-draw). Re-check each
+  // spring when the new cycle posts. No inner quotes: Claude returns this inside JSON.
+  guide_co: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — rebooking past clients, setting up your google business profile, a season marketing calendar, and getting reviews after every hunt
+
+one thing worth knowing in colorado: the primary draw closed april 7 this year, so a february or march rebooking email reaches your clients right before they apply, and the first guide is exactly that email.
+
+sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
+  // Utah variant (2026-10-19): the 2026 big game drawing ran Mar 19 to Apr 23
+  // (wildlife.utah.gov). Re-check each spring. No inner quotes.
+  guide_ut: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — rebooking past clients, setting up your google business profile, a season marketing calendar, and getting reviews after every hunt
+
+one thing worth knowing in utah: the big game drawing ran march 19 to april 23 this year, so a rebooking email in february or early march reaches your clients before they apply, and the first guide is exactly that email.
+
+sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
 };
 const NICHE_PITCH = { salmon_guide: 'guide', elk_guide: 'guide' };
 const SUBJECT_VARIANTS = {
   dtc: 'a couple free ads for {{company_name}}?',
-  guide: '4 free marketing guides for elk outfitters in the NW',
+  guide: '4 free marketing guides for elk outfitters in the West',
 };
 const GUIDE_CTA_LABEL = 'Get the 4 free guides';
 // Links use the .html path: the site has no clean-URL routing, so
@@ -169,6 +184,9 @@ function pitchForNiche(niche, leadId, companyName, state) {
   let key = NICHE_PITCH[niche] || 'dtc';
   // Wyoming leads get the Feb 2 deadline line (see PITCH_VARIANTS.guide_wy).
   if (key === 'guide' && /^(wy|wyoming)$/i.test(String(state || '').trim())) key = 'guide_wy';
+  // Colorado and Utah leads get their own application-window line.
+  if (key === 'guide' && /^(co|colorado)$/i.test(String(state || '').trim())) key = 'guide_co';
+  if (key === 'guide' && /^(ut|utah)$/i.test(String(state || '').trim())) key = 'guide_ut';
   const block = PITCH_VARIANTS[key];
   return block
     .replace(/{{company_name}}/g, companyName || 'your business')
