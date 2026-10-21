@@ -61,7 +61,7 @@ const REFERRAL_TOPIC = {
   taxidermist: 'taxidermy',
   tack_supply: 'tack or pack gear',
   supplier: 'gear or camp equipment',
-  other: 'a good local business',
+  other: 'a business like yours',
 };
 
 const firstName = (lead) => {
@@ -85,7 +85,7 @@ function buildFirst(lead) {
     `I'm Gabriel with Griffin Creative Labs. We're a small marketing shop that works only with elk outfitters in the West.\n\n` +
     `I'm reaching out to ${cleanName(lead.company_name)} because ${what}. A lot of outfitters in ${state} have a Google profile that isn't doing much for them: few photos, few reviews, old details. It's often the first place a hunter looks.\n\n` +
     `Here's a simple offer. If you send me the name of any outfitter you work with, I'll review their Google profile for free and send them three specific fixes. No strings, and they can use it whether or not we ever work together.\n\n` +
-    `And when an outfitter I talk to asks about ${REFERRAL_TOPIC[lead.category] || 'a good local business'}, I'll send them your way.\n\n` +
+    `And when an outfitter I talk to asks about ${REFERRAL_TOPIC[lead.category] || 'a business like yours'}, I'll send them your way.\n\n` +
     `Would that be useful? A one-line reply is plenty.\n\n` +
     `Gabriel\nGriffin Creative Labs · hello@griffincreativelab.com · (503) 779-8493`
   );
