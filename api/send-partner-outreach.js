@@ -252,3 +252,6 @@ module.exports = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message, ...out });
   }
 };
+
+// A batch of 10 with 5-15 s pauses between sends takes under 3 minutes.
+module.exports.config = { maxDuration: 300 };
