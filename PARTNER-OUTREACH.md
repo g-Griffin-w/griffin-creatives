@@ -21,7 +21,7 @@ Subject: *A free Google profile review for your outfitter clients*
 
 > Hi there,
 >
-> I'm Gabriel with Griffin Creative Labs. We're a small marketing shop that works only with elk outfitters in the West.
+> I'm Gabriel with Griffin Creative Labs. We're a small marketing shop that works with elk outfitters in the West.
 >
 > I'm reaching out to {business} because {one line that fits their category}. A lot of outfitters in {state} have a Google profile that isn't doing much for them: few photos, few reviews, old details. It's often the first place a hunter looks.
 >

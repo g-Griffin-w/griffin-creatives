@@ -119,12 +119,24 @@ const signupUrl = (lead) => `https://www.griffincreativelab.com/starter-kit.html
 // Leads emailed before Oct 12 2026 got the old ask-first pitch, which never
 // explained the guides. Their first follow-up is the explanation.
 const sawGuideIntro = (lead) => (lead.email_body || '').includes('starter-kit');
+// Leads emailed on or after Oct 21 2026 got the short question email (no link).
+const ELK_ASK = 'Want me to send them over?';
+const sawQuestion = (lead) => (lead.email_body || '').includes(ELK_ASK);
 
 function buildGuideFollowup(lead, stage) {
   const first = firstName(lead);
   const url = signupUrl(lead);
-  const list = 'getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back';
+  const list = 'Google Business Profile setup and edits, a rebooking email sequence, a marketing season calendar, and a review system for after every hunt';
 
+  if (stage === 0 && sawQuestion(lead)) {
+    return (
+      `Hey ${first} \u2014 floating this back up.\n\n` +
+      `The four free guides are still yours if you want them: ${list}. ` +
+      `Just reply "send" and I'll send the first one, or grab them here with your name and email:\n\n` +
+      `${url}\n\n` +
+      `Gabriel\nGriffin Creative Labs`
+    );
+  }
   if (stage === 0 && !sawGuideIntro(lead)) {
     return (
       `hi ${first},\n\n` +

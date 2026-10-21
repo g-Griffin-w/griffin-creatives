@@ -552,6 +552,44 @@ async function sendEmail({ to, subject, body, cta }) {
   return { ...result.data, rfcMessageId };
 }
 
+// ============================================================
+// Elk outfitter email: a fixed, short, personal ask (2026-10-21).
+// No AI writing, no link in the first email. It asks one question ("Want me to
+// send them over?") and the follow-ups (send-followups.js) carry the signup
+// link. A "yes" reply is answered by hand with the starter-kit link.
+// ============================================================
+const ELK_ASK = 'Want me to send them over?';
+const STATE_FULL = {
+  OR: 'Oregon', ID: 'Idaho', MT: 'Montana', WA: 'Washington', CA: 'California', WY: 'Wyoming', CO: 'Colorado', UT: 'Utah',
+};
+function stateFull(raw) {
+  const t = String(raw || '').trim();
+  if (STATE_FULL[t.toUpperCase()]) return STATE_FULL[t.toUpperCase()];
+  const hit = Object.values(STATE_FULL).find((n) => n.toLowerCase() === t.toLowerCase());
+  return hit || 'the West';
+}
+function elkFirstName(lead) {
+  const n = String(lead.first_name || '').trim().split(/\s+/)[0];
+  return /^[A-Za-z'’-]{2,}$/.test(n) ? n : 'there';
+}
+function buildElkEmail(lead) {
+  const company = sanitizeCompanyName(lead.company_name).replace(/[,.;\s]+$/, '') || 'your outfit';
+  const state = stateFull(lead.company_state);
+  // The season-calendar guide has all eight states' application dates filled in.
+  const dates = state === 'the West' ? "your state's application dates" : `${state}'s application dates`;
+  const body =
+    `Hey ${elkFirstName(lead)},\n\n` +
+    `I came across ${company} while looking at elk outfitters in ${state}. I'm Gabriel with Griffin Creative Labs, a small marketing shop that works with elk outfitters in the West.\n\n` +
+    `I put together four free guides for outfitters:\n` +
+    `- Setting up and editing your Google Business Profile\n` +
+    `- A rebooking email sequence for past hunters\n` +
+    `- A marketing season calendar, with ${dates} filled in\n` +
+    `- A review system to run after every hunt\n\n` +
+    `${ELK_ASK} Just reply "send" and I will.\n\n` +
+    `Gabriel\nGriffin Creative Labs`;
+  return { subject: `Guides for ${company}`, body, resolvedNiche: 'elk_guide', productContext: '' };
+}
+
 // Sleep helper
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const randomDelay = () =>
@@ -607,7 +645,8 @@ module.exports = async (req, res) => {
     for (const lead of leads) {
       try {
         // Generate personalized email (also scrapes site + classifies niche)
-        const { subject, body, resolvedNiche, productContext } = await generateEmail(lead);
+        const isElkTemplate = lead.niche === 'elk_guide';
+        const { subject, body, resolvedNiche, productContext } = isElkTemplate ? buildElkEmail(lead) : await generateEmail(lead);
 
         if (dryRun) {
           // Don't actually send — just capture the draft for inspection
@@ -627,7 +666,7 @@ module.exports = async (req, res) => {
             to: lead.email,
             subject,
             body,
-            cta: isGuide ? { url: signupUrl(lead.id), label: GUIDE_CTA_LABEL } : null,
+            cta: isGuide && !isElkTemplate ? { url: signupUrl(lead.id), label: GUIDE_CTA_LABEL } : null,
           });
 
           // Schedule the first follow-up 3 days out. The follow-up job threads
