@@ -35,18 +35,25 @@ Subject: *A free Google profile review for your outfitter clients*
 
 Follow-up (day 5): a short reminder of the same offer, and "reply 'no thanks' and I won't follow up again."
 
-## What's loaded now (33 partners, all `review`)
+## What's loaded now (36 partners, all `review`)
 | Category | Count | Where they came from |
 |---|---|---|
 | Gear and camp-equipment makers (tents, stoves, boots, packs, calls) | 20 | Colorado, Montana and Idaho outfitter association member lists |
-| Taxidermists | 4 | Colorado Outfitters Association member list |
+| Taxidermists | 7 | Colorado association member list, the National Taxidermists Association directory, and the Taxidermy Hall of Fame |
 | Tack and pack-gear shops | 3 | Same |
 | Insurance | 2 | Montana Outfitters and Guides Association member list |
 | Other (ranch brokerage, an outdoors radio show, safety training) | 4 | Same |
 | Photographers and videographers | 0 | None found with a public email yet |
 
-By state (where known): Colorado 11, Montana 11, Idaho 4, Wyoming 3, Utah 1, Oregon 1, California 1.
+By state (where known): Colorado 11, Montana 13, Idaho 5, Wyoming 3, Utah 1, Oregon 1, California 1.
 Every email is one the association or the business publishes. I didn't guess or build any address.
+
+### What the Edge browser added (Oct 20)
+The Edge extension connected and loaded JavaScript-heavy pages that plain fetches couldn't. It added 3 partners and showed where emails are and aren't:
+- **Idaho Outfitters and Guides Association member list:** all 78 business members are listed, but emails are hidden behind "Send Email" forms. Only about 20 have websites, and the ones I tried (Eberlestock, Selway Fabrication, Jaxonbilt Hats, PATH) don't show an email on their pages.
+- **National Taxidermists Association directory:** lists members by state with names and **phone numbers**, but no emails and few websites. About 20 members each for Montana, Idaho, Wyoming and Colorado. Good for a call list, not an email list.
+- **California Association of Taxidermists directory:** the list didn't load in the browser.
+- **State taxidermist associations** (from the Taxidermy Hall of Fame): presidents are listed with phone numbers; only Idaho's has an email.
 
 ### Honest gaps
 - **Not 20 per type per state.** Web search can't list local businesses well. Photographers, insurance agents and taxidermists for Washington, Oregon, California, Utah and Wyoming are mostly missing.
