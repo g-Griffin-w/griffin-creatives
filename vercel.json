@@ -46,6 +46,10 @@
     {
       "path": "/api/send-starter-kit-drip",
       "schedule": "0 18 * * *"
+    },
+    {
+      "path": "/api/send-partner-outreach",
+      "schedule": "30 17 * * 1-5"
     }
   ]
 }
