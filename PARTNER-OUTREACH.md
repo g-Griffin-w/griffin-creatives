@@ -61,6 +61,10 @@ The Edge extension connected and loaded JavaScript-heavy pages that plain fetche
 - **Idaho Outfitters and Guides Association's member list** has 78 business members but hides emails behind contact forms. About 10 of them have websites we could mine.
 - The association lists are mixed: some entries (diners, auto parts) aren't partners, and I left them out.
 
+## Queued to send (Oct 20, 2026)
+12 partners are `queued`: the 2 insurance contacts, 3 tack and pack-gear shops, and 7 taxidermists. The other 24 (gear and camp-equipment makers, and four others) stay in `review`.
+The job sends 10 on the first weekday run (Wed Oct 21, about 10:30 am Pacific) and the last 2 the next day. Follow-ups go out 5 days after each first email. The first live run is also the first real test of the Gmail sending path, so check hello@ Sent on Wednesday.
+
 ## How to send
 1. Look at the list: `select company_name, category, state, email from partner_leads order by category, state;`
 2. Edit or remove any you don't want (`status = 'skipped'`).
