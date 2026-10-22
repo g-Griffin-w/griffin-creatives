@@ -115,9 +115,9 @@ const page = (s) => {
 ${extra}
 </ul>
 <div class="more"><p><b>These are 2026 cycle dates.</b> Dates change from year to year, so confirm on the agency's site before you tell a client. Not legal or licensing advice.</p></div>
-<div class="wrap"><div class="cta-box"><h2>FOUR FREE GUIDES FOR ${s.name.toUpperCase()} OUTFITTERS</h2>
+<div class="wrap"><div class="cta-box"><h2>FOUR FREE MARKETING GUIDES FOR ${s.name.toUpperCase()} OUTFITTERS</h2>
 <p>Get found by new hunters on Google, collect reviews after every hunt, plan your season around ${s.name}'s dates, and bring past hunters back. Name and email, no card. The first guide lands right away.</p>
-<a class="cta-btn" href="starter-kit.html?src=web">Get the free guides</a></div></div>
+<a class="cta-btn" href="starter-kit.html?src=web">Get the free marketing guides</a></div></div>
 <div class="more"><p>Other states: <a href="draw-dates.html">All eight states</a> · ${others}</p><p><a href="scorecard.html">Take the free booking scorecard</a></p></div>
 <footer><p>Griffin Creative — griffincreativelab.com</p></footer>
 </body>

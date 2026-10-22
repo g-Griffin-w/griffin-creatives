@@ -1,0 +1,32 @@
+{
+  "slug": "2026-10-21-teardown-wednesday",
+  "slides": [
+    { "layout": "hook", "white": ["TEARDOWN:"], "orange": ["YOUR GOOGLE", "LISTING IN", "20 SECONDS."] },
+    { "layout": "text", "label": "THE MOCK EXAMPLE", "firstBig": true,
+      "lines": ["Meet Sample Ridge Outfitters. It isn't a real business.",
+                "We made it up so nobody gets called out. Every problem below is a fixable one."] },
+    { "layout": "checklist", "label": "QUESTION 1 · IS THIS A REAL OPERATION?",
+      "items": [["The mock listing", "3 photos. No phone number. Newest review is two years old."],
+                ["The fix", "Claim it. Add the phone and website. Post 10+ real photos of camp, horses and guides."]] },
+    { "layout": "checklist", "label": "QUESTION 2 · WHERE DO THEY HUNT?",
+      "items": [["The mock listing", "Service area just says “Montana.” No region, no units."],
+                ["The fix", "List the regions you actually hunt. Set a service area, not a storefront."]] },
+    { "layout": "checklist", "label": "QUESTION 3 · WHAT DOES A HUNT INCLUDE?",
+      "items": [["The mock listing", "No hunts listed. The description says “Call for details.”"],
+                ["The fix", "List each hunt as a service: days, what's included, and a starting price if you're comfortable."]] },
+    { "layout": "checklist", "label": "QUESTION 4 · ARE THERE RECENT HAPPY CLIENTS?",
+      "items": [["The mock listing", "9 reviews. None in the last two years. No replies from the owner."],
+                ["The fix", "Ask every hunter for a review after the hunt, with a direct link. Reply to each one."]] },
+    { "layout": "checklist", "label": "QUESTION 5 · HOW DO I BOOK?",
+      "items": [["The mock listing", "The website link goes to a homepage. No dates, no deposit, no form."],
+                ["The fix", "Link to one page with your dates, the deposit and a simple inquiry form."]] },
+    { "layout": "bullets", "label": "YOUR 5-MINUTE CHECK", "title": "Search your own business on Google",
+      "items": ["Is it claimed, with the right phone and website?", "Are there 10+ real photos?", "Is there a review from this year?", "Does each hunt show what's included?", "Can a hunter find how to book in one tap?"] },
+    { "layout": "text", "label": "WHY IT MATTERS", "firstBig": true,
+      "lines": ["Fix those five and your listing answers a hunter's questions before they ever call.",
+                "It's free, it takes an afternoon, and it works while you're guiding."] },
+    { "layout": "cta", "headline": ["WANT THE", "FULL GUIDE?"],
+      "body": "Free. Step-by-step Google Business Profile setup and edits, plus three more guides for elk outfitters.",
+      "button": "TAP “FREE GUIDES!” IN OUR BIO ↑", "foot": "griffincreativelab.com/starter-kit.html", "buttonSize": 60 }
+  ]
+}

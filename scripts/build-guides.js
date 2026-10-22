@@ -667,7 +667,7 @@ ${GUIDES.map((g) => `<a class="gc" href="/guides/${g.slug}.html"><span class="ta
 </div>
 ${cta()}
 </main>`;
-  return shell({ slug: 'index', title: 'The Booked Out Starter Kit', desc: 'Four free step-by-step guides for elk outfitters: Google Business Profile, reviews, rebooking emails, and a season marketing calendar.', body });
+  return shell({ slug: 'index', title: 'The Booked Out Starter Kit', desc: 'Four free step-by-step marketing guides for elk outfitters: Google Business Profile, reviews, rebooking emails, and a season marketing calendar.', body });
 }
 
 // ---------- write ----------

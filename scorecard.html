@@ -93,12 +93,12 @@ table.dates a { color: var(--orange); text-decoration: none; }
 <div id="result" style="display:none;">
 <div class="cta-box" style="border-left-color:var(--orange);margin-top:0;"><h2 id="score">0 / 10</h2><p id="verdict"></p>
 <p style="margin-bottom:8px;color:var(--white);"><b>Your top fixes</b></p><ol id="fixes" style="color:var(--gray);font-weight:300;line-height:1.8;padding-left:20px;margin-bottom:6px;"></ol></div>
-<div class="form-card" id="form-wrap" style="margin-top:24px;"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:30px;margin-bottom:8px;">GET THE GUIDES THAT FIX THESE</h2>
-<p class="note" style="margin-top:0;">Four free step-by-step guides. The first lands right away, the rest follow every other day.</p>
+<div class="form-card" id="form-wrap" style="margin-top:24px;"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:30px;margin-bottom:8px;">GET THE FREE MARKETING GUIDES THAT FIX THESE</h2>
+<p class="note" style="margin-top:0;">Four free step-by-step marketing guides. The first lands right away, the rest follow every other day.</p>
 <form id="signup-form"><div class="field-group"><label class="field-label" for="name">Name</label><input type="text" id="name" name="name" autocomplete="name" required></div>
 <div class="field-group"><label class="field-label" for="email">Email</label><input type="email" id="email" name="email" autocomplete="email" required></div>
 <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true">
-<button type="submit" class="btn-submit">Send me the guides</button><p class="submit-note">No card. No catch.</p></form></div>
+<button type="submit" class="btn-submit">Send me the free marketing guides</button><p class="submit-note">No card. No catch.</p></form></div>
 <div id="thanks" style="display:none;text-align:center;padding:40px 0;"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:42px;">CHECK YOUR <span style="color:var(--orange);">INBOX.</span></h2><p class="note">The first guide is on its way.</p></div>
 </div></div>
 <footer><p>Griffin Creative — griffincreativelab.com</p></footer>
@@ -142,7 +142,7 @@ document.getElementById('signup-form').addEventListener('submit', async function
     var r = await fetch('/api/send-starter-kit-drip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, email: email, src: 'scorecard', website: f['website'].value }) });
     ok = r.ok;
   } catch (err) { ok = false; }
-  if (!ok) { alert('Something went wrong. Please try again in a moment.'); btn.disabled = false; btn.textContent = 'Send me the guides'; return; }
+  if (!ok) { alert('Something went wrong. Please try again in a moment.'); btn.disabled = false; btn.textContent = 'Send me the free marketing guides'; return; }
   document.getElementById('form-wrap').style.display = 'none';
   document.getElementById('thanks').style.display = 'block';
 });

@@ -195,14 +195,14 @@ function buildStageEmail(stage, { first, companyName, q }) {
     }
     case 5:
       return {
-        subject: `the four guides, and what's next`,
+        subject: `the four free marketing guides, and what's next`,
         body:
           hi +
           `that's the whole kit — your google profile, reviews, a season calendar, and rebooking emails. that's new hunters finding you and past hunters coming back. ` +
           `everything in them you can do yourself, and they're yours either way.\n\n` +
           `the catch is that it's all ongoing: new dates every year, reviews after every hunt, the profile kept fresh, ` +
           `the rebooking email on time. if you'd rather not run that on top of guiding, that's what booked out is — ` +
-          `we run all of it for you year round, and then some. those four guides are only a slice of what's in it. ` +
+          `we run all of it for you year round, and then some. those four marketing guides are only a slice of what's in it. ` +
           `and you can cancel anytime.\n\n` +
           `how it works: ${PRICING_URL}\n\n` +
           `or just reply and tell me where you're at.` +

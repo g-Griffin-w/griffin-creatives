@@ -126,7 +126,7 @@ const PITCH_VARIANTS = {
   dtc: `here's the idea: we turn your existing product photos into finished, ready-to-upload static ads — designed with the copy right on the image, in every placement ratio. not concepts or briefs — actual files in your google drive within 48 hours, ready to test before your current winners burn out.
 
 want me to make you 2 free samples? you send nothing — i'll pull a product from your site, design 2 finished static ads, and they're yours to run whether or not we ever work together.`,
-  // The guide play is opt-in: this cold email explains the four free guides and
+  // The guide play is opt-in: this cold email explains the four free marketing guides and
   // has a CTA button to /starter-kit.html (name + email). Only people who sign
   // up receive the guides — the first immediately, then one every 2 days from
   // send-starter-kit-drip.js — and the Booked Out pitch comes at the end of
@@ -167,7 +167,7 @@ const SUBJECT_VARIANTS = {
   dtc: 'a couple free ads for {{company_name}}?',
   guide: '4 free marketing guides for elk outfitters in the West',
 };
-const GUIDE_CTA_LABEL = 'Get the 4 free guides';
+const GUIDE_CTA_LABEL = 'Get the 4 free marketing guides';
 // Links use the .html path: the site has no clean-URL routing, so
 // extensionless paths 404. ?lead=<id> ties the signup back to this lead.
 const signupUrl = (leadId) =>
@@ -580,7 +580,7 @@ function buildElkEmail(lead) {
   const body =
     `Hey ${elkFirstName(lead)},\n\n` +
     `I came across ${company} while looking at elk outfitters in ${state}. I'm Gabriel with Griffin Creative Labs, a small marketing shop that works with elk outfitters in the West.\n\n` +
-    `I put together four free guides for outfitters:\n` +
+    `I put together four free marketing guides for outfitters:\n` +
     `- Setting up and editing your Google Business Profile\n` +
     `- A rebooking email sequence for past hunters\n` +
     `- A marketing season calendar, with ${dates} filled in\n` +

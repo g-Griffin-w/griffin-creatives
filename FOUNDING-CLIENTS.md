@@ -57,21 +57,21 @@ Still to decide before the first call:
 
 **Hook 2: past hunters**
 > "And what happens with last year's hunters after they leave camp? Do you email them again before next year?"
-- **"Not really":** "Most outfitters don't. A hunter may not come back every year, but one good email keeps you the first outfitter they think of and the one they tell friends about. We built four free guides covering both: getting found, reviews, your season calendar and the rebooking email. Can I send them? What's the best email?" (Get the email. That's a lead.)
+- **"Not really":** "Most outfitters don't. A hunter may not come back every year, but one good email keeps you the first outfitter they think of and the one they tell friends about. We built four free marketing guides covering both: getting found, reviews, your season calendar and the rebooking email. Can I send them? What's the best email?" (Get the email. That's a lead.)
 - **"We send something":** "What do you send, and does it bring bookings back?" Listen for the gap, then offer the guides.
 - **"I'm busy":** "Totally. I'll send one email you can read after the season. What's the best address?"
 
-If they ask **what we do and what it costs**: "Everything we build stays yours: your Google profile, your website and your client list. We don't rent you leads. We run both for you. For new hunters: your Google profile, review requests after every hunt, and real photos from your own hunts. Paid Google ads are an optional add-on. For past hunters: a rebooking email sequence and a referral program. It's $2,800 a month, no contract, cancel anytime. We're new, so I'm taking six founding clients: the first three get a free first month, and the next three get half off their first month, in return for a testimonial. I'd rather start with the free guides and see if they're useful."
+If they ask **what we do and what it costs**: "Everything we build stays yours: your Google profile, your website and your client list. We don't rent you leads. We run both for you. For new hunters: your Google profile, review requests after every hunt, and real photos from your own hunts. Paid Google ads are an optional add-on. For past hunters: a rebooking email sequence and a referral program. It's $2,800 a month, no contract, cancel anytime. We're new, so I'm taking six founding clients: the first three get a free first month, and the next three get half off their first month, in return for a testimonial. I'd rather start with the free marketing guides and see if they're useful."
 
 ## Voicemail (20 seconds)
-> "Hi [name], this is Gabriel with Griffin Creative Labs. I help elk outfitters get found by new hunters and bring past ones back. I've got four free guides you can use whether or not we ever talk. My number is (503) 779-8493. Have a great season."
+> "Hi [name], this is Gabriel with Griffin Creative Labs. I help elk outfitters get found by new hunters and bring past ones back. I've got four free marketing guides you can use whether or not we ever talk. My number is (503) 779-8493. Have a great season."
 
 ## Short email after a yes
 **Subject:** The free guides, as promised
 
 > Hi [name],
 >
-> Thanks for the call. Here are the four free guides: https://www.griffincreativelab.com/starter-kit.html (name and email, no card). The Google profile one is the quickest way to get found by new hunters. The rebooking one gives you three emails for last season's clients.
+> Thanks for the call. Here are the four free marketing guides: https://www.griffincreativelab.com/starter-kit.html (name and email, no card). The Google profile one is the quickest way to get found by new hunters. The rebooking one gives you three emails for last season's clients.
 >
 > If you'd like me to look at your Google profile and tell you what I'd fix, I'm happy to. It's free.
 >
@@ -81,7 +81,7 @@ If they ask **what we do and what it costs**: "Everything we build stays yours: 
 ## Objections
 - **"How much?"** Say $2,800/mo, no contract, and the founding offer (a free or half-price first month). Don't hide the number.
 - **"We tried ads and it didn't work."** "What did you try? Ads without a booking page and an email follow-up usually don't. That's why we start with your past clients and your Google profile before any ad spend."
-- **"Send me info."** "Sure. What's the best email? I'll send the free guides, since they show how we work."
+- **"Send me info."** "Sure. What's the best email? I'll send the free marketing guides, since they show how we work."
 - **"We don't need marketing, we're booked."** "Great. Are you booked for 2027 too? Most outfitters I talk to are full this year and have open dates next year."
 - **"I need to talk to my partner."** "Of course. Want me to send a one-page summary you can both read, and call back Thursday?"
 

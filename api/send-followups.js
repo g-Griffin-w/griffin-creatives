@@ -38,7 +38,7 @@ const DAYS_TO_FOLLOWUP_2 = 4;
 const MAX_STAGE = 2; // stop after two follow-ups
 
 // Guide niches (elk_guide / salmon_guide): the guide play is opt-in. Email 1
-// (send-outreach.js) explains the four free guides and has a CTA button to
+// (send-outreach.js) explains the four free marketing guides and has a CTA button to
 // /starter-kit.html. Follow-ups here are just reminders of that ask, sent to
 // people who haven't signed up: a reminder, then a breakup. Same cadence as
 // DTC. Once someone signs up the follow-ups stop (below) and the drip in
@@ -114,7 +114,7 @@ function buildFollowupBody(lead, stage) {
 // outfitters; salmon_guide has none yet, so those leads are skipped in the
 // handler.
 const GUIDE_SIGNATURE = '\n\ngabriel\ngriffincreative\ngriffincreativelab.com';
-const GUIDE_CTA_LABEL = 'Get the 4 free guides';
+const GUIDE_CTA_LABEL = 'Get the 4 free marketing guides';
 const signupUrl = (lead) => `https://www.griffincreativelab.com/starter-kit.html?lead=${lead.id}`;
 // Leads emailed before Oct 12 2026 got the old ask-first pitch, which never
 // explained the guides. Their first follow-up is the explanation.
@@ -131,7 +131,7 @@ function buildGuideFollowup(lead, stage) {
   if (stage === 0 && sawQuestion(lead)) {
     return (
       `Hey ${first} \u2014 floating this back up.\n\n` +
-      `The four free guides are still yours if you want them: ${list}. ` +
+      `The four free marketing guides are still yours if you want them: ${list}. ` +
       `Just reply "send" and I'll send the first one, or grab them here with your name and email:\n\n` +
       `${url}\n\n` +
       `Gabriel\nGriffin Creative Labs`
@@ -150,7 +150,7 @@ function buildGuideFollowup(lead, stage) {
   if (stage === 0) {
     return (
       `hi ${first} — floating this back up.\n\n` +
-      `the four free guides are still yours if you want them: ${list}. ` +
+      `the four free marketing guides are still yours if you want them: ${list}. ` +
       `just your name and email, and the first one lands right away:\n\n` +
       `${url}` +
       GUIDE_SIGNATURE

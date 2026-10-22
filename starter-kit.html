@@ -73,7 +73,7 @@ footer p { font-size: 13px; color: #2e2e2e; }
   <div class="page-header-inner">
     <span class="sec-tag">// Free, No Catch</span>
     <h1>THE BOOKED OUT<br><span class="accent">STARTER KIT.</span></h1>
-    <p>Four step-by-step guides for elk outfitters. The first lands in your inbox the moment you sign up, and the other three follow over the next week. Follow them yourself and you'll be easier to find, better reviewed, and booked earlier. No call, no catch.</p>
+    <p>Four free step-by-step marketing guides for elk outfitters. The first lands in your inbox the moment you sign up, and the other three follow over the next week. Follow them yourself and you'll be easier to find, better reviewed, and booked earlier. No call, no catch.</p>
   </div>
 </div>
 
@@ -100,7 +100,7 @@ footer p { font-size: 13px; color: #2e2e2e; }
         <div style="position:absolute;left:-9999px" aria-hidden="true">
           <label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
         </div>
-        <button type="submit" class="btn-submit">Send Me The Guides</button>
+        <button type="submit" class="btn-submit">Send Me The Free Marketing Guides</button>
         <p class="submit-note">The first guide lands in your inbox right away. Nothing else required.</p>
       </form>
     </div>
@@ -179,7 +179,7 @@ document.getElementById('signup-form').addEventListener('submit', async function
       var j = await r.json().catch(function(){ return {}; });
       alert(j.error || 'Please check your name and email.');
       btn.disabled = false;
-      btn.textContent = 'Send Me The Guides';
+      btn.textContent = 'Send Me The Free Marketing Guides';
       return;
     }
   } catch (err) { ok = false; }
@@ -188,7 +188,7 @@ document.getElementById('signup-form').addEventListener('submit', async function
   if (!ok) {
     alert('Something went wrong. Please try again in a moment.');
     btn.disabled = false;
-    btn.textContent = 'Send Me The Guides';
+    btn.textContent = 'Send Me The Free Marketing Guides';
     return;
   }
 
