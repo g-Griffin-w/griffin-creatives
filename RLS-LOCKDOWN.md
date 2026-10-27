@@ -1,4 +1,16 @@
-# Lock down the griffin_clients table (do this AFTER the deploy)
+# Lock down the griffin_clients table
+
+**Status: APPLIED on 2026-10-27**, after the deploy was verified. With the public key, reads, inserts and updates on `griffin_clients` now return "permission denied", and `client_portal_keys` returns nothing. The onboarding form, photo uploads and all scripts still work because they go through the server with the service key.
+
+**If something outside this repo breaks** (an old Stripe, Make or Zapier flow that wrote to this table with the public key; the last such row was created 2026-06-10), the rollback below restores the old access. It also reopens the hole, so prefer fixing that flow to use the service key.
+```sql
+grant select, insert, update on public.griffin_clients to anon;
+create policy "Allow anon select" on public.griffin_clients for select to anon using (true);
+create policy "allow_public_insert" on public.griffin_clients for insert to anon with check (true);
+create policy "Allow public update by stripe_customer_id" on public.griffin_clients for update to anon using (true) with check (true);
+```
+
+The notes below are the original plan and reasoning.
 
 ## The problem
 `griffin_clients` currently allows the **public anon key** to read, insert and update **every row**. That key is visible in `onboarding.html`, so anyone who views the page source has it. A real client's name, email, phone, past-client list (hunters' emails and phones), review link and mailing address would be readable and editable by anyone.
