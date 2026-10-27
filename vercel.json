@@ -22,6 +22,10 @@
   ],
   "routes": [
     {
+      "src": "/api/(connect-mailbox|log-hunters|review-link|save-onboarding|get-upload-url|send-review-requests)",
+      "dest": "/api/portal.js?action=$1"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1.js"
     },
