@@ -278,6 +278,27 @@ footer p { font-size: 13px; color: #2e2e2e; }
         </div>
 
         <hr class="form-divider">
+        <div class="form-section-label">Bookings &amp; Availability</div>
+
+        <div class="field-group">
+          <label class="field-label" for="open-dates">Dates You Still Have Open</label>
+          <textarea id="open-dates" name="open-dates" placeholder="e.g. Sept 14-20 rifle (2 spots left), Oct 5-11 (full), Nov cow hunt (open)"></textarea>
+          <p class="field-hint">Real dates and how many spots. Not sure yet? Leave it blank and we'll sort it out on our call.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="deposit-terms">Deposit &amp; Payment Terms</label>
+          <textarea id="deposit-terms" name="deposit-terms" placeholder="e.g. 50% deposit holds your dates, balance due 60 days before the hunt, deposit rolls over if you don't draw a tag"></textarea>
+          <p class="field-hint">How a hunter books and pays. Every booking email we write for you repeats these terms, so they need to be yours.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="last-season-detail">One Real Moment From Last Season</label>
+          <textarea id="last-season-detail" name="last-season-detail" placeholder="e.g. Dave's 340-inch bull on day three, glassed from the south ridge at first light"></textarea>
+          <p class="field-hint">A single specific moment, first names only. It goes in your thank-you email to past clients so it reads like you wrote it.</p>
+        </div>
+
+        <hr class="form-divider">
         <div class="form-section-label">Your Past Clients</div>
 
         <div class="upload-note">
@@ -294,6 +315,26 @@ footer p { font-size: 13px; color: #2e2e2e; }
           <label class="field-label" for="promos">Referral or Repeat-Client Incentive</label>
           <textarea id="promos" name="promos" placeholder="e.g. $50 off for referring a friend, priority booking for past clients"></textarea>
           <p class="field-hint">Anything you already do for repeat or referred clients — real or something you'd want to start.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="mailing-address">Business Mailing Address</label>
+          <input type="text" id="mailing-address" name="mailing-address" placeholder="123 Main St, Town, ST 00000">
+          <p class="field-hint">Email law requires a real mailing address in the footer of marketing emails. A street address or PO box for the business is fine.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="email-provider">Where Does Your Business Email Live?</label>
+          <select id="email-provider" name="email-provider">
+            <option value="">Choose one</option>
+            <option value="gmail">Gmail (name@gmail.com)</option>
+            <option value="workspace">Google Workspace (your own domain, on Google)</option>
+            <option value="outlook">Outlook / Microsoft 365</option>
+            <option value="yahoo">Yahoo</option>
+            <option value="other">Something else (GoDaddy, your host, etc.)</option>
+            <option value="not_sure">Not sure</option>
+          </select>
+          <p class="field-hint">If it's Gmail or Google Workspace, your rebooking and review-request emails can go out from your own address. Otherwise they go from ours with your name on them and your replies come straight to you.</p>
         </div>
 
         <hr class="form-divider">
@@ -628,6 +669,17 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
 
   const f = e.target;
 
+  // The form has novalidate, so the browser doesn't enforce `required`. Check it here.
+  const emptyRequired = Array.from(f.querySelectorAll('[required]')).find(function(el) {
+    return !el.disabled && !String(el.value || '').trim();
+  });
+  if (emptyRequired) {
+    const lbl = f.querySelector('label[for="' + emptyRequired.id + '"]');
+    alert('Please fill in: ' + (lbl ? lbl.textContent.trim() : emptyRequired.name));
+    emptyRequired.focus();
+    return;
+  }
+
   const regionValues = Array.from(document.querySelectorAll('.region-opt:checked')).map(function(cb) { return cb.value; });
   if (regionValues.length === 0) {
     alert('Check at least one state.');
@@ -639,35 +691,57 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
     ? JSON.stringify(uploadedPaths.products)
     : '';
 
-  const { error } = await db.from('griffin_clients').update({
-    full_name: f['your-name'].value,
-    email: f['email'].value,
-    phone: f['phone'].value,
-    business_name: f['business-name'].value,
-    website: f['website'].value,
-    niche: f['niche'].value,
-    region: regionJoined,
-    season_window: f['season-window'].value,
-    plan: f['plan'].value,
-    ad_goals: f['trip-details'].value,
-    target_audience: f['target-audience'].value,
-    product_world: f['trip-scenes'].value,
-    brand_voice: f['brand-tone'].value,
-    past_clients_csv: f['past-clients-csv'].value,
-    promos: f['promos'].value,
-    product_image_urls: productPathsJson,
-    logo_url: uploadedPaths.logo[0] || '',
-    brand_colors: f['brand-colors'].value,
-    gbp_link: f['gbp-link'].value,
-    gbp_exists: f['gbp-exists'].value,
-    gbp_manager_added: f['gbp-manager-added'].value,
-    platforms: f['social-handles'].value,
-    booking_link: f['booking-link'].value,
-    notes: f['notes'].value,
-    onboarding_complete: true
-  }).eq('id', cid);
-
-  if (error) { alert('Error: ' + error.message); console.error(error); return; }
+  // Saved through our server (/api/save-onboarding), not straight to the database
+  // from the browser, so the public key never needs write access to client records.
+  let saveError = '';
+  try {
+    const saveRes = await fetch('/api/save-onboarding', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cid: cid,
+        fields: {
+          full_name: f['your-name'].value,
+          email: f['email'].value,
+          phone: f['phone'].value,
+          business_name: f['business-name'].value,
+          website: f['website'].value,
+          niche: f['niche'].value,
+          region: regionJoined,
+          season_window: f['season-window'].value,
+          plan: f['plan'].value,
+          ad_goals: f['trip-details'].value,
+          target_audience: f['target-audience'].value,
+          product_world: f['trip-scenes'].value,
+          brand_voice: f['brand-tone'].value,
+          open_dates: f['open-dates'].value,
+          deposit_terms: f['deposit-terms'].value,
+          last_season_detail: f['last-season-detail'].value,
+          past_clients_csv: f['past-clients-csv'].value,
+          promos: f['promos'].value,
+          mailing_address: f['mailing-address'].value,
+          email_provider: f['email-provider'].value,
+          product_image_urls: productPathsJson,
+          logo_url: uploadedPaths.logo[0] || '',
+          brand_colors: f['brand-colors'].value,
+          gbp_link: f['gbp-link'].value,
+          gbp_exists: f['gbp-exists'].value,
+          gbp_manager_added: f['gbp-manager-added'].value,
+          platforms: f['social-handles'].value,
+          booking_link: f['booking-link'].value,
+          notes: f['notes'].value
+        }
+      })
+    });
+    if (!saveRes.ok) {
+      let msg = 'Could not save (' + saveRes.status + ').';
+      try { msg = (await saveRes.json()).error || msg; } catch (e) {}
+      saveError = msg;
+    }
+  } catch (err) {
+    saveError = 'Could not reach the server. Check your connection and try again.';
+  }
+  if (saveError) { alert(saveError); return; }
   document.getElementById('form-wrap').style.display = 'none';
   const ty = document.getElementById('thankyou');
   ty.style.display = 'block';

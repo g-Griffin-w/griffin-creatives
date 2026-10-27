@@ -119,16 +119,16 @@ const SEQUENCE_PROMPTS = {
 - Email 1 (Day 0 — the only email): deadline reminder + low-key promise to guide them again if they draw.`,
 };
 
-function buildDraftPrompt({ nicheLabel, businessName, context, sequenceType }) {
+function buildDraftPrompt({ nicheLabel, businessName, context, sequenceType, facts }) {
   return `You are a direct-response email copywriter writing on behalf of a real ${nicheLabel} business named "${businessName}".
 
 CONTEXT scraped from their own site (may be empty): ${context || '(none found)'}
-
+${facts ? `\nFACTS FROM THE OWNER (from their onboarding form). Use these in place of the matching bracketed placeholders, in the owner's own words where you can:\n${facts}\n` : ''}
 ${SEQUENCE_PROMPTS[sequenceType](context)}
 
 Rules:
-- Written in the guide's own voice — first person, plainspoken, outdoorsy, never corporate marketing-speak.
-- Do NOT invent specific dates, prices, or claims about this exact business — use bracketed placeholders anywhere a real fact would be needed.
+- Written in the guide's own voice — first person, plainspoken, outdoorsy, never corporate marketing-speak.${facts ? '\n- Sign each email with the owner\'s first name from the facts.' : ''}
+- Do NOT invent specific dates, prices, or claims about this exact business — use bracketed placeholders anywhere a real fact would be needed and is not in the facts above.
 - Each email: subject line + body under 150 words.
 - No emojis, no exclamation-point stacking, no corporate tone.
 
@@ -140,12 +140,12 @@ OUTPUT FORMAT (JSON only, no markdown fences, no preamble). Output exactly as ma
 }`;
 }
 
-async function draftSequence({ apiKey, niche, seasonLabel, businessName, context }) {
+async function draftSequence({ apiKey, niche, seasonLabel, businessName, context, facts, nicheLabelOverride }) {
   const Anthropic = require('@anthropic-ai/sdk');
   const claude = new Anthropic({ apiKey });
-  const nicheLabel = NICHE_LABELS[niche];
+  const nicheLabel = nicheLabelOverride || NICHE_LABELS[niche];
   const sequenceType = sequenceTypeFor(niche, seasonLabel);
-  const prompt = buildDraftPrompt({ nicheLabel, businessName, context, sequenceType });
+  const prompt = buildDraftPrompt({ nicheLabel, businessName, context, sequenceType, facts });
   const msg = await claude.messages.create({
     model: 'claude-sonnet-4-5',
     max_tokens: 1500,
@@ -172,7 +172,7 @@ function toMarkdown({ businessName, niche, emails }) {
   const lines = [
     `# Book-next-season sequence — ${businessName} (${niche})`,
     '',
-    `Drafted ${new Date().toISOString()}. Every [bracketed placeholder] is a real fact only the business owner can fill in — review before this goes near an actual send.`,
+    `Drafted ${new Date().toISOString()}. Every placeholder in square brackets is a real fact only the business owner can fill in — review before this goes near an actual send.`,
     '',
   ];
   for (const e of emails) {
@@ -187,9 +187,36 @@ async function main() {
     const a = args.find((x) => x.startsWith(`--${flag}=`));
     return a ? a.slice(flag.length + 3) : '';
   };
-  const website = get('website');
-  const niche = get('niche');
-  const nameArg = get('name');
+  let website = get('website');
+  let niche = get('niche');
+  let nameArg = get('name');
+  // --client="<id or business name>" pulls the owner's onboarding answers from
+  // griffin_clients so the draft uses their real facts instead of placeholders.
+  let facts = '';
+  let nicheLabelOverride = '';
+  const clientRef = get('client');
+  if (clientRef) {
+    const { connect, findClient, factsFrom } = require('../lib/client-facts');
+    const f = factsFrom(await findClient(connect(), clientRef));
+    website = website || f.website;
+    niche = niche || f.niche;
+    nameArg = nameArg || f.business;
+    if (f.stateNames.length && niche === 'elk_guide') nicheLabelOverride = `${f.stateNames.join('/')} elk hunting outfitter`;
+    facts = [
+      ['Owner first name', f.ownerFirst],
+      ['Business', f.business],
+      ['States', f.stateNames.join(', ')],
+      ['Typical trip and pricing', f.trip],
+      ['Who books with them', f.audience],
+      ['Voice', f.voice],
+      ['One real moment from last season', f.lastSeason],
+      // open_dates is deliberately not passed: it is THIS season's openings, and
+      // these emails are about next season.
+      ['Deposit and payment terms', f.depositTerms],
+      ['Referral or repeat-client perk', f.promos],
+      ['Booking link', f.bookingLink],
+    ].filter(([, v]) => v).map(([k, v]) => `- ${k}: ${v}`).join('\n');
+  }
   // 'main' = direct-booking touch for salmon, or the post-season thank-you
   // for elk. 'application-reminder' = elk's pre-deadline nudge (only
   // meaningful for elk_guide — salmon ignores this and always uses direct
@@ -197,7 +224,7 @@ async function main() {
   const seasonLabel = get('season-label') || 'main';
   if (!website || !niche) {
     die(
-      'usage: node scripts/draft-retention-sequence.js --website=https://... --niche=salmon_guide|elk_guide [--season-label=main|application-reminder] [--name="Business Name"]',
+      'usage: node scripts/draft-retention-sequence.js --website=https://... --niche=salmon_guide|elk_guide [--season-label=main|application-reminder] [--name="Business Name"]\n   or: node --env-file=.env.local scripts/draft-retention-sequence.js --client="<id or business name>" [--season-label=...]',
     );
   }
   if (!NICHE_LABELS[niche]) die(`--niche must be one of: ${Object.keys(NICHE_LABELS).join(', ')}`);
@@ -217,7 +244,7 @@ async function main() {
   const businessName = nameArg || new URL(url).hostname.replace(/^www\./, '');
 
   console.log(`Drafting sequence via Claude (${sequenceTypeFor(niche, seasonLabel)})...`);
-  const emails = await draftSequence({ apiKey, niche, seasonLabel, businessName, context });
+  const emails = await draftSequence({ apiKey, niche, seasonLabel, businessName, context, facts, nicheLabelOverride });
 
   const outDir = path.join(__dirname, '..', 'retention-sequences');
   fs.mkdirSync(outDir, { recursive: true });

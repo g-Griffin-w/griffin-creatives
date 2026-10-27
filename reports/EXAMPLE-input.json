@@ -1,0 +1,26 @@
+{
+  "client": "Business name or client id",
+  "month": "2026-11",
+  "summary": "One or two honest sentences. What moved, what didn't, what you're doing about it.",
+  "gbp": {
+    "views": 420, "views_prev": 310,
+    "calls": 12, "calls_prev": 8,
+    "website_clicks": 40, "website_clicks_prev": 33,
+    "direction_requests": 5,
+    "photos": 24,
+    "posts": 3
+  },
+  "reviews": { "new": 4, "total": 18, "rating": 4.9, "replied": 4 },
+  "rebooking": { "replies": 3 },
+  "bookings": { "inquiries": 6, "booked": 1, "sources": "2 Google profile, 1 referral, 3 returning hunters" },
+  "work_done": [
+    "Added 12 new photos from last season",
+    "Published 3 Google profile posts timed to the draw dates",
+    "Replied to 4 new reviews"
+  ],
+  "next_month": [
+    "Send the December rebooking email to past hunters",
+    "Update hunt dates for next season"
+  ],
+  "notes": ""
+}

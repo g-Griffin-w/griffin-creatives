@@ -131,5 +131,5 @@ const urls = ['', 'starter-kit.html', 'draw-dates.html', 'scorecard.html', ...ST
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${SITE}/${u}</loc></url>`).join('\n')}\n</urlset>\n`;
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), sitemap);
 // The guides are the lead magnet and the API/onboarding pages are not for search.
-fs.writeFileSync(path.join(ROOT, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /guides/\nDisallow: /api/\nDisallow: /onboarding.html\n\nSitemap: ${SITE}/sitemap.xml\n`);
+fs.writeFileSync(path.join(ROOT, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /guides/\nDisallow: /api/\nDisallow: /onboarding.html\nDisallow: /review-requests.html\n\nSitemap: ${SITE}/sitemap.xml\n`);
 console.log(`wrote ${STATES.length} state pages, sitemap.xml, robots.txt`);

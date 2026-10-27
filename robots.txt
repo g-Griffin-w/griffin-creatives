@@ -3,5 +3,6 @@ Allow: /
 Disallow: /guides/
 Disallow: /api/
 Disallow: /onboarding.html
+Disallow: /review-requests.html
 
 Sitemap: https://www.griffincreativelab.com/sitemap.xml

@@ -22,3 +22,11 @@ CLAUDE_GLOBAL_PASTE.md
 # Scraped lead contact lists (live in Supabase; keep out of the repo)
 *-leads.csv
 call-sheet.csv
+call-list-by-season.csv
+
+# Client reports (generated per client, keep out of the repo)
+reports/*
+!reports/EXAMPLE-input.json
+
+# Per-client onboarding packets (hold client facts)
+client-packets/

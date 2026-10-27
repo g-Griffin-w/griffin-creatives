@@ -105,11 +105,13 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: "File too large. Max 25 MB." });
     }
 
-    // Resolve internal client UUID from the stripe_customer_id (cid)
+    // The onboarding link carries griffin_clients.id (?cid=<uuid>) for clients
+    // created by hand; older rows were keyed by stripe_customer_id. Accept both.
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cid);
     const { data: client, error: clientErr } = await sb
       .from("griffin_clients")
       .select("id")
-      .eq("stripe_customer_id", cid)
+      .eq(isUuid ? "id" : "stripe_customer_id", cid)
       .single();
 
     if (clientErr || !client) {

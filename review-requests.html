@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Add Hunters — Griffin Creative</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root { --black: #080808; --white: #f0ece3; --orange: #ff4d00; --gray: #888; --card: #111; --border: #1e1e1e; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--white); padding: 40px 20px 80px; }
+main { max-width: 640px; margin: 0 auto; }
+.tag { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--orange); letter-spacing: 0.12em; text-transform: uppercase; }
+h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 9vw, 64px); line-height: 1; letter-spacing: 0.02em; margin: 12px 0 16px; }
+p { color: var(--gray); line-height: 1.6; margin-bottom: 16px; }
+.card { background: var(--card); border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
+.stats { display: flex; gap: 12px; margin-bottom: 20px; }
+.stat { flex: 1; background: var(--card); border: 1px solid var(--border); padding: 14px; text-align: center; }
+.stat b { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 34px; color: var(--white); }
+.stat span { font-size: 12px; color: var(--gray); }
+textarea { width: 100%; min-height: 160px; background: #0c0c0c; color: var(--white); border: 1px solid var(--border); padding: 14px; font: 14px 'DM Mono', monospace; line-height: 1.6; resize: vertical; }
+textarea:focus { outline: 1px solid var(--orange); }
+button { width: 100%; margin-top: 12px; padding: 16px; background: var(--orange); color: #fff; border: 0; font: 600 15px 'DM Sans', sans-serif; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; }
+button:disabled { opacity: 0.5; cursor: default; }
+#msg { margin-top: 14px; font-size: 14px; line-height: 1.5; }
+.ok { color: #7bd88f; } .bad { color: #ff7a59; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+td { padding: 8px 4px; border-top: 1px solid var(--border); color: var(--gray); }
+td:last-child { text-align: right; font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; }
+.warn { border-color: #5a2a14; }
+small { color: var(--gray); font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <span class="tag">// After the hunt</span>
+  <h1 id="title">ADD YOUR HUNTERS.</h1>
+  <p>Paste the hunters who just left camp, one per line: <b style="color:var(--white)">name, email, last day of the hunt</b>. We email each of them the day after the hunt ends and ask for an honest Google review. People who don't open the first email get one reminder.</p>
+
+  <div id="setup" class="card warn" hidden>
+    <p style="margin:0">We're still finishing your setup (review link or mailing address), so nothing will send yet. You can still add hunters now and they'll go out once it's ready.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="s-queued">–</b><span>Waiting</span></div>
+    <div class="stat"><b id="s-sent">–</b><span>Sent</span></div>
+    <div class="stat"><b id="s-clicked">–</b><span>Opened the link</span></div>
+  </div>
+
+  <div class="card">
+    <textarea id="text" placeholder="Mike Johnson, mike@example.com, 2026-10-18&#10;Dave Smith, dave@example.com, 2026-10-18"></textarea>
+    <button id="go">Add hunters</button>
+    <div id="msg"></div>
+    <p style="margin:14px 0 0"><small>Only add people who hunted with you. Emails go out <span id="from">from your business</span>, and replies come straight to you. If someone replies "stop", don't add them again.</small></p>
+  </div>
+
+  <div class="card" id="recent-card" hidden>
+    <table id="recent"></table>
+  </div>
+</main>
+
+<script>
+const k = new URLSearchParams(location.search).get('k') || '';
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function load() {
+  if (!k) { $('msg').textContent = 'This link is missing its key. Ask Gabriel for a new one.'; $('msg').className = 'bad'; $('go').disabled = true; return; }
+  const r = await fetch('/api/log-hunters?k=' + encodeURIComponent(k));
+  if (!r.ok) { $('msg').textContent = 'This link is not valid. Ask Gabriel for a new one.'; $('msg').className = 'bad'; $('go').disabled = true; return; }
+  const d = await r.json();
+  if (d.business) $('title').textContent = 'ADD YOUR HUNTERS.';
+  $('s-queued').textContent = d.totals.queued;
+  $('s-sent').textContent = d.totals.sent;
+  $('s-clicked').textContent = d.totals.clicked;
+  $('setup').hidden = d.setup_complete;
+  if (d.mailbox) $('from').textContent = 'from ' + d.mailbox;
+  if (d.recent.length) {
+    $('recent-card').hidden = false;
+    $('recent').innerHTML = d.recent.map((x) => `<tr><td>${esc(x.name || x.email)}</td><td>${esc(x.status)}</td></tr>`).join('');
+  }
+}
+
+$('go').addEventListener('click', async () => {
+  const text = $('text').value.trim();
+  if (!text) return;
+  $('go').disabled = true; $('msg').textContent = ''; $('msg').className = '';
+  try {
+    const r = await fetch('/api/log-hunters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ k, text }) });
+    const d = await r.json();
+    if (!r.ok) {
+      $('msg').className = 'bad';
+      $('msg').textContent = d.error || 'Something went wrong.';
+    } else {
+      const bits = [`${d.added} added`];
+      if (d.already_on_list) bits.push(`${d.already_on_list} already on your list`);
+      if (d.rejected && d.rejected.length) bits.push(`${d.rejected.length} skipped (no valid email): ${d.rejected.map((x) => x.line).join(' | ')}`);
+      $('msg').className = 'ok';
+      $('msg').textContent = bits.join(' · ');
+      if (d.added) $('text').value = '';
+      load();
+    }
+  } catch (e) {
+    $('msg').className = 'bad'; $('msg').textContent = 'Could not reach the server. Try again.';
+  }
+  $('go').disabled = false;
+});
+load();
+</script>
+</body>
+</html>

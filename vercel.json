@@ -50,6 +50,10 @@
     {
       "path": "/api/send-partner-outreach",
       "schedule": "30 17 * * 1-5"
+    },
+    {
+      "path": "/api/send-review-requests",
+      "schedule": "15 17 * * *"
     }
   ]
 }
