@@ -79,7 +79,7 @@ through May 8); resident elk due **Jun 1**; deer/pronghorn Jun 1; moose/sheep/go
 | 3 | Mon Oct 19 | Rebook Monday | Carousel, 9 slides | E/G | The three-email rebooking sequence (POSTED) |
 | 4 | Tue Oct 20 | Draw Dates Tuesday | Reel, 20–30 sec | S | Montana timeline: Mar 1 open, Apr 1 due, mid-April results, Elk B Jun 1 (script READY) |
 | 5 | Wed Oct 21 | Teardown Wednesday | Carousel, 8–10 slides | E | Mock Google listing teardown: the 5 questions hunters answer in 20 seconds |
-| 6 | Thu Oct 22 | Outfitter Question | Reel, 15–30 sec | B | When do you start talking to last year's clients about next season? |
+| 6 | Thu Oct 22 | Outfitter Question | Reel, 15–30 sec | B | When do you start talking to last year's clients about next season? (SKIPPED, on vacation; stills built in `content-posts/2026-10-22-outfitter-question/` if you want to use them another Thursday) |
 | 7 | Fri Oct 23 | Free Guide Friday | Carousel, 8 slides | G | Guide 4 · Reviews: your direct link and QR code |
 | 8 | Sat Oct 24 | Camp Notes | Single image or text | B/M | What we're building: the free guides, honestly |
 | 9 | Mon Oct 26 | Rebook Monday | Carousel, 9 slides | E/G | Build the past-client list: the columns that matter |
