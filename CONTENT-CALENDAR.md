@@ -83,7 +83,7 @@ through May 8); resident elk due **Jun 1**; deer/pronghorn Jun 1; moose/sheep/go
 | 7 | Fri Oct 23 | Free Guide Friday | Carousel, 8 slides | G | Guide 4 · Reviews: your direct link and QR code |
 | 8 | Sat Oct 24 | Camp Notes | Single image or text | B/M | What we're building: the free guides, honestly |
 | 9 | Mon Oct 26 | Rebook Monday | Carousel, 9 slides | E/G | Build the past-client list: the columns that matter |
-| 10 | Tue Oct 27 | Draw Dates Tuesday | Reel, 20–30 sec | S | Oregon timeline: May 15 deadline, results mid-June |
+| 10 | Tue Oct 27 | Draw Dates Tuesday | Reel, 20–30 sec | S | Oregon timeline: May 15 deadline, results mid-June (script READY) |
 | 11 | Wed Oct 28 | Teardown Wednesday | Carousel, 8–10 slides | E | Mock homepage teardown: what shows above the fold |
 | 12 | Thu Oct 29 | Outfitter Question | Reel, 15–30 sec | B | Where do most of your new bookings come from? |
 | 13 | Fri Oct 30 | Free Guide Friday | Carousel, 8 slides | G | Guide 2 · Google Profile: claim it and clear duplicates |

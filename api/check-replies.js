@@ -1,9 +1,20 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const { google } = require('googleapis');
 const { createClient } = require('@supabase/supabase-js');
+const {
+  buildGuidesEmail,
+  buildRawReply,
+  wantsGuides,
+  plainBodyOf,
+  isAutomated,
+} = require('../lib/guide-autoreply');
 
 // ============================================================
 // Reply tracker
+// Also auto-answers a plain "send" / "yes" from an elk_guide lead with the four
+// free guides (buttons, not raw URLs) — see lib/guide-autoreply.js. Once per
+// lead (guides_sent_at); anything that isn't a short plain yes is left for a
+// human and shows up in the digest as usual.
 // Matches inbound Gmail replies to sent outreach_leads, classifies intent,
 // and writes reply_received / replied_at / reply_text / reply_intent back to
 // Supabase so per-niche decision gates are measurable.
@@ -95,6 +106,8 @@ async function sendAlertEmail(hits) {
 
   const fmt = (h) =>
     `• ${h.company || 'Unknown'}${h.name ? ` (${h.name})` : ''} — ${h.email} [${h.niche || 'n/a'}] (${h.intent})\n` +
+    (h.auto_reply === 'sent' ? '  AUTO-SENT the four guides.\n' : '') +
+    (h.auto_reply === 'failed' ? '  AUTO-REPLY FAILED — send the guides by hand.\n' : '') +
     `  "${h.snippet}"\n`;
 
   const body =
@@ -125,6 +138,65 @@ async function sendAlertEmail(hits) {
   await gmail.users.messages.send({ userId: 'me', requestBody: { raw } });
 }
 
+// ============================================================
+// Guides auto-reply
+// Answers a plain "send" / "yes" with the four guides as button links, in the
+// same thread. Returns null (not applicable), 'sent', 'would_send' (dry run) or
+// 'failed'. The guides_sent_at claim is taken before sending so a second run
+// can never send twice; a failed send releases it and the lead falls back to
+// the normal digest, flagged so Gabriel sends the guides by hand.
+// ============================================================
+async function maybeSendGuides({ lead, messageId, fromAddr, dryRun, results }) {
+  const ourEmail = (process.env.GMAIL_FROM_EMAIL || '').toLowerCase();
+  if (!fromAddr || fromAddr === ourEmail) return null;
+
+  const msg = (
+    await gmail.users.messages.get({ userId: 'me', id: messageId, format: 'full' })
+  ).data;
+  const headers = msg.payload?.headers || [];
+  const header = (name) =>
+    (headers.find((h) => h.name.toLowerCase() === name) || {}).value || '';
+
+  if (isAutomated(fromAddr, headers)) return null;
+  if (!wantsGuides(plainBodyOf(msg.payload))) return null;
+  if (dryRun) return 'would_send';
+
+  const { data: claimed, error: claimError } = await supabase
+    .from('outreach_leads')
+    .update({ guides_sent_at: new Date().toISOString() })
+    .eq('id', lead.id)
+    .is('guides_sent_at', null)
+    .select('id');
+  if (claimError || !claimed || claimed.length === 0) return null;
+
+  try {
+    const sameAddress = fromAddr === String(lead.email || '').toLowerCase();
+    const { text, html } = buildGuidesEmail({
+      first: sameAddress ? String(lead.first_name || '').trim().split(/\s+/)[0] : '',
+      state: lead.company_state,
+    });
+    const subject = /^re:/i.test(header('subject')) ? header('subject') : `Re: ${header('subject')}`;
+    const raw = buildRawReply({
+      to: fromAddr,
+      fromEmail: process.env.GMAIL_FROM_EMAIL,
+      fromName: process.env.GMAIL_FROM_NAME,
+      subject,
+      text,
+      html,
+      inReplyTo: header('message-id'),
+    });
+    await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: { raw, threadId: msg.threadId },
+    });
+    return 'sent';
+  } catch (err) {
+    await supabase.from('outreach_leads').update({ guides_sent_at: null }).eq('id', lead.id);
+    results.errors.push({ lead_id: lead.id, stage: 'guides_autoreply', error: err.message });
+    return 'failed';
+  }
+}
+
 module.exports = async (req, res) => {
   const authHeader = req.headers.authorization || '';
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -137,7 +209,7 @@ module.exports = async (req, res) => {
     // 1. Pull sent leads that haven't been marked as replied yet.
     const { data: leads, error: fetchError } = await supabase
       .from('outreach_leads')
-      .select('id,email,first_name,job_title,company_name,niche,gmail_thread_id')
+      .select('id,email,first_name,job_title,company_name,company_state,niche,gmail_thread_id,guides_sent_at')
       .eq('status', 'sent')
       .eq('reply_received', false);
 
@@ -204,7 +276,13 @@ module.exports = async (req, res) => {
         results.matched++;
 
         const snippet = full.data.snippet || '';
-        const intent = dryRun ? 'skipped' : await classifyIntent(snippet);
+        const autoReply =
+          lead.niche === 'elk_guide' && !lead.guides_sent_at
+            ? await maybeSendGuides({ lead, messageId: ref.id, fromAddr, dryRun, results })
+            : null;
+        const intent = autoReply === 'sent' || autoReply === 'would_send'
+          ? 'positive'
+          : dryRun ? 'skipped' : await classifyIntent(snippet);
 
         results.hits.push({
           lead_id: lead.id,
@@ -213,6 +291,7 @@ module.exports = async (req, res) => {
           company: lead.company_name,
           niche: lead.niche,
           intent,
+          auto_reply: autoReply,
           snippet: snippet.slice(0, 160),
         });
 

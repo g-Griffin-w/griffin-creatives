@@ -13,6 +13,20 @@
    (+4d), both with the CTA button. They never receive the guides unless they
    sign up. Stops on reply and on signup.
 
+5. **"Send" / "yes" replies** (`check-replies.js` + `lib/guide-autoreply.js`):
+   when an `elk_guide` lead answers the cold email with a short plain yes
+   ("send", "yes please", "sounds good"), `check-replies` replies in the same
+   thread with the four guides as "Read guide N" buttons (text + HTML), once
+   per lead (`outreach_leads.guides_sent_at`). Anything else (questions,
+   "send me pricing", "no", out-of-office, bounces) is NOT auto-answered and
+   shows up in the digest for a human. The digest marks auto-sent leads, and
+   flags "AUTO-REPLY FAILED" if the send errors. It only runs when
+   `check-replies` runs: once a day on Hobby, so a reply can wait up to ~24h.
+   Hit `POST /api/check-replies` (Bearer CRON_SECRET) hourly from an external
+   cron for faster answers; reruns are safe. `?dry_run=1` shows
+   `auto_reply: would_send` without sending. Manual replies to leads must
+   follow the same rule: links are buttons, never bare URLs.
+
 **Crons** (`vercel.json`; Vercel Hobby allows 100 cron jobs/project, once a
 day each): `check-replies` 14:00 UTC, `send-followups` 17:00, drip 18:00.
 These replace the cron-job.org jobs, which stopped in July (last logged
