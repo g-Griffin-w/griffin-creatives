@@ -28,7 +28,7 @@
    follow the same rule: links are buttons, never bare URLs.
 
 **Crons** (`vercel.json`; Vercel Hobby allows 100 cron jobs/project, once a
-day each): `check-replies` 14:00 UTC, `send-followups` 17:00, drip 18:00.
+day each): `check-replies` 18:00 UTC (11am Pacific in summer, 10am in winter; Hobby fires anywhere in that hour), `send-followups` 17:00, drip 18:00.
 These replace the cron-job.org jobs, which stopped in July (last logged
 reply 2026-07-22, last follow-up 2026-07-14).
 

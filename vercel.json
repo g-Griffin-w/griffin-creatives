@@ -41,7 +41,7 @@
     },
     {
       "path": "/api/check-replies",
-      "schedule": "0 14 * * *"
+      "schedule": "0 18 * * *"
     },
     {
       "path": "/api/send-followups",
