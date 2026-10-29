@@ -1,5 +1,6 @@
 const { google } = require('googleapis');
 const { createClient } = require('@supabase/supabase-js');
+const { CALL_URL, CALL_CTA_LABEL, buildCallPitch } = require('../lib/call-pitch');
 
 // ============================================================
 // Follow-up sender
@@ -311,6 +312,154 @@ const randomDelay = () =>
   Math.floor(Math.random() * (DELAY_MS_MAX - DELAY_MS_MIN)) + DELAY_MS_MIN;
 
 // ============================================================
+// Call pitch for people who have the guides
+// ============================================================
+// The same call pitch the drip sends its signups at the end: 10-15 minutes by
+// phone, button to the Calendly phone event. One per lead (call_pitch_sent_at).
+// Two ways in:
+//  - replied "send": the auto-reply (check-replies) gave them the guides, and
+//    the pitch follows CALL_PITCH_AFTER_DAYS later;
+//  - opened a guide page from an emailed link (guide_views, any guide except
+//    the signup page): the pitch follows a day after the open. Only opens from
+//    CALL_PITCH_VIEWS_SINCE on count, so old opens aren't pitched retroactively.
+// People who signed up through the emailed link get theirs from the drip
+// instead, so they are skipped here. If the lead wrote anything after our last
+// email (the last message in the thread is not ours), a person handles it and
+// nothing is sent.
+const CALL_PITCH_VIEWS_SINCE = '2026-10-29T00:00:00Z';
+const CALL_PITCH_AFTER_VIEW_HOURS = 20;
+const CALL_PITCH_AFTER_DAYS = 3;
+const CALL_PITCH_MAX_AGE_DAYS = 30;
+const CALL_PITCH_BATCH = 10;
+
+// { lastIsOurs, replyTo } from the real Gmail thread, or null if unreadable.
+async function readThreadEnd(threadId) {
+  const ourEmail = (process.env.GMAIL_FROM_EMAIL || '').toLowerCase();
+  try {
+    const thread = await gmail.users.threads.get({
+      userId: 'me',
+      id: threadId,
+      format: 'metadata',
+      metadataHeaders: ['From'],
+    });
+    const froms = (thread.data.messages || []).map((m) => {
+      const v = ((m.payload?.headers || []).find((h) => h.name === 'From') || {}).value || '';
+      const addr = (v.match(/<([^>]+)>/) || [null, v])[1].trim().toLowerCase();
+      return addr;
+    });
+    if (froms.length === 0) return null;
+    const inbound = froms.filter((a) => a && a !== ourEmail);
+    return {
+      lastIsOurs: froms[froms.length - 1] === ourEmail,
+      replyTo: inbound.length ? inbound[inbound.length - 1] : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function sendGuideCallPitches({ dryRun }) {
+  const out = { due: 0, sent: 0, skipped: 0, errors: [], drafts: [] };
+  try {
+    const day = 24 * 60 * 60 * 1000;
+    const { data: repliers, error } = await supabase
+      .from('outreach_leads')
+      .select('*')
+      .not('guides_sent_at', 'is', null)
+      .is('call_pitch_sent_at', null)
+      .lte('guides_sent_at', new Date(Date.now() - CALL_PITCH_AFTER_DAYS * day).toISOString())
+      .gte('guides_sent_at', new Date(Date.now() - CALL_PITCH_MAX_AGE_DAYS * day).toISOString())
+      .order('guides_sent_at', { ascending: true })
+      .limit(CALL_PITCH_BATCH);
+    if (error) throw new Error(error.message);
+
+    const { data: views, error: viewsError } = await supabase
+      .from('guide_views')
+      .select('lead_id')
+      .not('lead_id', 'is', null)
+      .neq('guide', 'signup-page')
+      .gte('created_at', CALL_PITCH_VIEWS_SINCE)
+      .lte('created_at', new Date(Date.now() - CALL_PITCH_AFTER_VIEW_HOURS * 60 * 60 * 1000).toISOString());
+    if (viewsError) throw new Error(viewsError.message);
+    const viewerIds = [...new Set((views || []).map((v) => v.lead_id))];
+    let openers = [];
+    if (viewerIds.length > 0) {
+      const { data, error: openersError } = await supabase
+        .from('outreach_leads')
+        .select('*')
+        .in('id', viewerIds)
+        .eq('reply_received', false)
+        .is('call_pitch_sent_at', null)
+        .limit(CALL_PITCH_BATCH);
+      if (openersError) throw new Error(openersError.message);
+      openers = data || [];
+    }
+
+    const seen = new Set();
+    const leads = [...(repliers || []), ...openers]
+      .filter((l) => (seen.has(l.id) ? false : seen.add(l.id)))
+      .slice(0, CALL_PITCH_BATCH);
+    out.due = leads.length;
+    if (out.due === 0) return out;
+
+    const { data: signups } = await supabase
+      .from('lead_magnet_signups')
+      .select('outreach_lead_id')
+      .in('outreach_lead_id', leads.map((l) => l.id));
+    const onDrip = new Set((signups || []).map((r) => r.outreach_lead_id));
+
+    for (const lead of leads) {
+      try {
+        if (onDrip.has(lead.id) || lead.reply_intent === 'negative' || !lead.gmail_thread_id) {
+          out.skipped++;
+          continue;
+        }
+        const end = await readThreadEnd(lead.gmail_thread_id);
+        if (!end || !end.lastIsOurs) {
+          out.skipped++;
+          continue;
+        }
+        const to = end.replyTo || lead.email;
+        const first = String(lead.first_name || '').trim().split(/\s+/)[0];
+        const body = buildCallPitch({ first });
+        const subject = replySubject(lead.email_subject);
+        if (dryRun) {
+          out.drafts.push({ lead_id: lead.id, to, company_name: lead.company_name, subject, body });
+          continue;
+        }
+        const { data: claimed, error: claimError } = await supabase
+          .from('outreach_leads')
+          .update({ call_pitch_sent_at: new Date().toISOString() })
+          .eq('id', lead.id)
+          .is('call_pitch_sent_at', null)
+          .select('id');
+        if (claimError || !claimed || claimed.length === 0) continue;
+        try {
+          await sendFollowup({
+            to,
+            subject,
+            body,
+            threadId: lead.gmail_thread_id,
+            inReplyTo: lead.rfc_message_id,
+            cta: { url: CALL_URL, label: CALL_CTA_LABEL },
+          });
+          out.sent++;
+        } catch (err) {
+          await supabase.from('outreach_leads').update({ call_pitch_sent_at: null }).eq('id', lead.id);
+          throw err;
+        }
+        await sleep(randomDelay());
+      } catch (err) {
+        out.errors.push({ lead_id: lead.id, stage: 'call_pitch', error: err.message });
+      }
+    }
+  } catch (err) {
+    out.errors.push({ stage: 'call_pitch_query', error: err.message });
+  }
+  return out;
+}
+
+// ============================================================
 // Main handler
 // ============================================================
 module.exports = async (req, res) => {
@@ -326,6 +475,8 @@ module.exports = async (req, res) => {
     : BATCH_SIZE;
 
   try {
+    const callPitches = await sendGuideCallPitches({ dryRun });
+
     // Pull sent, un-replied leads whose follow-up is due and who still have
     // touches left. reply_received=false is the auto-stop.
     const nowIso = new Date().toISOString();
@@ -351,6 +502,7 @@ module.exports = async (req, res) => {
         success: true,
         message: 'No follow-ups due',
         sent: 0,
+        call_pitches: callPitches,
         timestamp: nowIso,
       });
     }
@@ -483,6 +635,7 @@ module.exports = async (req, res) => {
       success: true,
       batch_size: leads.length,
       ...results,
+      call_pitches: callPitches,
       timestamp: new Date().toISOString(),
     });
   } catch (err) {

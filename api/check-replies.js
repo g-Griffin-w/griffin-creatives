@@ -174,6 +174,7 @@ async function maybeSendGuides({ lead, messageId, fromAddr, dryRun, results }) {
     const { text, html } = buildGuidesEmail({
       first: sameAddress ? String(lead.first_name || '').trim().split(/\s+/)[0] : '',
       state: lead.company_state,
+      leadId: lead.id,
     });
     const subject = /^re:/i.test(header('subject')) ? header('subject') : `Re: ${header('subject')}`;
     const raw = buildRawReply({

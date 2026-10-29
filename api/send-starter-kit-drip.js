@@ -23,6 +23,8 @@ const MAX_PER_RUN = 25;
 // Safety valve on the public endpoint: past this many new signups in 24h the
 // instant send is skipped and the daily cron handles the rest.
 const INSTANT_DAILY_CAP = 150;
+const { CALL_URL, CALL_CTA_LABEL, buildCallPitch } = require('../lib/call-pitch');
+
 const GUIDE_BASE = 'https://www.griffincreativelab.com/guides/';
 const PRICING_URL = 'https://www.griffincreativelab.com/index.html#pricing';
 const CANONICAL_SIGNATURE = '\n\ngabriel\ngriffincreative\ngriffincreativelab.com';
@@ -129,10 +131,12 @@ async function getCompanyName(signup) {
 
 // ---------- Stage content ----------
 // Returns { subject, body, cta }. Deterministic — no AI spend.
-// Stage 1 is sent on signup; 2-4 every DRIP_INTERVAL_DAYS; 5 is the pitch.
+// Stage 1 is sent on signup; 2-4 every DRIP_INTERVAL_DAYS; 5 is the pitch: a
+// call pitch for people who signed up from our outreach email (fromOutreach),
+// the Booked Out pricing pitch for everyone else.
 const PS = '\n\nps — if you ever want to see how we\'d run all of this for you, just reply "booked out".';
 
-function buildStageEmail(stage, { first, companyName, q }) {
+function buildStageEmail(stage, { first, companyName, q, fromOutreach }) {
   const hi = `hi ${first || 'there'},\n\n`;
   const forCo = companyName ? ` for ${companyName}` : '';
   const guide = (slug) => `${GUIDE_BASE}${slug}.html${q}`;
@@ -194,6 +198,13 @@ function buildStageEmail(stage, { first, companyName, q }) {
       };
     }
     case 5:
+      if (fromOutreach) {
+        return {
+          subject: `15 minutes on getting you seen year round?`,
+          body: buildCallPitch({ first }),
+          cta: { url: CALL_URL, label: CALL_CTA_LABEL },
+        };
+      }
       return {
         subject: `the four free marketing guides, and what's next`,
         body:
@@ -221,7 +232,7 @@ async function deliverNextStage(signup, { dryRun = false } = {}) {
   const nextStage = signup.drip_stage + 1;
   // ?lead / ?s let the guide page log who opened it (guide_engagement view).
   const q = signup.outreach_lead_id ? `?lead=${signup.outreach_lead_id}` : `?s=${signup.id}`;
-  const { subject, body, cta } = buildStageEmail(nextStage, { first, companyName, q });
+  const { subject, body, cta } = buildStageEmail(nextStage, { first, companyName, q, fromOutreach: Boolean(signup.outreach_lead_id) });
 
   if (dryRun) return { email: signup.email, stage: nextStage, subject, body };
 

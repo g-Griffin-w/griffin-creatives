@@ -25,7 +25,21 @@
    Hit `POST /api/check-replies` (Bearer CRON_SECRET) hourly from an external
    cron for faster answers; reruns are safe. `?dry_run=1` shows
    `auto_reply: would_send` without sending. Manual replies to leads must
-   follow the same rule: links are buttons, never bare URLs.
+   follow the same rule: links are buttons, never bare URLs. The buttons open
+   the guide pages directly (no signup) and carry `?lead=<id>`, so the opens
+   are logged in `guide_views` against the lead.
+
+6. **Call pitch** (`lib/call-pitch.js`): everyone who has the guides gets one
+   short email pitching a 10-15 minute phone call, with a "Pick a time and I'll
+   call you" button to the Calendly "15-minute phone call" event (Gabriel
+   calls them). Three ways in, one pitch per lead (`outreach_leads.call_pitch_sent_at`):
+   - signed up through the emailed link: the last drip email (stage 5)
+     (signups from other sources still get the Booked Out pricing pitch);
+   - replied "send": `send-followups.js` sends it 3 days after the guides;
+   - opened a guide page (any guide except the signup page) from an emailed
+     link: `send-followups.js` sends it the next day. Only opens from
+     2026-10-29 on count (`CALL_PITCH_VIEWS_SINCE`).
+   If the lead wrote anything after our last email, nothing is sent.
 
 **Crons** (`vercel.json`; Vercel Hobby allows 100 cron jobs/project, once a
 day each): `check-replies` 18:00 UTC (11am Pacific in summer, 10am in winter; Hobby fires anywhere in that hour), `send-followups` 17:00, drip 18:00.
