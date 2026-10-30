@@ -27,7 +27,7 @@ Goal: keep leads moving today, and get everything built and scheduled so Thursda
 
 ## Afternoon: lead-building and relationships
 8. **Association follow-ups (planned for Thursday, do them today since you travel):** IOGA, WYOGA, MOGA. Reply to anyone who answered. Call IOGA about the Dec 1 vendor fair if you haven't.
-9. **Google Business Profile verification.** Today's reminder. Try again, or contact Google support.
+9. **Google Business Profile verification.** Video submitted Oct 28; Google says up to 5 business days (about Nov 4). If it is rejected or silent by Nov 5, choose postcard or contact Google support. When it clears, paste the fields from GBP-SETUP.md.
 10. **Google Ads account (practice).** You create it, then send me the `AW-…` ID and conversion label. I'll add the tracking tag. Details in `GOOGLE-ADS-OWN-CAMPAIGN.md`.
 11. **Google Places API key.** The reminder from Oct 20. If you create it, I can find taxidermists, photographers, insurance agents and tack shops in all eight states.
 

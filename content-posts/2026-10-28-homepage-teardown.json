@@ -1,0 +1,33 @@
+{
+  "slug": "2026-10-28-homepage-teardown",
+  "slides": [
+    { "layout": "hook", "white": ["TEARDOWN:"], "orange": ["YOUR HOMEPAGE,", "BEFORE ANYONE", "SCROLLS."] },
+    { "layout": "text", "label": "THE MOCK EXAMPLE", "firstBig": true,
+      "lines": ["Meet Sample Ridge Outfitters again. Still not a real business.",
+                "A hunter lands on the homepage and decides in seconds whether to keep reading. Here's what has to be on screen before they scroll."] },
+    { "layout": "checklist", "label": "ABOVE THE FOLD 1 · WHAT DO YOU DO?",
+      "items": [["The mock homepage", "A banner that says “Welcome.” You have to scroll to learn it's a guided elk hunt."],
+                ["The fix", "One plain line at the top: guided elk hunts in [your state], and the species and seasons you offer."]] },
+    { "layout": "checklist", "label": "ABOVE THE FOLD 2 · A REAL PHOTO",
+      "items": [["The mock homepage", "A stock photo of mountains. Could be anyone's."],
+                ["The fix", "A real hunter, real camp, real elk. Your own photo says you're a working operation."]] },
+    { "layout": "checklist", "label": "ABOVE THE FOLD 3 · WHAT NEXT?",
+      "items": [["The mock homepage", "A menu with eight links and no button. The phone number is in the footer."],
+                ["The fix", "One clear button (“Check 2027 dates”) and your phone number, both on the first screen."]] },
+    { "layout": "checklist", "label": "ABOVE THE FOLD 4 · ON A PHONE",
+      "items": [["The mock homepage", "On a phone, the logo fills the screen and the headline is below the fold."],
+                ["The fix", "Open it on your own phone. If the headline and the button aren't both visible, shrink the logo."]] },
+    { "layout": "bullets", "label": "YOUR 1-MINUTE CHECK", "title": "Open your homepage on your phone",
+      "items": ["Can you tell what you offer without scrolling?",
+                "Is the photo yours?",
+                "Is there one button and a phone number?",
+                "Do the dates or booking info show up in one tap?"] },
+    { "layout": "text", "label": "WHY IT MATTERS", "firstBig": true,
+      "lines": ["Most hunters find you on their phone, often through Google.",
+                "If the first screen answers what, where and how to book, they keep going. If not, they back out and try the next outfitter."] },
+    { "layout": "cta", "headline": ["WANT THE", "FULL GUIDE?"],
+      "body": "Free. Step-by-step Google Business Profile setup and edits, plus three more guides for elk outfitters.",
+      "button": "TAP “FREE GUIDES!” IN OUR BIO ↑",
+      "foot": "griffincreativelab.com/starter-kit.html", "buttonSize": 60 }
+  ]
+}

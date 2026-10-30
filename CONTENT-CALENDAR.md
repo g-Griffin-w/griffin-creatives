@@ -84,9 +84,9 @@ through May 8); resident elk due **Jun 1**; deer/pronghorn Jun 1; moose/sheep/go
 | 8 | Sat Oct 24 | Camp Notes | Single image or text | B/M | What we're building: the free guides, honestly |
 | 9 | Mon Oct 26 | Rebook Monday | Carousel, 9 slides | E/G | Build the past-client list: the columns that matter |
 | 10 | Tue Oct 27 | Draw Dates Tuesday | Reel, 20–30 sec | S | Oregon timeline: May 15 deadline, results mid-June (script READY) |
-| 11 | Wed Oct 28 | Teardown Wednesday | Carousel, 8–10 slides | E | Mock homepage teardown: what shows above the fold |
-| 12 | Thu Oct 29 | Outfitter Question | Reel, 15–30 sec | B | Where do most of your new bookings come from? |
-| 13 | Fri Oct 30 | Free Guide Friday | Carousel, 8 slides | G | Guide 2 · Google Profile: claim it and clear duplicates |
+| 11 | Wed Oct 28 | Teardown Wednesday | Carousel, 8–10 slides | E | Mock homepage teardown: what shows above the fold (9 slides READY in `content-posts/2026-10-28-homepage-teardown/`) |
+| 12 | Thu Oct 29 | Outfitter Question | Reel, 15–30 sec | B | Where do most of your new bookings come from? (3 stills READY in `content-posts/2026-10-29-new-bookings/`, use as Reel frames or post as a 3-slide carousel) |
+| 13 | Fri Oct 30 | Free Guide Friday | Reel, 20–30 sec | G | Guide 2 · Google Profile: the 5 questions a hunter asks on your listing (script READY in `content-posts/2026-10-30-google-profile-reel.md`) |
 | 14 | Sat Oct 31 | Camp Notes | Single image or text | B/M | Halloween: the scariest thing for an outfitter is an empty September |
 | 15 | Mon Nov 2 | Rebook Monday | Carousel, 9 slides | E/G | Email 1 deep-dive: 6 ways to open with a real moment |
 | 16 | Tue Nov 3 | Draw Dates Tuesday | Reel, 20–30 sec | S | Idaho timeline: May 1 to Jun 5, results mid-June to early July, August second draw |

@@ -1,6 +1,8 @@
 # Google Business Profile — Griffin Creative Labs (ready to paste)
 
-Status 2026-10-14 (updated): profile CREATED as "Griffin Creative Labs" under hello@griffincreativelab.com, service-area business, address hidden, NOT verified (video verification on phone failed; skipped). Next: Change option -> postcard, or Google support. Original check: no public listing found for "Griffin Creative" / "Griffin
+Status 2026-10-28: verification video submitted again; Google says up to 5 business days (about Nov 4). Do nothing in the profile until it clears, then paste the fields below.
+
+Status 2026-10-14: profile CREATED as "Griffin Creative Labs" under hello@griffincreativelab.com, service-area business, address hidden, NOT verified (video verification on phone failed; skipped). Next: Change option -> postcard, or Google support. Original check: no public listing found for "Griffin Creative" / "Griffin
 Creative Lab" on Google Maps (the only close match is an unrelated business,
 "Kelly Griffin Creative Production"). A profile that exists but is unpublished
 or unverified under hello@griffincreativelab.com can't be seen without signing
