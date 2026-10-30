@@ -12,6 +12,10 @@
       "use": "@vercel/static"
     },
     {
+      "src": "images/*.webp",
+      "use": "@vercel/static"
+    },
+    {
       "src": "robots.txt",
       "use": "@vercel/static"
     },

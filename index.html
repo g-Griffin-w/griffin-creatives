@@ -40,6 +40,7 @@ body[data-active="elk"] .pricing-grid[data-niche-block="elk"] { display: grid; }
 /* HERO */
 .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 160px 40px 80px; position: relative; overflow: hidden; }
 .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(255,77,0,0.07) 0%, transparent 70%); pointer-events: none; }
+.hero-logo { position: absolute; right: clamp(24px, 6vw, 110px); top: 41%; transform: translateY(-50%); width: clamp(240px, 31vw, 480px); height: auto; pointer-events: none; }
 .hero-tag { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--orange); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 24px; }
 .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(64px, 11vw, 150px); line-height: 0.92; letter-spacing: 0.01em; max-width: 920px; }
 .hero h1 .outline { -webkit-text-stroke: 1px var(--white); color: transparent; }
@@ -137,6 +138,7 @@ footer p { font-size: 13px; color: #2e2e2e; }
   .nav-links { display: none; }
   .niche-toggle-wrap { top: 66px; }
   .hero { padding: 150px 20px 60px; }
+  .hero-logo { position: static; transform: none; order: 10; width: 220px; margin-top: 44px; }
   .section { padding: 60px 20px; }
   .deliver-grid { grid-template-columns: 1fr; }
   .pricing-section { padding: 60px 20px; }
@@ -168,6 +170,7 @@ footer p { font-size: 13px; color: #2e2e2e; }
 <!-- HERO -->
 <section class="hero">
   <div class="hero-bg"></div>
+  <img class="hero-logo" src="/images/logo-badge.webp" width="900" height="900" alt="Griffin Creative Labs: marketing for outfitters" fetchpriority="high">
   <div class="hero-tag">// Marketing for Elk Outfitters in the West</div>
   <h1>FILL YOUR<br><span class="outline">CALENDAR.</span><br><span class="accent">EVERY SEASON.</span></h1>
   <p class="hero-sub" data-niche-block="salmon">You know the water. We fill the boat. Real proof content from your own trips, a system that brings past clients back before next season even opens, and getting found by people already searching for a guide like you.</p>
