@@ -38,6 +38,10 @@ Tell me "log" with outcomes and I'll update the sheet.
 - **Partners:** queue the 23 gear and camp-equipment makers too, or hold them.
 - **Send rate:** keep 25 a day or raise it. 194 are queued, about 8 days left at 25.
 
+## 5. Get found on Google (20 min, you)
+- **Set up Google Search Console.** Sign in as hello@ at search.google.com/search-console, add property `https://www.griffincreativelab.com/` (URL prefix), pick the "HTML tag" method, and send me the `content="..."` value. I add it to the homepage and push; then click Verify, submit `sitemap.xml`, and request indexing for the homepage and the three new pages.
+- New public pages are live: `outfitter-marketing.html`, `google-business-profile-for-outfitters.html`, `rebook-past-hunters.html`.
+
 ## What I can do for you tomorrow (say the word)
 - ~~Fix the reply checker so "stop" counts as a no and bounces are logged as bounces.~~ Done Oct 30 (not pushed yet). 13 old bounces re-marked `bounced`.
 - Update the call sheet: Wyoming's Finest and Trixie to the top, drop scanner-only "warm" labels.
