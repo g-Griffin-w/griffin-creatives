@@ -28,6 +28,14 @@
    follow the same rule: links are buttons, never bare URLs. The buttons open
    the guide pages directly (no signup) and carry `?lead=<id>`, so the opens
    are logged in `guide_views` against the lead.
+   Delivery failures are not replies (`lib/reply-rules.js`): a dead address
+   (550 5.1.1, address not found) sets `status = 'bounced'` and is listed in the
+   digest with the phone number so you can call for a good email; a temporary
+   failure (inbox full, Gmail retrying) is ignored. A plain "stop" /
+   "unsubscribe" / "not interested" is recorded as a negative reply without
+   asking the model, and an explicit stop/unsubscribe also sets
+   `status = 'unsubscribed'`. A bounce in the same thread as a real reply never
+   hides the reply.
 
 6. **Call pitch** (`lib/call-pitch.js`): everyone who has the guides gets one
    short email pitching a 10-15 minute phone call, with a "Pick a time and I'll
