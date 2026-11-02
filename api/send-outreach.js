@@ -1,6 +1,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const { google } = require('googleapis');
 const { createClient } = require('@supabase/supabase-js');
+const { tipForSite, buildTipEmail } = require('../lib/outreach-audit');
 
 // ============================================================
 // Configuration
@@ -590,6 +591,29 @@ function buildElkEmail(lead) {
   return { subject: `Guides for ${company}`, body, resolvedNiche: 'elk_guide', productContext: '' };
 }
 
+// Tip opener (2026-11-02): when the lead's own home page shows one clear, checkable
+// gap (no 2027 dates, no reviews, a title that doesn't say elk, no description),
+// the email leads with a free fix for it and a "Book a 15-minute call" button.
+// It keeps ELK_ASK so send-followups.js treats it like the standard email.
+// Any miss (no site, unreadable, nothing wrong, kill switch) returns the standard
+// email, so a bad site can never block a send.
+async function buildElkEmailForLead(lead) {
+  try {
+    const company = sanitizeCompanyName(lead.company_name).replace(/[,.;\s]+$/, '') || 'your outfit';
+    const state = stateFull(lead.company_state);
+    const stateName = state === 'the West' ? '' : state;
+    const tip = await tipForSite(lead.company_website, { company, state: stateName });
+    if (tip) {
+      const datesPhrase = stateName ? `${stateName}'s application dates` : "your state's application dates";
+      const email = buildTipEmail({ firstName: elkFirstName(lead), company, datesPhrase, tip });
+      return { ...email, resolvedNiche: 'elk_guide', productContext: '' };
+    }
+  } catch {
+    // fall through to the standard email
+  }
+  return buildElkEmail(lead);
+}
+
 // Sleep helper
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const randomDelay = () =>
@@ -646,7 +670,7 @@ module.exports = async (req, res) => {
       try {
         // Generate personalized email (also scrapes site + classifies niche)
         const isElkTemplate = lead.niche === 'elk_guide';
-        const { subject, body, resolvedNiche, productContext } = isElkTemplate ? buildElkEmail(lead) : await generateEmail(lead);
+        const { subject, body, resolvedNiche, productContext, cta: elkCta } = isElkTemplate ? await buildElkEmailForLead(lead) : await generateEmail(lead);
 
         if (dryRun) {
           // Don't actually send — just capture the draft for inspection
@@ -666,7 +690,7 @@ module.exports = async (req, res) => {
             to: lead.email,
             subject,
             body,
-            cta: isGuide && !isElkTemplate ? { url: signupUrl(lead.id), label: GUIDE_CTA_LABEL } : null,
+            cta: elkCta || (isGuide && !isElkTemplate ? { url: signupUrl(lead.id), label: GUIDE_CTA_LABEL } : null),
           });
 
           // Schedule the first follow-up 3 days out. The follow-up job threads

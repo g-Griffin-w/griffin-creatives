@@ -8,7 +8,7 @@ Goal: get clients. The whole plan is to market ourselves: calls, the cold email,
   - **Wyoming's Finest Outfitters (WY)**, (435) 720-7205. Replied today, guides went out at 11:32am. Best lead right now.
   - **Spotted Horse Ranch (WY)**, Trixie, (800) 528-2084 or 307-733-2097. Replied Oct 28.
 - **Everything else that "replied" was a bounce:** Hukit and Peak View (dead), Mule Shoe (bad address), Sawbuck (inbox full), Colorado Wilderness (still retrying).
-- **Signups:** 1 real, Colton Barness (Oct 27, through the emailed link, on guide email 1).
+- **Signups:** 1 real, "Colton Barness" (Oct 27, through the emailed link, on guide email 1). It is tied to **2 H Outdoors (MT), (406) 596-9821**, but the owner is Charles McDougal, so ask for him. Call prep for 2 H and Utah Big Game is in `SEARCH-AUDITS.md`.
 - **Call pitch sent:** Deep in the Bush Adventures (Oct 28). It sends itself next to Trixie around Oct 31 and Wyoming's Finest around Nov 1.
 - **Calls Oct 28:** 4 calls, nobody interested. No real outfitter has been through a full call yet.
 - **Google Business Profile:** waiting on Google (video verification, about Nov 4).
@@ -21,7 +21,7 @@ Order, with who to push hardest first:
 3. **Rugg's Outfitting**, (406) 822-2061.
 4. Cameron Outfitters (406) 821-3115 · Juniper Mountain (208) 454-1322 · Flying B Ranch (800) 472-1945 · Miles High (208) 697-3521 · Rasmussen (208) 476-7075 · Shattuck Creek (208) 826-3373 · Heaven's Gate · Ridgerunner · Flying Resort Ranches.
 5. **Get-an-email calls (2 min each):** Mule Shoe Outfitters (307) 367-2223 and Sawbuck Outfitters (970) 921-3557. Our emails never reached them; just ask for a good address.
-6. **Utah Big Game Outfitters, (435) 749-1091: call back Sat Oct 31 at noon** (they asked; reached them Fri Oct 30).
+6. **Utah Big Game Outfitters, (435) 749-1091:** called back Sat Oct 31 as asked, no answer, left a voicemail. Try again Mon Nov 2 midday; pitch is in `SEARCH-AUDITS.md`.
 Tell me "log" with outcomes and I'll update the sheet.
 
 ## 2. Inbox and replies (15 min, morning)
