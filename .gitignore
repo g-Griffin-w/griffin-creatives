@@ -30,3 +30,4 @@ reports/*
 
 # Per-client onboarding packets (hold client facts)
 client-packets/
+COLD-CALL-LIST-FULL.csv
