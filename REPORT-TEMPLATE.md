@@ -16,6 +16,7 @@ It writes `reports/<client>-<YYYY-MM>.html`. Open it, print to PDF (or paste it 
 | Number | Source | Automatic? |
 |---|---|---|
 | Profile views, calls, website clicks, direction requests | Business Profile → Performance, set to the month. Copy the numbers into `gbp`. | Manual (2 min) |
+| Pages indexed, search impressions, clicks, top searches | Search Console, Indexing > Pages and Performance, set to the month. No field in the JSON yet, so type them into `notes`. | Manual (3 min) |
 | New reviews, total reviews, rating | The profile's reviews tab | Manual |
 | Reviews replied to, photos, posts | What you actually did this month | Manual |
 | Review requests sent, reminders, link opens | `review_requests` table | **Automatic** |

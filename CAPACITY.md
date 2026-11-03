@@ -16,8 +16,8 @@
 | Rebooking sequence: draft, fill facts, approve, import list | 2.0 | 1.25 | `draft-retention-sequence.js --client=...` uses the form facts; `onboard-client.js import` cleans and loads the list |
 | Review pipeline setup | 0.75 | 0.25 | `onboard-client.js set` and `status`; mailing address comes from the form |
 | Booking setup: form, auto-reply, scheduler, deposit link, templates | 3.0 | 1.5 | `make-booking-kit.js` fills the emails and form spec |
-| Website check | 1.5 | 0.5 | Written fix list only; edits are a separate quote |
-| **Total** | **≈ 14** (11 to 17) | **≈ 7** (6 to 9) | Client #1 will still run long because that is when the templates get tuned |
+| Website check and search setup | 2.0 | 1.0 | Search Console done live on the call (10 min), `search-audit.js`, written fix list with exact text, draft text for up to three hunt pages. Building a site is a separate quote. See SEARCH-WALKTHROUGH.md |
+| **Total** | **≈ 14.5** (11.5 to 17.5) | **≈ 7.75** (6.5 to 9.5) | Client #1 will still run long because that is when the templates get tuned |
 
 ## Every month after
 
@@ -28,16 +28,17 @@
 | Proof-content batch (review before it goes out) | 1.0 |
 | Hunter intake, bounces, opt-outs, rebooking replies | 0.5 |
 | Inquiry and booking check-in with the client | 0.5 |
+| Search check (five searches, Search Console Pages and Performance, title rewrites) | 0.5 |
 | Monthly report | 0.75 (1.25 the first few) |
 | Client touchpoint (call or text) | 0.5 |
 | Seasonal updates and surprises | 0.5 |
-| **Total** | **≈ 6** (range 5 to 8) |
+| **Total** | **≈ 6.5** (range 5.5 to 8.5) |
 
 ## What this means for pay and for your calendar
 
-- **Month 1 costs about 20 hours** (14 onboarding + 6 ongoing). A free first month is 20 unpaid hours per client. Half-price is 20 hours for $1,400 (~$70/hr).
-- **After month 1:** $2,800 for about 6 hours is roughly $465/hr. That's the real business. Month 1 is the investment.
-- **Six founding clients in the first month** is about 120 hours of work (6 × 20). That's too much to do at once.
+- **Month 1 costs about 21 hours** (14.5 onboarding + 6.5 ongoing). A free first month is 21 unpaid hours per client. Half-price is 21 hours for $1,400 (~$67/hr).
+- **After month 1:** $2,800 for about 6.5 hours is roughly $430/hr. That's the real business. Month 1 is the investment.
+- **Six founding clients in the first month** is about 126 hours of work (6 × 21). That's too much to do at once.
 
 ### How many clients can you carry?
 
@@ -50,7 +51,7 @@ Assume delivery hours per month = the hours you can actually give delivery after
 | 100 | 8 active | 3 |
 | 120 | 10 active | 3 to 4 |
 
-(Active × 6 hours + new × 14 hours must fit in the delivery hours.)
+(Active × 6.5 hours + new × 14.5 hours must fit in the delivery hours.)
 
 **Plan: onboard one or two clients per month, not six at once.** A realistic founding path is 2 clients in the first month, 2 more in the second, 2 more in the third, and the half-price offers are the later ones.
 
@@ -62,7 +63,8 @@ Assume delivery hours per month = the hours you can actually give delivery after
 
 ## What adds hours
 - Clients who are slow to verify Google, send photos, or hand over their past-client list. This is usually the real delay. Set a deadline in the founding offer.
-- Clients without a decent website. Fixing it is a separate job (a quote, not part of $2,800).
+- Clients without a decent website. Fixing it is a separate job (a quote, not part of $2,800). Search setup still happens, but there may be little to rank.
+- Clients whose domain registrar login is lost or held by a web guy. The Search Console DNS step then waits on someone else; use the URL-prefix method meanwhile.
 - Heavy review-reply or inquiry follow-up volume.
 - Prospect work. Each lead-magnet audit or demo sequence takes real time (about 20 minutes for an audit), whether or not they sign.
 

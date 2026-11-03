@@ -31,6 +31,7 @@ client fills onboarding.html
 | 5 | Read back what they entered: dates open, deposit terms, the last-season moment, the trip and price. Fix anything wrong. | Everything we write is built from these. |
 | 15 | **Google profile.** They share their screen. Exists: they add hello@griffincreativelab.com as a Manager (People and access, Add, Manager). Doesn't exist: create it together; if it needs verification, start the video or phone verification now. | This is the step that used to take days of back-and-forth. |
 | 5 | **Review link.** Business Profile, "Ask for reviews", copy the link. You then run `set --review-url=...`. | The review sender won't run without it. |
+| 10 | **Search Console.** They add their site, verify it, add hello@griffincreativelab.com as a Full user, submit the sitemap and request indexing. Steps and wording in [SEARCH-WALKTHROUGH.md](SEARCH-WALKTHROUGH.md). | Google can't start reading their site until it's verified, and a DNS change needs them logged in to the registrar. |
 | 5 | **Mailing address.** Confirm the footer address. | Email law, and the sender won't run without it. |
 | 5 | **Connect mailbox** (Gmail or Google Workspace only). They open the connect link from `status` and click Allow. Others skip this and send from hello@ with their name. | Do before any rebooking email goes out. |
 | 5 | **Booking.** Do they have a Calendly or a form? If not, tell them you'll set it up from the booking kit and they'll approve it. | Defines what Booking Setup means for them. |
@@ -51,7 +52,8 @@ Then:
 1. Open `client-packets/<slug>/gbp-profile.md`. Fill or delete every `[confirm: ...]`. Send the client the Q&A and posts to approve (first month, they approve). Paste into Google.
 2. Open `client-packets/<slug>/booking-kit.md`. Set up the form, Calendly and deposit link in **their** accounts. Send one test inquiry through it.
 3. Edit `retention-sequences/<slug>.md` (delete the header line, fill `[your state's application deadline]` from the state agency page), send the client the copy to approve, then `approve-retention-sequence.js`.
-4. `status` again. Everything checked means done.
+4. Run `node scripts/search-audit.js https://theirsite.com` and send the search fix list (titles, descriptions, hunt pages, listings) within two days. See [SEARCH-WALKTHROUGH.md](SEARCH-WALKTHROUGH.md).
+5. `status` again. Everything checked means done.
 
 ## Rules these scripts follow
 - **Facts only.** Drafts use what the client told us. Anything unknown stays as a visible `[bracket]` and the approve script refuses to load a sequence that still has one.
