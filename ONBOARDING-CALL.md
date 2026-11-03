@@ -21,7 +21,7 @@ client fills onboarding.html
    ```bash
    node --env-file=.env.local scripts/onboard-client.js new --business="Battle Creek Outfitters" --email=tom@example.com --name="Tom Early"
    ```
-2. Send them the link and ask them to fill it in **before** the call. About 10 minutes. Photos and the past-client list can come later.
+2. Send them the link and ask them to fill it in. About 10 minutes. It asks for photos (aim for 12), the past-client list (paste it or load a CSV; or they email it), what the website is built on and who has the domain login. When they submit, the confirmation screen tells them to book the kickoff call at `calendly.com/hello-griffincreativelab/kickoff-call-screen-share` (60 minutes, Google Meet) and what to have ready.
 3. Before you dial: `node --env-file=.env.local scripts/onboard-client.js status "battle creek"`. Whatever is unchecked is your agenda.
 
 ## On the call (screen share)

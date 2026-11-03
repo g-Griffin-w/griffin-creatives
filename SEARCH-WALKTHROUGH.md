@@ -25,7 +25,7 @@ This is the website half of "getting found". The Google Business Profile is the 
 
 ## On the call (screen share)
 
-1. **Find out where the site lives.** Wix, Squarespace, WordPress, GoDaddy, or something else? Who controls the domain, and can they log in to the registrar right now? Two minutes.
+1. **Confirm where the site lives.** The onboarding form already asked what it's built on and who manages the domain (`onboard-client.js status` shows the answers). Confirm them, and check they can log in to the registrar right now. Two minutes.
 2. **Open Search Console.** They go to `search.google.com/search-console` signed in with the business Google account.
 3. **Add the property.** *Domain* covers every version of the address and verifies with a DNS record. If they can't get into the registrar today, choose *URL prefix* instead and verify with the builder's SEO or Google settings page or an HTML tag.
 4. **Verify.** Follow the method Google shows. A DNS change can take minutes to a few hours, so if "Verify" fails, retry later; don't redo the setup. If they already have `google-site-verification` TXT records, leave them. Never delete an SPF record (`v=spf1 ...`): it's what lets their email send.

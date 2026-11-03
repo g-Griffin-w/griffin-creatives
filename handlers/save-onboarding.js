@@ -40,6 +40,8 @@ const FIELDS = {
   gbp_link: 500,
   gbp_exists: 20,
   gbp_manager_added: 20,
+  site_platform: 20,
+  domain_access: 20,
   platforms: 500,
   booking_link: 500,
   notes: 3000,
@@ -55,6 +57,8 @@ const ENUMS = {
   plan: ['get_found', 'full_season', 'booked_out'],
   gbp_exists: ['yes', 'no', 'not_sure', ''],
   gbp_manager_added: ['yes', 'no', 'not_sure', 'na', ''],
+  site_platform: ['wix', 'squarespace', 'wordpress', 'godaddy', 'shopify', 'custom', 'none', 'not_sure', ''],
+  domain_access: ['me', 'someone_else', 'not_sure', ''],
   email_provider: ['gmail', 'workspace', 'outlook', 'yahoo', 'other', 'not_sure', ''],
 };
 

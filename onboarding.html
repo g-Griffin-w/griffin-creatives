@@ -128,6 +128,12 @@ textarea.mono { font-family: 'DM Mono', monospace; font-size: 13px; }
 .thankyou p { font-size: 17px; color: var(--gray); font-weight: 300; line-height: 1.7; max-width: 440px; margin: 0 auto 40px; }
 .thankyou a { padding: 14px 36px; background: transparent; color: var(--white); font-size: 14px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--border); border-radius: 2px; text-decoration: none; display: inline-block; transition: border-color 0.2s; }
 .thankyou a:hover { border-color: var(--gray); }
+.thankyou a.thankyou-cta { background: var(--orange); border-color: var(--orange); color: var(--black, #080808); font-weight: 600; margin-bottom: 40px; }
+.thankyou a.thankyou-cta:hover { border-color: var(--white); }
+.thankyou-steps { text-align: left; max-width: 440px; margin: 0 auto 40px; font-size: 14px; color: var(--gray); font-weight: 300; line-height: 1.7; }
+.thankyou-steps strong { color: var(--white); font-weight: 500; display: block; margin-top: 14px; }
+.thankyou-steps ul { margin: 6px 0 0 18px; }
+.thankyou-steps p { font-size: 14px; margin: 14px 0 0; max-width: none; }
 
 /* FOOTER */
 footer { border-top: 1px solid var(--border); padding: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
@@ -308,7 +314,12 @@ footer p { font-size: 13px; color: #2e2e2e; }
         <div class="field-group">
           <label class="field-label" for="past-clients-csv">Past Client List</label>
           <textarea id="past-clients-csv" name="past-clients-csv" class="mono" placeholder="name,email,phone,last_trip_date&#10;Jake Thompson,jake@email.com,555-0101,2026-09-14&#10;Maria Chen,maria@email.com,555-0102,2026-09-20"></textarea>
-          <p class="field-hint">Paste what you have — even just names and emails helps. One client per line: name, email, phone, last trip date. Don't have this handy? Leave it blank and send it whenever you can pull it together — nothing else is blocked on it.</p>
+          <div style="margin-top:10px;">
+            <label class="field-label" for="past-clients-file" style="font-size:12px;">Or load a file</label>
+            <input type="file" id="past-clients-file" accept=".csv,.txt,text/csv,text/plain" style="font-size:13px;color:var(--gray);">
+            <p class="field-hint" id="past-clients-file-msg">A CSV file works. In Excel or Google Sheets: File, Save as (or Download), CSV. It fills the box above so you can check it.</p>
+          </div>
+          <p class="field-hint">Paste what you have — even just names and emails helps. One client per line: name, email, phone, last trip date. Don't have it handy? Leave it blank and email it to hello@griffincreativelab.com when you can (a spreadsheet or a photo of your guest book is fine). Your Google profile and review setup start without it, but your rebooking emails can't go out until we have it.</p>
         </div>
 
         <div class="field-group">
@@ -351,7 +362,7 @@ footer p { font-size: 13px; color: #2e2e2e; }
             <div class="upload-cta">
               <span class="upload-icon">+</span>
               <p>Drop trip photos here or <span class="upload-link">click to upload</span></p>
-              <p class="upload-hint">3-10 photos minimum — real catches, real harvests, real clients. Not stock, not staged. This is the actual proof we turn into ads.</p>
+              <p class="upload-hint">Aim for 12 (3 is enough to get started) — real catches, real harvests, real clients. Not stock, not staged. This is the actual proof we turn into ads and your Google profile. Short on photos today? Upload what you have and send the rest within a week.</p>
             </div>
           </div>
           <div class="upload-list" id="list-products"></div>
@@ -394,6 +405,34 @@ footer p { font-size: 13px; color: #2e2e2e; }
           <label class="field-label" for="gbp-link">Google Business Profile Link</label>
           <input type="url" id="gbp-link" name="gbp-link" placeholder="https://g.co/kgs/... or search your business on Google Maps and paste the link">
           <p class="field-hint">If you have one. If not, leave blank &mdash; we'll walk you through setting one up on our call.</p>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="site-platform">What Is Your Website Built On?</label>
+            <select id="site-platform" name="site-platform">
+              <option value="">Choose one</option>
+              <option value="wix">Wix</option>
+              <option value="squarespace">Squarespace</option>
+              <option value="wordpress">WordPress</option>
+              <option value="godaddy">GoDaddy Website Builder</option>
+              <option value="shopify">Shopify</option>
+              <option value="custom">Custom, built by a developer</option>
+              <option value="none">I don't have a website yet</option>
+              <option value="not_sure">Not sure</option>
+            </select>
+            <p class="field-hint">Not sure? Check the bottom of your site or your email receipts. We use this to get your site found on Google.</p>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="domain-access">Who Manages Your Domain?</label>
+            <select id="domain-access" name="domain-access">
+              <option value="">Choose one</option>
+              <option value="me">I have the login (GoDaddy, Namecheap, etc.)</option>
+              <option value="someone_else">Someone else does (web person, relative)</option>
+              <option value="not_sure">Not sure</option>
+            </select>
+            <p class="field-hint">Your domain is the address, like yourbusiness.com. It's the one login we may ask you to use on our call.</p>
+          </div>
         </div>
 
         <div class="field-group">
@@ -443,7 +482,22 @@ footer p { font-size: 13px; color: #2e2e2e; }
         </svg>
       </div>
       <h2>GOT IT<span>.</span></h2>
-      <p>We're on it. We'll reach out directly once your first proof-content batch is ready to review.</p>
+      <p>Thanks. One step left: book your kickoff call. It's about an hour on a screen share. You do the clicks, we guide you, and by the end your Google profile and Google Search Console are set up.</p>
+      <a href="https://calendly.com/hello-griffincreativelab/kickoff-call-screen-share" class="thankyou-cta">Book your kickoff call →</a>
+      <div class="thankyou-steps">
+        <strong>Have these ready for the call</strong>
+        <ul>
+          <li>The Google account you use for your business</li>
+          <li>Your website login, or who manages it</li>
+          <li>Your domain login, if you know it</li>
+        </ul>
+        <strong>Still to send us</strong>
+        <ul>
+          <li>Any trip photos you didn't upload (aim for 12), within a week</li>
+          <li>Your past-client list, if you left it blank</li>
+        </ul>
+        <p>Email them to <a href="mailto:hello@griffincreativelab.com" style="all:unset;color:var(--orange);cursor:pointer;text-decoration:underline;">hello@griffincreativelab.com</a>. Your rebooking emails start as soon as we have the list.</p>
+      </div>
       <a href="index.html">← Back to Home</a>
     </div>
 
@@ -657,6 +711,21 @@ if (cid) {
 // =====================================================================
 // FORM SUBMIT
 // =====================================================================
+// Past-client list: load a CSV/text file into the paste box so it can be checked before sending.
+document.getElementById('past-clients-file').addEventListener('change', function () {
+  const msg = document.getElementById('past-clients-file-msg');
+  const file = this.files && this.files[0];
+  if (!file) return;
+  if (file.size > 250000) { msg.textContent = 'That file is too large. Send it to hello@griffincreativelab.com instead.'; this.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = function () {
+    document.getElementById('past-clients-csv').value = String(reader.result || '').trim();
+    msg.textContent = 'Loaded ' + file.name + '. Look it over in the box above, then submit.';
+  };
+  reader.onerror = function () { msg.textContent = 'Could not read that file. Paste the list in the box above, or email it to hello@griffincreativelab.com.'; };
+  reader.readAsText(file);
+});
+
 document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   if (!cid) return;
@@ -727,6 +796,8 @@ document.getElementById('onboarding-form').addEventListener('submit', async func
           gbp_link: f['gbp-link'].value,
           gbp_exists: f['gbp-exists'].value,
           gbp_manager_added: f['gbp-manager-added'].value,
+          site_platform: f['site-platform'].value,
+          domain_access: f['domain-access'].value,
           platforms: f['social-handles'].value,
           booking_link: f['booking-link'].value,
           notes: f['notes'].value

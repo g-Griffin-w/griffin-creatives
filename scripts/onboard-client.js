@@ -125,6 +125,7 @@ async function cmdStatus(sb, ref) {
   row(c.onboarding_complete, 'Onboarding form submitted', '', 'Send them the onboarding link.');
   row(photos >= 3, 'Photos uploaded', `${photos} (want 12)`, 'Ask for at least 12 real hunt photos.');
   row(c.gbp_manager_added === 'yes', 'Google profile: we are a Manager', `exists=${c.gbp_exists || '?'} manager=${c.gbp_manager_added || '?'}`, 'Do manager access / verification on the kickoff call (screen share).');
+  row(Boolean(c.site_platform) && Boolean(c.domain_access), 'Website platform and domain control known (for Search Console)', `platform=${c.site_platform || '?'} domain=${c.domain_access || '?'}`, 'Ask on the kickoff call: what the site is built on and who has the domain login.');
   row(Boolean(c.review_url), 'Google review link saved', c.review_url || '', 'Copy it from Business Profile > Ask for reviews, then run: set --review-url=...');
   row(Boolean(c.mailing_address), 'Mailing address saved', c.mailing_address || '', 'Ask for it, then run: set --mailing-address="..."');
   const canConnect = ['gmail', 'workspace'].includes(c.email_provider);
