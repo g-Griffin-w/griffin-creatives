@@ -89,7 +89,7 @@ through May 8); resident elk due **Jun 1**; deer/pronghorn Jun 1; moose/sheep/go
 | 13 | Fri Oct 30 | Free Guide Friday | Reel, 20–30 sec | G | Guide 2 · Google Profile: the 5 questions a hunter asks on your listing (script READY in `content-posts/2026-10-30-google-profile-reel.md`) |
 | 14 | Sat Oct 31 | Camp Notes | Single image or text | B/M | Halloween: the scariest thing for an outfitter is an empty September |
 | 15 | Mon Nov 2 | Rebook Monday | Carousel, 9 slides | E/G | Email 1 deep-dive: 6 ways to open with a real moment (9 slides + caption READY in `content-posts/2026-11-02-email-1-openers/` and `CAPTIONS-NOV-2.md`) |
-| 16 | Tue Nov 3 | Draw Dates Tuesday | Reel, 20–30 sec | S | Idaho timeline: May 1 to Jun 5, results mid-June to early July, August second draw |
+| 16 | Tue Nov 3 | Draw Dates Tuesday | Reel, 20–30 sec | S | Idaho timeline: May 1 to Jun 5, results mid-June to early July, August second draw (6 stills + script + caption READY in `content-posts/2026-11-03-idaho-reel/` and `2026-11-03-idaho-reel.md`) |
 | 17 | Wed Nov 4 | Teardown Wednesday | Carousel, 8–10 slides | E | Hunt page teardown: dates, price, what's included |
 | 18 | Thu Nov 5 | Outfitter Question | Reel, 15–30 sec | B | How do you collect past clients' emails today? |
 | 19 | Fri Nov 6 | Free Guide Friday | Carousel, 8 slides | G | Guide 3 · Calendar: fill in your four key dates |

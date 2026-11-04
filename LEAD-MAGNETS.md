@@ -6,9 +6,12 @@
 2. **Signup page**: name + email only. `POST /api/send-starter-kit-drip` saves
    the subscriber and sends **guide 1 immediately**. If that send fails the
    daily cron sends it, so a signup is never lost.
-3. **Drip** (`send-starter-kit-drip.js`): guide 1 on signup, guides 2-4 on
-   days 2 / 4 / 6, then a short Booked Out pitch on day 8. Each email has a
-   "Read guide N" button. Guides 2-4 carry a "reply 'booked out'" PS.
+3. **Drip** (`send-starter-kit-drip.js`): guide 1 on signup, guides 2-5 on
+   days 2 / 4 / 6 / 8, then a short Booked Out pitch on day 10. Each email has a
+   "Read guide N" button. Guides 2-5 carry a "reply 'booked out'" PS. Guide 5 is
+   "Get found on Google" (it was a bonus until 2026-11-04; everything customer-facing
+   now calls it guide 5 of 5). Signups that were already past stage 4 when this
+   changed get guide 5 next, then the pitch.
 4. **Non-subscribers** (`send-followups.js`): a reminder (+3d) and a breakup
    (+4d), both with the CTA button. They never receive the guides unless they
    sign up. Stops on reply and on signup.
@@ -16,7 +19,7 @@
 5. **"Send" / "yes" replies** (`check-replies.js` + `lib/guide-autoreply.js`):
    when an `elk_guide` lead answers the cold email with a short plain yes
    ("send", "yes please", "sounds good"), `check-replies` replies in the same
-   thread with the four guides as "Read guide N" buttons (text + HTML), once
+   thread with the five guides as "Read guide N" buttons (text + HTML), once
    per lead (`outreach_leads.guides_sent_at`). Anything else (questions,
    "send me pricing", "no", out-of-office, bounces) is NOT auto-answered and
    shows up in the digest for a human. The digest marks auto-sent leads, and
@@ -41,7 +44,7 @@
    short email pitching a 10-15 minute phone call, with a "Pick a time and I'll
    call you" button to the Calendly "15-minute phone call" event (Gabriel
    calls them). Three ways in, one pitch per lead (`outreach_leads.call_pitch_sent_at`):
-   - signed up through the emailed link: the last drip email (stage 5)
+   - signed up through the emailed link: the last drip email (stage 6)
      (signups from other sources still get the Booked Out pricing pitch);
    - replied "send": `send-followups.js` sends it 3 days after the guides;
    - opened a guide page (any guide except the signup page) from an emailed

@@ -12,7 +12,7 @@ const { classifyBounce, isOptOut, isUnsubscribe } = require('../lib/reply-rules'
 
 // ============================================================
 // Reply tracker
-// Also auto-answers a plain "send" / "yes" from an elk_guide lead with the four
+// Also auto-answers a plain "send" / "yes" from an elk_guide lead with the five
 // free guides (buttons, not raw URLs) — see lib/guide-autoreply.js. Once per
 // lead (guides_sent_at); anything that isn't a short plain yes is left for a
 // human and shows up in the digest as usual.
@@ -114,7 +114,7 @@ async function sendAlertEmail(hits, bounced = []) {
 
   const fmt = (h) =>
     `• ${h.company || 'Unknown'}${h.name ? ` (${h.name})` : ''} — ${h.email} [${h.niche || 'n/a'}] (${h.intent})\n` +
-    (h.auto_reply === 'sent' ? '  AUTO-SENT the four guides.\n' : '') +
+    (h.auto_reply === 'sent' ? '  AUTO-SENT the five guides.\n' : '') +
     (h.auto_reply === 'failed' ? '  AUTO-REPLY FAILED — send the guides by hand.\n' : '') +
     (h.opt_out ? '  OPTED OUT — do not contact again.\n' : '') +
     `  "${h.snippet}"\n`;
@@ -154,7 +154,7 @@ async function sendAlertEmail(hits, bounced = []) {
 
 // ============================================================
 // Guides auto-reply
-// Answers a plain "send" / "yes" with the four guides as button links, in the
+// Answers a plain "send" / "yes" with the five guides as button links, in the
 // same thread. Returns null (not applicable), 'sent', 'would_send' (dry run) or
 // 'failed'. The guides_sent_at claim is taken before sending so a second run
 // can never send twice; a failed send releases it and the lead falls back to

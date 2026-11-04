@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // scripts/build-guides.js
 //
-// Generates the four DIY lead-magnet guide pages (+ an index) into guides/*.html.
+// Generates the five DIY lead-magnet guide pages (+ an index) into guides/*.html.
 // Static output, no serverless functions. Run:  node scripts/build-guides.js
 //
 // Why a generator: the site's Vercel build only ships *.html (see vercel.json),
@@ -234,7 +234,7 @@ function shell({ slug, title, desc, body }) {
 <body data-guide="${slug}">
 <nav>
   <a href="/index.html" class="logo">GRIFFIN<span>CREATIVE</span></a>
-  <a href="/guides/index.html" class="nav-r">All 4 guides</a>
+  <a href="/guides/index.html" class="nav-r">All 5 guides</a>
 </nav>
 ${body}
 <footer>Griffin Creative · griffincreativelab.com</footer>
@@ -281,21 +281,21 @@ const GUIDES = [
   { slug: 'google-business-profile', num: 2, short: 'Google Business Profile', time: '45 min' },
   { slug: 'season-calendar', num: 3, short: 'Season Calendar', time: '30 min' },
   { slug: 'review-requests', num: 4, short: 'Reviews After Every Hunt', time: '20 min' },
-  { slug: 'get-found-on-google', num: 5, short: 'Get Found on Google', time: '45 min', bonus: true },
+  { slug: 'get-found-on-google', num: 5, short: 'Get Found on Google', time: '45 min' },
 ];
 const G = (slug) => GUIDES.find((x) => x.slug === slug);
 function pager(slug) {
   const i = GUIDES.findIndex((x) => x.slug === slug);
   const p = GUIDES[i - 1], n = GUIDES[i + 1];
   return `<div class="pn">${p ? `<a href="/guides/${p.slug}.html">← Guide ${p.num}: ${p.short}</a>` : '<span></span>'}${
-    n ? `<a href="/guides/${n.slug}.html">${n.bonus ? 'Bonus' : 'Guide ' + n.num}: ${n.short} →</a>` : `<a href="/guides/index.html">All guides</a>`
+    n ? `<a href="/guides/${n.slug}.html">Guide ${n.num}: ${n.short} →</a>` : `<a href="/guides/index.html">All guides</a>`
   }</div>`;
 }
 const cta = () =>
   `<section class="cta"><span class="tag">// Rather not do this yourself?</span><h2>That's what <em style="font-style:normal;color:var(--orange)">Booked Out</em> is.</h2><p>Everything in this guide, done for you and kept running all season. We build it, we keep it fresh, and we send it on schedule while you're out guiding.</p><a class="btn" href="/index.html#pricing">See how Booked Out works</a></section>`;
 
 function hero(g, title, lede, pills) {
-  return `<header class="hero wrap"><span class="tag">// Free Guide ${g.num} of 4</span><h1>${title}</h1><p class="lede">${lede}</p><div class="pills">${pills
+  return `<header class="hero wrap"><span class="tag">// Free Guide ${g.num} of 5</span><h1>${title}</h1><p class="lede">${lede}</p><div class="pills">${pills
     .map(([k, v]) => `<span class="pill">${k}: <b>${v}</b></span>`)
     .join('')}</div></header>`;
 }
@@ -666,7 +666,7 @@ function guide5() {
     'Check once a month',
   ];
   const body = `
-<header class="hero wrap"><span class="tag">// Bonus guide · free</span><h1>GET FOUND <em>ON GOOGLE.</em></h1><p class="lede">A hunter who hears your name searches for you. A hunter who has not heard of you searches for an outfitter. This is how you show up for both, without paying anyone.</p><div class="pills"><span class="pill">Time: <b>45 min</b></span><span class="pill">Then: <b>10 min a month</b></span><span class="pill">Cost: <b>Free</b></span></div></header>
+<header class="hero wrap"><span class="tag">// Free Guide 5 of 5</span><h1>GET FOUND <em>ON GOOGLE.</em></h1><p class="lede">A hunter who hears your name searches for you. A hunter who has not heard of you searches for an outfitter. This is how you show up for both, without paying anyone.</p><div class="pills"><span class="pill">Time: <b>45 min</b></span><span class="pill">Then: <b>10 min a month</b></span><span class="pill">Cost: <b>Free</b></span></div></header>
 <main class="wrap">
 <div class="why">
 <p><b>Why this matters.</b> Most hunters start with a search. If your name, your website and your listing do not show up, or show up wrong, the hunter books whoever does. Google does not rank you because you ask nicely. It shows the pages that clearly answer what the hunter typed, from a business it can tell is real.</p>
@@ -790,14 +790,14 @@ function index() {
     'get-found-on-google': 'Titles, hunt pages, listings, links and Google Search Console, so hunters find you.',
   };
   const body = `
-<header class="hero wrap"><span class="tag">// Free, no catch</span><h1>THE BOOKED OUT <em>STARTER KIT.</em></h1><p class="lede">Four step-by-step guides for elk outfitters. Follow them yourself and you'll be easier to find, better reviewed, and booked earlier. Each one takes under an hour.</p></header>
+<header class="hero wrap"><span class="tag">// Free, no catch</span><h1>THE BOOKED OUT <em>STARTER KIT.</em></h1><p class="lede">Five step-by-step guides for elk outfitters. Follow them yourself and you'll be easier to find, better reviewed, and booked earlier. Each one takes under an hour.</p></header>
 <main class="wrap">
 <div class="cards">
-${GUIDES.map((g) => `<a class="gc" href="/guides/${g.slug}.html"><span class="tag">// ${g.bonus ? 'Bonus guide' : `Guide ${g.num} of 4`} · ${g.time}</span><h3>${g.short}</h3><p>${blurbs[g.slug]}</p></a>`).join('')}
+${GUIDES.map((g) => `<a class="gc" href="/guides/${g.slug}.html"><span class="tag">// Guide ${g.num} of 5 · ${g.time}</span><h3>${g.short}</h3><p>${blurbs[g.slug]}</p></a>`).join('')}
 </div>
 ${cta()}
 </main>`;
-  return shell({ slug: 'index', title: 'The Booked Out Starter Kit', desc: 'Four free step-by-step marketing guides for elk outfitters: Google Business Profile, reviews, rebooking emails, and a season marketing calendar.', body });
+  return shell({ slug: 'index', title: 'The Booked Out Starter Kit', desc: 'Five free step-by-step marketing guides for elk outfitters: Google Business Profile, reviews, rebooking emails, a season marketing calendar, and getting found on Google.', body });
 }
 
 // ---------- write ----------

@@ -5,8 +5,8 @@ const { createClient } = require('@supabase/supabase-js');
 // The Booked Out Starter Kit — opt-in guide drip.
 // See LEAD-MAGNETS.md. The flow:
 //   cold email (CTA button) -> /starter-kit.html (name + email) -> subscribed
-//   -> guide 1 immediately, guides 2-4 every 2 days (days 2/4/6)
-//   -> a short Booked Out pitch at the end (day 8).
+//   -> guide 1 immediately, guides 2-5 every 2 days (days 2/4/6/8)
+//   -> a short Booked Out pitch at the end (day 10).
 //
 // Two ways in, one function (the Hobby plan caps us at 12 functions):
 //   1. Public signup: POST { name, email, lead? } from /starter-kit.html.
@@ -131,7 +131,7 @@ async function getCompanyName(signup) {
 
 // ---------- Stage content ----------
 // Returns { subject, body, cta }. Deterministic — no AI spend.
-// Stage 1 is sent on signup; 2-4 every DRIP_INTERVAL_DAYS; 5 is the pitch: a
+// Stage 1 is sent on signup; 2-5 every DRIP_INTERVAL_DAYS; 6 is the pitch: a
 // call pitch for people who signed up from our outreach email (fromOutreach),
 // the Booked Out pricing pitch for everyone else.
 const PS = '\n\nps — if you ever want to see how we\'d run all of this for you, just reply "booked out".';
@@ -148,10 +148,10 @@ function buildStageEmail(stage, { first, companyName, q, fromOutreach }) {
         subject: `your free rebooking guide${forCo}`,
         body:
           hi +
-          `you're in. guide 1 of 4 is right here — the email most outfitters never send: the rebooking email.\n\n` +
+          `you're in. guide 1 of 5 is right here — the email most outfitters never send: the rebooking email.\n\n` +
           `it's step by step, with copy-and-paste templates for the thank-you, the rebook, and the application reminder:\n\n` +
           `${url}\n\n` +
-          `the other three land over the next week, one every couple of days.` +
+          `the other four land over the next week or so, one every couple of days.` +
           CANONICAL_SIGNATURE,
         cta: { url, label: 'Read guide 1' },
       };
@@ -159,10 +159,10 @@ function buildStageEmail(stage, { first, companyName, q, fromOutreach }) {
     case 2: {
       const url = guide('google-business-profile');
       return {
-        subject: `guide 2 of 4: your google business profile`,
+        subject: `guide 2 of 5: your google business profile`,
         body:
           hi +
-          `guide 2 of 4. when someone searches for an elk hunt, your google business profile is usually the first thing they see.\n\n` +
+          `guide 2 of 5. when someone searches for an elk hunt, your google business profile is usually the first thing they see.\n\n` +
           `this walks you through claiming it, picking the right category, and filling it out — ten steps, about 45 minutes:\n\n` +
           `${url}` +
           PS +
@@ -173,12 +173,12 @@ function buildStageEmail(stage, { first, companyName, q, fromOutreach }) {
     case 3: {
       const url = guide('season-calendar');
       return {
-        subject: `guide 3 of 4: your season marketing calendar`,
+        subject: `guide 3 of 5: your season marketing calendar`,
         body:
           hi +
-          `guide 3 of 4. fill in four dates from your state agency and follow a month-by-month plan built around tag-draw timing:\n\n` +
+          `guide 3 of 5. fill in four dates from your state agency and follow a month-by-month plan built around tag-draw timing:\n\n` +
           `${url}\n\n` +
-          `one more to go.` +
+          `two more to go.` +
           PS +
           CANONICAL_SIGNATURE,
         cta: { url, label: 'Read guide 3' },
@@ -187,17 +187,31 @@ function buildStageEmail(stage, { first, companyName, q, fromOutreach }) {
     case 4: {
       const url = guide('review-requests');
       return {
-        subject: `guide 4 of 4: reviews after every hunt`,
+        subject: `guide 4 of 5: reviews after every hunt`,
         body:
           hi +
-          `last guide. the link, a printable qr card, the message to send, and the google rules to stay on the right side of:\n\n` +
-          `${url}` +
+          `guide 4 of 5. the link, a printable qr card, the message to send, and the google rules to stay on the right side of:\n\n` +
+          `${url}\n\n` +
+          `one more to go.` +
           PS +
           CANONICAL_SIGNATURE,
         cta: { url, label: 'Read guide 4' },
       };
     }
-    case 5:
+    case 5: {
+      const url = guide('get-found-on-google');
+      return {
+        subject: `guide 5 of 5: getting found on google`,
+        body:
+          hi +
+          `last guide. this one is about showing up when a hunter searches for you or for an outfitter: your website's titles and descriptions, a page for each hunt, the listings google checks, and setting up google search console (free). about 45 minutes:\n\n` +
+          `${url}` +
+          PS +
+          CANONICAL_SIGNATURE,
+        cta: { url, label: 'Read guide 5' },
+      };
+    }
+    case 6:
       if (fromOutreach) {
         return {
           subject: `15 minutes on getting you seen year round?`,
@@ -206,14 +220,14 @@ function buildStageEmail(stage, { first, companyName, q, fromOutreach }) {
         };
       }
       return {
-        subject: `the four free marketing guides, and what's next`,
+        subject: `the five free marketing guides, and what's next`,
         body:
           hi +
-          `that's the whole kit — your google profile, reviews, a season calendar, and rebooking emails. that's new hunters finding you and past hunters coming back. ` +
+          `that's the whole kit — your google profile, reviews, a season calendar, rebooking emails, and getting found on google. that's new hunters finding you and past hunters coming back. ` +
           `everything in them you can do yourself, and they're yours either way.\n\n` +
           `the catch is that it's all ongoing: new dates every year, reviews after every hunt, the profile kept fresh, ` +
           `the rebooking email on time. if you'd rather not run that on top of guiding, that's what booked out is — ` +
-          `we run all of it for you year round, and then some. those four marketing guides are only a slice of what's in it. ` +
+          `we run all of it for you year round, and then some. those five marketing guides are only a slice of what's in it. ` +
           `and you can cancel anytime.\n\n` +
           `how it works: ${PRICING_URL}\n\n` +
           `or just reply and tell me where you're at.` +
@@ -241,7 +255,7 @@ async function deliverNextStage(signup, { dryRun = false } = {}) {
     .from('lead_magnet_signups')
     .update({
       drip_stage: nextStage,
-      next_drip_at: nextStage < 5 ? daysFromNow(DRIP_INTERVAL_DAYS) : null,
+      next_drip_at: nextStage < 6 ? daysFromNow(DRIP_INTERVAL_DAYS) : null,
     })
     .eq('id', signup.id);
   if (updateErr) throw new Error(`supabase update failed: ${updateErr.message}`);
@@ -328,7 +342,7 @@ module.exports = async (req, res) => {
     const { data: due, error: fetchErr } = await supabase
       .from('lead_magnet_signups')
       .select('*')
-      .lt('drip_stage', 5)
+      .lt('drip_stage', 6)
       .lte('next_drip_at', new Date().toISOString())
       .order('next_drip_at', { ascending: true })
       .limit(MAX_PER_RUN);
