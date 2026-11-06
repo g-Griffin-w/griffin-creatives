@@ -11,9 +11,9 @@
 // Page 1 (outside), left to right: inside flap | back panel (QR + contact) | front cover
 // Page 2 (inside), left to right: guides 1+2 | guides 3+4 | guide 5 + "done for you"
 //
-// Print: double-sided, landscape, "flip on short edge". Everything sits inside a
-// 0.3 in margin, so no bleed or "no margins" setting is needed. Fold the right
-// panel (cover) in last... i.e. fold the left flap in first, then the cover over it.
+// Print: double-sided, landscape, "flip on short edge". Black-and-orange design: the black
+// field is inset 0.25 in on every side (white border), so any printer can print it
+// without bleed or trimming. Fold the left flap in first, then the cover over it.
 //
 // The QR is handouts/qr-ioga.png (https://www.griffincreativelab.com/starter-kit.html?src=ioga).
 
@@ -28,9 +28,11 @@ const OUT = path.join(ROOT, 'handouts', 'ioga-brochure');
 
 const W = 1100; // 11 in at 100 px/in; rendered 3x for 300 dpi
 const H = 850;
-const PW = [366, 367, 367];
+const PW = [350, 350, 350];
+const PH = 800; // black field is inset 25px (0.25 in) on every side so any printer can print it
 const PAD = '44px 32px 40px 32px';
-const C = { black: '#111111', ink: '#2b2b2b', gray: '#5f5f5f', light: '#8a8a8a', orange: '#ff4d00', rule: '#e4dfd5', wash: '#fff3ec' };
+// Black-and-orange: C.black is the MAIN TEXT colour (off-white); C.bg is the black field.
+const C = { bg: '#0a0a0a', black: '#f0ece3', ink: '#d6d2c8', gray: '#a9a49a', light: '#8a8a8a', orange: '#ff4d00', rule: '#3a3a3a', wash: '#1a120c' };
 
 const GUIDES = {
   1: { title: 'Rebooking emails', time: 'Three emails and a follow-up', steps: [
@@ -84,7 +86,7 @@ const logo = (size) => div({ fontFamily: 'DIN', fontSize: size, letterSpacing: 2
 ]);
 
 function panel(w, children, extra) {
-  return div({ width: w, height: H, flexDirection: 'column', padding: PAD, backgroundColor: '#ffffff', ...(extra || {}) }, children);
+  return div({ width: w, height: PH, flexDirection: 'column', padding: PAD, backgroundColor: C.bg, position: 'relative', ...(extra || {}) }, children);
 }
 
 function guide(n) {
@@ -93,14 +95,14 @@ function guide(n) {
     div({ alignItems: 'center', marginBottom: 12 }, [
       div({ width: 52, height: 52, backgroundColor: C.orange, alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 },
         div({ fontFamily: 'DIN', fontSize: 40, color: '#ffffff', lineHeight: 1 }, String(n))),
-      div({ flexDirection: 'column', width: 236 }, [
+      div({ flexDirection: 'column', width: 220 }, [
         div({ fontSize: 21, fontWeight: 700, color: C.black, lineHeight: 1.12 }, g.title),
       ]),
     ]),
     div({ fontSize: 14, color: C.gray, lineHeight: 1.3, marginBottom: 6 }, DESC[n]),
     ...g.steps.map((s) => div({ marginTop: 9, alignItems: 'flex-start' }, [
       div({ width: 8, height: 8, backgroundColor: C.orange, marginTop: 7, marginRight: 11, flexShrink: 0 }, ''),
-      div({ fontSize: 17, color: C.ink, lineHeight: 1.28, width: 270 }, s),
+      div({ fontSize: 17, color: C.ink, lineHeight: 1.28, width: 266 }, s),
     ])),
   ]);
 }
@@ -134,7 +136,7 @@ function back(qrUri) {
       div({ fontFamily: 'DIN', fontSize: 52, lineHeight: 1, color: C.black, letterSpacing: 1 }, 'SCAN TO GET'),
       div({ fontFamily: 'DIN', fontSize: 52, lineHeight: 1, color: C.orange, letterSpacing: 1 }, 'ALL FIVE, FREE.'),
     ]),
-    div({ width: 270, height: 270, border: `3px solid ${C.black}`, padding: 12, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center', alignSelf: 'center' },
+    div({ width: 270, height: 270, border: `4px solid ${C.orange}`, padding: 12, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center', alignSelf: 'center' },
       { type: 'img', props: { src: qrUri, width: 238, height: 238, style: { width: 238, height: 238 } } }),
     div({ fontSize: 14, fontWeight: 700, color: C.black, marginTop: 14, alignSelf: 'center' }, 'griffincreativelab.com/starter-kit.html'),
     div({ fontSize: 13, color: C.gray, marginTop: 3, alignSelf: 'center' }, 'Just a name and email. No card.'),
@@ -181,7 +183,8 @@ function insideC() {
   ]);
 }
 
-const sheet = (panels) => div({ width: W, height: H, flexDirection: 'row', backgroundColor: '#ffffff', fontFamily: 'Lato' }, panels);
+const sheet = (panels) => div({ width: W, height: H, padding: 25, backgroundColor: '#ffffff', fontFamily: 'Lato' },
+  div({ width: W - 50, height: PH, flexDirection: 'row', backgroundColor: C.bg }, panels));
 
 // Minimal multi-page PDF (US Letter landscape), one JPEG per page.
 function pdfFromJpegs(jpegs, wPx, hPx, pw = 792, ph = 612) {
