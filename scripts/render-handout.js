@@ -6,6 +6,10 @@
 // then a PNG and a single-page PDF (the PDF is the PNG as a JPEG, written by hand
 // so no PDF library is needed).
 //
+// Print run: about 200 copies for IOGA check-in on 12/1 (~175 members expected).
+// The top and bottom orange bars run to the page edge, so tell the print shop
+// "no margins / fit to page", or ask for a bleed.
+//
 // Usage: node scripts/render-handout.js
 //   -> handouts/ioga-handout.png, handouts/ioga-handout.pdf
 //
@@ -58,12 +62,12 @@ function page(qrUri) {
           h('span', { color: C.black }, 'GRIFFIN '),
           h('span', { color: C.orange }, 'CREATIVE LABS'),
         ]),
-        div({ fontSize: 14, letterSpacing: 2, color: C.light, fontWeight: 700 }, 'MARKETING FOR ELK OUTFITTERS'),
+        div({ fontSize: 14, letterSpacing: 2, color: C.light, fontWeight: 700 }, 'MARKETING FOR OUTFITTERS'),
       ]),
       div({ flexDirection: 'column', marginTop: 26 }, [
         div({ fontFamily: 'DIN', fontSize: 90, lineHeight: 0.98, color: C.black, letterSpacing: 1 }, 'FIVE FREE MARKETING'),
-        div({ fontFamily: 'DIN', fontSize: 90, lineHeight: 0.98, color: C.black, letterSpacing: 1 }, 'GUIDES FOR IDAHO'),
-        div({ fontFamily: 'DIN', fontSize: 90, lineHeight: 0.98, color: C.orange, letterSpacing: 1 }, 'ELK OUTFITTERS.'),
+        div({ fontFamily: 'DIN', fontSize: 90, lineHeight: 0.98, color: C.black, letterSpacing: 1 }, 'GUIDES FOR'),
+        div({ fontFamily: 'DIN', fontSize: 90, lineHeight: 0.98, color: C.orange, letterSpacing: 1 }, 'OUTFITTERS.'),
       ]),
       div({ fontSize: 20, color: C.ink, lineHeight: 1.35, marginTop: 16, marginBottom: 22, width: 738 },
         'Step by step, with copy-and-paste templates. Work through them in any order.'),
