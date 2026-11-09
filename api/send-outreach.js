@@ -580,7 +580,7 @@ function buildElkEmail(lead) {
   const dates = state === 'the West' ? "your state's application dates" : `${state}'s application dates`;
   const body =
     `Hey ${elkFirstName(lead)},\n\n` +
-    `I came across ${company} while looking at elk outfitters in ${state}. I'm Gabriel with Griffin Creative Labs, a marketing agency that works with outfitters in the West.\n\n` +
+    `I came across ${company} while looking at hunting outfitters in ${state}. I'm Gabriel with Griffin Creative Labs, a marketing agency that works with outfitters in the West.\n\n` +
     `I put together five free marketing guides for outfitters:\n` +
     `- Setting up and editing your Google Business Profile\n` +
     `- A rebooking email sequence for past hunters\n` +
@@ -599,6 +599,9 @@ function buildElkEmail(lead) {
 // Any miss (no site, unreadable, nothing wrong, kill switch) returns the standard
 // email, so a bad site can never block a send.
 async function buildElkEmailForLead(lead) {
+  // The site tip talks about elk (title, description). Outfitters who hunt other game
+  // (company_industry 'Hunting Outfitter (non-elk)') get the standard email instead.
+  if (/non-elk/i.test(lead.company_industry || '')) return buildElkEmail(lead);
   try {
     const company = sanitizeCompanyName(lead.company_name).replace(/[,.;\s]+$/, '') || 'your outfit';
     const state = stateFull(lead.company_state);
