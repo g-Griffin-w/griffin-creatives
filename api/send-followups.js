@@ -28,10 +28,15 @@ const { CALL_URL, CALL_CTA_LABEL, buildCallPitch } = require('../lib/call-pitch'
 // timeout mid-batch loses nothing — the next run picks up the rest.
 const BATCH_SIZE = Math.max(
   1,
-  Math.min(30, parseInt(process.env.FOLLOWUP_BATCH_SIZE, 10) || 20),
+  Math.min(40, parseInt(process.env.FOLLOWUP_BATCH_SIZE, 10) || 30),
 );
-const DELAY_MS_MIN = 3000;
-const DELAY_MS_MAX = 7000;
+const DELAY_MS_MIN = 2000;
+const DELAY_MS_MAX = 5000;
+// Stop starting new sends after this many ms so the run always finishes and
+// reports, instead of being killed by the platform timeout mid-batch.
+const RUN_BUDGET_MS = 230000;
+let runStarted = Date.now(); // reset at the start of every request
+const overBudget = () => Date.now() - runStarted > RUN_BUDGET_MS;
 
 // Days between touches. Initial send schedules stage-0 at +3d (in send-outreach).
 // After follow-up #1 we schedule follow-up #2 four days later (~day 7 overall).
@@ -39,7 +44,7 @@ const DAYS_TO_FOLLOWUP_2 = 4;
 const MAX_STAGE = 2; // stop after two follow-ups
 
 // Guide niches (elk_guide / salmon_guide): the guide play is opt-in. Email 1
-// (send-outreach.js) explains the four free marketing guides and has a CTA button to
+// (send-outreach.js) explains the five free marketing guides and has a CTA button to
 // /starter-kit.html. Follow-ups here are just reminders of that ask, sent to
 // people who haven't signed up: a reminder, then a breakup. Same cadence as
 // DTC. Once someone signs up the follow-ups stop (below) and the drip in
@@ -115,7 +120,7 @@ function buildFollowupBody(lead, stage) {
 // outfitters; salmon_guide has none yet, so those leads are skipped in the
 // handler.
 const GUIDE_SIGNATURE = '\n\ngabriel\ngriffincreative\ngriffincreativelab.com';
-const GUIDE_CTA_LABEL = 'Get the 4 free marketing guides';
+const GUIDE_CTA_LABEL = 'Get the 5 free marketing guides';
 const signupUrl = (lead) => `https://www.griffincreativelab.com/starter-kit.html?lead=${lead.id}`;
 // Leads emailed before Oct 12 2026 got the old ask-first pitch, which never
 // explained the guides. Their first follow-up is the explanation.
@@ -127,12 +132,12 @@ const sawQuestion = (lead) => (lead.email_body || '').includes(ELK_ASK);
 function buildGuideFollowup(lead, stage) {
   const first = firstName(lead);
   const url = signupUrl(lead);
-  const list = 'Google Business Profile setup and edits, a rebooking email sequence, a marketing season calendar, and a review system for after every hunt';
+  const list = 'Google Business Profile setup, a rebooking email sequence, a marketing season calendar, a review system for after every hunt, and getting found on Google';
 
   if (stage === 0 && sawQuestion(lead)) {
     return (
       `Hey ${first} \u2014 floating this back up.\n\n` +
-      `The four free marketing guides are still yours if you want them: ${list}. ` +
+      `The five free marketing guides are still yours if you want them: ${list}. ` +
       `Just reply "send" and I'll send the first one, or grab them here with your name and email:\n\n` +
       `${url}\n\n` +
       `Gabriel\nGriffin Creative Labs`
@@ -141,9 +146,9 @@ function buildGuideFollowup(lead, stage) {
   if (stage === 0 && !sawGuideIntro(lead)) {
     return (
       `hi ${first},\n\n` +
-      `following up on my note — here's the simpler version of what i offered. we put together four free ` +
-      `step-by-step guides for elk outfitters: ${list}.\n\n` +
-      `sign up with your name and email and the first one lands right away, with the other three over the next week. no catch:\n\n` +
+      `following up on my note — here's the simpler version of what i offered. we put together five free ` +
+      `step-by-step guides for outfitters: ${list}.\n\n` +
+      `sign up with your name and email and the first one lands right away, with the rest over the next week. no catch:\n\n` +
       `${url}` +
       GUIDE_SIGNATURE
     );
@@ -151,7 +156,7 @@ function buildGuideFollowup(lead, stage) {
   if (stage === 0) {
     return (
       `hi ${first} — floating this back up.\n\n` +
-      `the four free marketing guides are still yours if you want them: ${list}. ` +
+      `the five free marketing guides are still yours if you want them: ${list}. ` +
       `just your name and email, and the first one lands right away:\n\n` +
       `${url}` +
       GUIDE_SIGNATURE
@@ -468,6 +473,7 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
+  runStarted = Date.now();
   const dryRun = req.query?.dry_run === '1';
   const rawLimit = parseInt(req.query?.limit, 10);
   const batchLimit = Number.isFinite(rawLimit)
@@ -475,8 +481,6 @@ module.exports = async (req, res) => {
     : BATCH_SIZE;
 
   try {
-    const callPitches = await sendGuideCallPitches({ dryRun });
-
     // Pull sent, un-replied leads whose follow-up is due and who still have
     // touches left. reply_received=false is the auto-stop.
     const nowIso = new Date().toISOString();
@@ -498,6 +502,7 @@ module.exports = async (req, res) => {
     }
 
     if (!leads || leads.length === 0) {
+      const callPitches = await sendGuideCallPitches({ dryRun });
       return res.status(200).json({
         success: true,
         message: 'No follow-ups due',
@@ -525,6 +530,10 @@ module.exports = async (req, res) => {
     }
 
     for (const lead of leads) {
+      if (overBudget()) {
+        results.stopped_for_time = true;
+        break;
+      }
       try {
         const guide = isGuideLead(lead);
         const maxStage = MAX_STAGE;
@@ -630,6 +639,10 @@ module.exports = async (req, res) => {
         results.errors.push({ lead_id: lead.id, email: lead.email, stage: 'send', error: err.message });
       }
     }
+
+    // Call pitches go last so they can never hold up the follow-ups.
+    const callPitches = overBudget() ? { skipped_for_time: true } : await sendGuideCallPitches({ dryRun });
+    console.log('send-followups', JSON.stringify({ batch: leads.length, sent: results.sent, failed: results.failed, errors: results.errors.slice(0, 5), stopped_for_time: Boolean(results.stopped_for_time) }));
 
     return res.status(200).json({
       success: true,

@@ -52,6 +52,14 @@
       "schedule": "0 17 * * *"
     },
     {
+      "path": "/api/send-followups",
+      "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/send-followups",
+      "schedule": "0 23 * * *"
+    },
+    {
       "path": "/api/send-starter-kit-drip",
       "schedule": "0 18 * * *"
     },
