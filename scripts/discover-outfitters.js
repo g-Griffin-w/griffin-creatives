@@ -114,6 +114,9 @@ const STATE_RE = {
   OR: /\bOregon\b|\bOR\s*97\d{3}\b|,\s*OR\b/,
   WA: /\bWashington\b|\bWA\s*9[89]\d{3}\b|,\s*WA\b/,
   CA: /\bCalifornia\b|\bCA\s*9\d{4}\b|,\s*CA\b/,
+  CO: /\bColorado\b|\bCO\s*8[01]\d{3}\b|,\s*CO\b/,
+  UT: /\bUtah\b|\bUT\s*84\d{3}\b|,\s*UT\b/,
+  WY: /\bWyoming\b|\bWY\s*8[23]\d{3}\b|,\s*WY\b/,
 };
 const inState = (text, st) => (STATE_RE[st] ? STATE_RE[st].test(text) : true);
 
@@ -165,6 +168,12 @@ async function readListing(c) {
 
 async function process1(c) {
   const out = { name: c.name, state: c.state, source: c.source, listing: c.listing };
+  // A state outfitter registry that publishes the outfitter's own email and the
+  // game units they hunt (e.g. the Colorado Outfitters Association directory) is
+  // proof enough: no website crawl needed.
+  if (c.trusted && c.email) {
+    return { ...out, website: c.website || null, email: c.email, phone: c.phone || null, mentionsElk: true, status: 'ok', how: 'registry' };
+  }
   try {
     if (c.listing) {
       const ok = await readListing(c);
@@ -284,10 +293,10 @@ async function main() {
     const em = r.email.toLowerCase();
     const dom = domainOf(r.website);
     const nk = nameKey(r.name || '');
-    if (haveEmail.has(em) || seenEmail.has(em) || haveDomain.has(dom) || seenDomain.has(dom)) continue;
+    if (haveEmail.has(em) || seenEmail.has(em) || (dom && (haveDomain.has(dom) || seenDomain.has(dom)))) continue;
     if (nk.length > 3 && haveName.has(nk)) continue; // same business already held under another email
     seenEmail.add(em);
-    seenDomain.add(dom);
+    if (dom) seenDomain.add(dom);
     ok.push(r);
   }
   const tally = results.reduce((a, r) => ((a[r.status] = (a[r.status] || 0) + 1), a), {});
