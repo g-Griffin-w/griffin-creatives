@@ -601,7 +601,7 @@ function buildElkEmail(lead) {
 async function buildElkEmailForLead(lead) {
   // The site tip talks about elk (title, description). Outfitters who hunt other game
   // (company_industry 'Hunting Outfitter (non-elk)') get the standard email instead.
-  if (/non-elk/i.test(lead.company_industry || '')) return buildElkEmail(lead);
+  if (/non-elk|^hunting outfitter/i.test(lead.company_industry || '')) return buildElkEmail(lead);
   try {
     const company = sanitizeCompanyName(lead.company_name).replace(/[,.;\s]+$/, '') || 'your outfit';
     const state = stateFull(lead.company_state);
