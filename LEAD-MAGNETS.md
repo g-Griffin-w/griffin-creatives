@@ -6,15 +6,54 @@
 2. **Signup page**: name + email only. `POST /api/send-starter-kit-drip` saves
    the subscriber and sends **guide 1 immediately**. If that send fails the
    daily cron sends it, so a signup is never lost.
-3. **Drip** (`send-starter-kit-drip.js`): guide 1 on signup, guides 2-4 on
-   days 2 / 4 / 6, then a short Booked Out pitch on day 8. Each email has a
-   "Read guide N" button. Guides 2-4 carry a "reply 'booked out'" PS.
+3. **Drip** (`send-starter-kit-drip.js`): guide 1 on signup, guides 2-5 on
+   days 2 / 4 / 6 / 8, then a short Booked Out pitch on day 10. Each email has a
+   "Read guide N" button. Guides 2-5 carry a "reply 'booked out'" PS. Guide 5 is
+   "Get found on Google" (it was a bonus until 2026-11-04; everything customer-facing
+   now calls it guide 5 of 5). Signups that were already past stage 4 when this
+   changed get guide 5 next, then the pitch.
 4. **Non-subscribers** (`send-followups.js`): a reminder (+3d) and a breakup
    (+4d), both with the CTA button. They never receive the guides unless they
    sign up. Stops on reply and on signup.
 
+5. **"Send" / "yes" replies** (`check-replies.js` + `lib/guide-autoreply.js`):
+   when an `elk_guide` lead answers the cold email with a short plain yes
+   ("send", "yes please", "sounds good"), `check-replies` replies in the same
+   thread with the five guides as "Read guide N" buttons (text + HTML), once
+   per lead (`outreach_leads.guides_sent_at`). Anything else (questions,
+   "send me pricing", "no", out-of-office, bounces) is NOT auto-answered and
+   shows up in the digest for a human. The digest marks auto-sent leads, and
+   flags "AUTO-REPLY FAILED" if the send errors. It only runs when
+   `check-replies` runs: once a day on Hobby, so a reply can wait up to ~24h.
+   Hit `POST /api/check-replies` (Bearer CRON_SECRET) hourly from an external
+   cron for faster answers; reruns are safe. `?dry_run=1` shows
+   `auto_reply: would_send` without sending. Manual replies to leads must
+   follow the same rule: links are buttons, never bare URLs. The buttons open
+   the guide pages directly (no signup) and carry `?lead=<id>`, so the opens
+   are logged in `guide_views` against the lead.
+   Delivery failures are not replies (`lib/reply-rules.js`): a dead address
+   (550 5.1.1, address not found) sets `status = 'bounced'` and is listed in the
+   digest with the phone number so you can call for a good email; a temporary
+   failure (inbox full, Gmail retrying) is ignored. A plain "stop" /
+   "unsubscribe" / "not interested" is recorded as a negative reply without
+   asking the model, and an explicit stop/unsubscribe also sets
+   `status = 'unsubscribed'`. A bounce in the same thread as a real reply never
+   hides the reply.
+
+6. **Call pitch** (`lib/call-pitch.js`): everyone who has the guides gets one
+   short email pitching a 10-15 minute phone call, with a "Pick a time and I'll
+   call you" button to the Calendly "15-minute phone call" event (Gabriel
+   calls them). Three ways in, one pitch per lead (`outreach_leads.call_pitch_sent_at`):
+   - signed up through the emailed link: the last drip email (stage 6)
+     (signups from other sources still get the Booked Out pricing pitch);
+   - replied "send": `send-followups.js` sends it 3 days after the guides;
+   - opened a guide page (any guide except the signup page) from an emailed
+     link: `send-followups.js` sends it the next day. Only opens from
+     2026-10-29 on count (`CALL_PITCH_VIEWS_SINCE`).
+   If the lead wrote anything after our last email, nothing is sent.
+
 **Crons** (`vercel.json`; Vercel Hobby allows 100 cron jobs/project, once a
-day each): `check-replies` 14:00 UTC, `send-followups` 17:00, drip 18:00.
+day each): `check-replies` 18:00 UTC (11am Pacific in summer, 10am in winter; Hobby fires anywhere in that hour), `send-followups` 17:00, drip 18:00.
 These replace the cron-job.org jobs, which stopped in July (last logged
 reply 2026-07-22, last follow-up 2026-07-14).
 

@@ -1,0 +1,11 @@
+{
+  "slug": "2026-10-22-outfitter-question",
+  "slides": [
+    { "layout": "hook", "white": ["OUTFITTERS:"], "orange": ["WHEN DO YOU", "START TALKING", "TO LAST YEAR'S", "CLIENTS?"] },
+    { "layout": "bullets", "label": "PICK ONE", "title": "About next season, I reach out…",
+      "items": ["At the end of the hunt", "In December", "When my dates open", "Before the application deadline", "I don't, honestly"] },
+    { "layout": "cta", "headline": ["TELL US IN", "THE COMMENTS."],
+      "body": "No wrong answers. We're collecting how elk outfitters actually do it.",
+      "button": "FREE GUIDES: TAP THE LINK IN OUR BIO ↑", "foot": "griffincreativelab.com/starter-kit.html", "buttonSize": 52 }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "slug": "2026-11-03-idaho-reel",
+  "slides": [
+    { "layout": "hook", "white": ["IF I GUIDED", "IN IDAHO,"], "orange": ["THIS IS THE", "EMAIL I'D SEND", "IN MID-MAY"], "sub": "Copy it. Takes 2 minutes." },
+    { "layout": "topic", "n": "1", "label": "THE WINDOW", "head": ["MAY 1", "TO JUNE 5."], "example": "Idaho controlled hunt applications. These are 2026 dates; 2027 isn't posted yet." },
+    { "layout": "topic", "n": "2", "label": "THE RESULTS", "head": ["MID-JUNE."], "example": "First draw results posted June 17 in 2026. Leftover tags go to a second draw in August." },
+    { "layout": "topic", "n": "3", "label": "THE EMAIL", "head": ["TAG DEADLINE", "IS JUNE 5."], "example": "“Hi [first name], quick heads up: the Idaho elk application window closes June 5. If you draw, I'm holding [dates] for you. If you don't, let me know and we'll figure out next year.”", "tag": "TEMPLATE" },
+    { "layout": "topic", "n": "4", "label": "WHEN TO SEND IT", "head": ["2 TO 3 WEEKS", "BEFORE JUNE 5."], "example": "Then email again when results post. That's when a hunter who drew is ready to book." },
+    { "layout": "cta", "top": "COMMENT", "big": "IDAHO", "body": "and I'll send you the template.", "foot": "griffincreativelab.com" }
+  ]
+}

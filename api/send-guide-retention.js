@@ -1,5 +1,5 @@
-const { google } = require('googleapis');
 const { createClient } = require('@supabase/supabase-js');
+const { sendAsClient } = require('../lib/client-mail');
 
 // ============================================================
 // Guide "book next season" retention sender.
@@ -38,26 +38,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY,
 );
 
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GMAIL_CLIENT_ID,
-  process.env.GMAIL_CLIENT_SECRET,
-);
-oauth2Client.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
-const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-
-function encodeMimeHeader(value) {
-  // eslint-disable-next-line no-control-regex
-  if (/^[\x00-\x7F]*$/.test(value)) return value;
-  const base64 = Buffer.from(value, 'utf-8').toString('base64');
-  return `=?utf-8?B?${base64}?=`;
-}
-
-function generateMessageId(fromEmail) {
-  const domain = (fromEmail && fromEmail.split('@')[1]) || 'griffincreativelab.com';
-  const rand = Math.random().toString(36).slice(2);
-  return `<${Date.now()}.${rand}@${domain}>`;
-}
-
 // Parses "Day 0" / "Day 5" -> 0 / 5. Returns null if the label doesn't match
 // (a human editing the approved copy could rename these) so the caller can
 // fall back to DEFAULT_STAGE_GAP_DAYS rather than crash.
@@ -71,39 +51,6 @@ function daysUntilNextStage(emails, stageIndex) {
   const next = parseDayLabel(emails[stageIndex + 1]?.send_day);
   if (cur == null || next == null || next <= cur) return DEFAULT_STAGE_GAP_DAYS;
   return next - cur;
-}
-
-async function sendRetentionEmail({ to, subject, body, threadId, inReplyTo }) {
-  const fromEmail = process.env.GMAIL_FROM_EMAIL;
-  const fromName = process.env.GMAIL_FROM_NAME;
-
-  const headers = [
-    `From: ${encodeMimeHeader(fromName)} <${fromEmail}>`,
-    `To: ${to}`,
-    `Subject: ${encodeMimeHeader(subject)}`,
-    `Message-ID: ${generateMessageId(fromEmail)}`,
-    'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset=utf-8',
-    'Content-Transfer-Encoding: base64',
-  ];
-  if (inReplyTo) {
-    headers.push(`In-Reply-To: ${inReplyTo}`);
-    headers.push(`References: ${inReplyTo}`);
-  }
-
-  const bodyEncoded = Buffer.from(body, 'utf-8').toString('base64').match(/.{1,76}/g).join('\r\n');
-  const message = headers.join('\r\n') + '\r\n\r\n' + bodyEncoded;
-  const encoded = Buffer.from(message)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
-
-  const requestBody = { raw: encoded };
-  if (threadId) requestBody.threadId = threadId;
-
-  const result = await gmail.users.messages.send({ userId: 'me', requestBody });
-  return result.data;
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -199,6 +146,20 @@ module.exports = async (req, res) => {
       return result;
     }
 
+    // Cache the paying client's row (name, business, email) so each email goes
+    // out from their connected mailbox, or from hello@ with their name and Reply-To.
+    const clientCache = new Map();
+    async function getClient(guideClientId) {
+      if (clientCache.has(guideClientId)) return clientCache.get(guideClientId);
+      const { data } = await supabase
+        .from('griffin_clients')
+        .select('id, full_name, business_name, email')
+        .eq('id', guideClientId)
+        .maybeSingle();
+      clientCache.set(guideClientId, data || null);
+      return data || null;
+    }
+
     const results = { sent: 0, failed: 0, skipped_unapproved: 0, dry_run: dryRun, errors: [], drafts: [] };
 
     for (const contact of contacts) {
@@ -237,7 +198,8 @@ module.exports = async (req, res) => {
             next_send_at: nextAt,
           });
         } else {
-          const sendResult = await sendRetentionEmail({
+          const sendResult = await sendAsClient({
+            client: await getClient(contact.guide_client_id),
             to: contact.email,
             subject: email.subject,
             body: email.body,

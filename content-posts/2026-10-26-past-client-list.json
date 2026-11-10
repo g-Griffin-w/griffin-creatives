@@ -1,0 +1,26 @@
+{
+  "slug": "2026-10-26-past-client-list",
+  "slides": [
+    { "layout": "hook", "white": ["YOUR PAST-CLIENT"], "orange": ["LIST IS YOUR", "BEST MARKETING", "ASSET."] },
+    { "layout": "text", "label": "WHY START HERE", "firstBig": true,
+      "lines": ["Every rebooking email needs one thing first: a list of the people who already hunted with you.",
+                "Most outfitters have it. It's just scattered across texts, emails and a notebook."] },
+    { "layout": "bullets", "label": "STEP 1", "title": "Pull it into one place",
+      "items": ["Past booking emails and invoices", "Your phone contacts and texts", "Deposit and payment records", "Your guest book or camp sign-in sheet"] },
+    { "layout": "checklist", "label": "STEP 2 · THE COLUMNS THAT MATTER",
+      "items": [["First name and email", "The only two you can't skip."],
+                ["Year and hunt type", "Archery, rifle, drop camp, guided."],
+                ["Who guided them", "So your note can mention a real person."],
+                ["One real detail", "The bull on day four, the long pack out, the weather."]] },
+    { "layout": "checklist", "label": "STEP 3 · KEEP IT USEFUL",
+      "items": [["Add each hunter after the hunt", "While you still remember the details."],
+                ["Note who replied to what", "So you don't send the same ask twice."],
+                ["Ask permission", "Only email people who hunted with you or asked to hear from you."]] },
+    { "layout": "text", "label": "THE PAYOFF", "firstBig": true,
+      "lines": ["A real list lets you send a real thank-you, a real rebooking email and a real reminder before the draw.",
+                "That is how a past hunter turns into next season's booking."] },
+    { "layout": "cta", "headline": ["WANT THE", "FULL GUIDE?"],
+      "body": "Free. The list template, all three rebooking emails filled in, state dates and a checklist.",
+      "button": "TAP “FREE GUIDES!” IN OUR BIO ↑", "foot": "griffincreativelab.com/starter-kit.html", "buttonSize": 60 }
+  ]
+}

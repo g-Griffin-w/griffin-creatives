@@ -1,65 +1,57 @@
-# To-do — Monday Oct 19, 2026 (lead focus, ~6 hours)
+# To-do — Friday Oct 30, 2026
 
-Note: you said "Mon Oct 18" but Oct 18 is Sunday. This list is for **Monday Oct 19**.
+Goal: get clients. The whole plan is to market ourselves: calls, the cold email, the free guides, and posts that bring hunters-side outfitters to us. Calls are the biggest lever today.
 
-## Where we are (Sun Oct 18)
-- **Cold email:** 196 sent since Oct 10 (about 23/day). **341 queued: WY 224 · OR 93 · MT 13 · ID 7 · WA 4.** That is about 15 days of sending, and MT/ID are nearly gone, so the pool is mostly Wyoming and Oregon after this week.
-- **Follow-ups running:** the day-3 "simpler version" and day-8 "last note" emails are going out on schedule. 105 leads are 4+ days old.
-- **Replies:** 0 real replies. **2 bounces today** (see item 2).
-- **Signups:** 0 real. The only `social` row is your own test.
-- **One warm signal:** **Rugg's Outfitting (Superior, MT)** opened the signup page Sun Oct 18 at about 8am Mountain. Owner email kip@ruggsoutfitting.com, phone **(406) 822-2061**. They got our first email Oct 12. It could still be a scanner, but a Sunday-morning view is more likely a person.
-- **DMARC:** fine. Google, Microsoft and Yahoo reports all show DMARC pass.
-- **Associations:** IOGA, WYOGA and MOGA were emailed Oct 15. No replies yet.
+## Where we are (Thu night)
+- **Cold email:** 804 sent, 194 queued. It keeps sending on its own.
+- **Real replies: 2.** Both said "send" and got the guides.
+  - **Wyoming's Finest Outfitters (WY)**, (435) 720-7205. Replied today, guides went out at 11:32am. Best lead right now.
+  - **Spotted Horse Ranch (WY)**, Trixie, (800) 528-2084 or 307-733-2097. Replied Oct 28.
+- **Everything else that "replied" was a bounce:** Hukit and Peak View (dead), Mule Shoe (bad address), Sawbuck (inbox full), Colorado Wilderness (still retrying).
+- **Signups:** 1 real, "Colton Barness" (Oct 27, through the emailed link, on guide email 1). It is tied to **2 H Outdoors (MT), (406) 596-9821**, but the owner is Charles McDougal, so ask for him. Call prep for 2 H and Utah Big Game is in `SEARCH-AUDITS.md`.
+- **Call pitch sent:** Deep in the Bush Adventures (Oct 28). It sends itself next to Trixie around Oct 31 and Wyoming's Finest around Nov 1.
+- **Calls Oct 28:** 4 calls, nobody interested. No real outfitter has been through a full call yet.
+- **Google Business Profile:** waiting on Google (video verification, about Nov 4).
+- **Website:** logo deploy in progress; check it loads on griffincreativelab.com.
 
-## Monday, in order (6 hours)
+## 1. Calls (midday, about 90 minutes): the main client-getting job
+Order, with who to push hardest first:
+1. **Wyoming's Finest Outfitters**, (435) 720-7205. They asked for the guides: "did the guides come through? what did you think?" then the 10–15 minute pitch.
+2. **Spotted Horse Ranch (Trixie)**, 307-733-2097. Same warm opener.
+3. **Rugg's Outfitting**, (406) 822-2061.
+4. Cameron Outfitters (406) 821-3115 · Juniper Mountain (208) 454-1322 · Flying B Ranch (800) 472-1945 · Miles High (208) 697-3521 · Rasmussen (208) 476-7075 · Shattuck Creek (208) 826-3373 · Heaven's Gate · Ridgerunner · Flying Resort Ranches.
+5. **Get-an-email calls (2 min each):** Mule Shoe Outfitters (307) 367-2223 and Sawbuck Outfitters (970) 921-3557. Our emails never reached them; just ask for a good address.
+6. **Utah Big Game Outfitters, (435) 749-1091:** called back Sat Oct 31 as asked, no answer, left a voicemail. Try again Mon Nov 2 midday; pitch is in `SEARCH-AUDITS.md`.
+Tell me "log" with outcomes and I'll update the sheet.
 
-### 1. Triage and the warm lead (45 min)
-1. **Inbox sweep (10 min).** Replies first. Also check ioga.org, wyoga.org and mogamt.org.
-2. **Clean up the 2 bounces (10 min).**
-   - `contact@bobmarshallwindernessoutfitters.com`: the domain looks misspelled ("winderness"). Find the real site and fix the address.
-   - `elkhunter@montana.com`: dead address. Look for another contact or move the lead to the phone list.
-   - Mark both `skipped` or fix them in `outreach_leads`. Tell me and I'll do the SQL.
-3. **Call Rugg's Outfitting, (406) 822-2061 (15 min).** This is the one lead who may be engaged.
-   - Open with: "I sent you a note last week about free guides for elk outfitters. Did the signup page work for you?"
-   - Offer to email the guides directly. Don't pitch the $2,800 plan yet.
-   - Rifle season: try 7–8am or after 6pm.
-4. **IOGA call, (208) 342-1438** if you didn't get to it Friday. Ask about the vendor packet and booth price (vendor fair Dec 1).
-5. **Check results (10 min).** `select * from guide_engagement order by last_view desc;` and any new `lead_magnet_signups`.
+## 2. Inbox and replies (15 min, morning)
+- Check hello@ for new "send" replies. Anything that isn't a plain yes comes to you; I only auto-reply to plain yeses.
+- After about 11am Pacific, the reply checker runs. Tell me if anything looks wrong.
 
-### 2. Phone block (90 min)
-6. **15 calls from `phone-leads.csv`.** It has 29 phone-only leads (ID 13, WY 9, MT 5, OR 1, WA 1). Start with Idaho. Script is in `ASSOCIATION-OUTREACH.md`.
-   - Goal of every call: get an email address and permission to send the guides. A yes is a lead.
-   - Log each call: no answer / voicemail / got email / not interested. Voicemail is fine; leave 20 seconds and your number.
-   - Best windows in season: early morning and evening.
+## 3. Post and reach (30 min)
+- **Friday Reel: Google Profile, 5 questions a hunter asks.** Script and caption in `content-posts/2026-10-30-google-profile-reel.md`. Build in CapCut or Instagram (about 10 minutes), post, add the Story link sticker (`griffincreativelab.com/starter-kit.html`), and post to the Facebook page too.
+- **Reply to every comment on Thursday's "where do your bookings come from" post.** Each answer is a conversation with an outfitter.
+- Saturday (Halloween) Camp Notes: "the scariest thing for an outfitter is an empty September." I can build it tonight if you want it AirDropped.
 
-### 3. Post and engage (45 min)
-7. **Post the Rebook Monday carousel (9 slides, ready in `content-posts/2026-10-19-rebook-monday-1/`).** AirDrop the slides to your phone. Caption draft:
-   > The rebooking sequence, word for word: the thank-you, the rebook, and the application reminder. Ten days of silence? Send one line, then stop. The full templates are free: tap "Free guides!" in our bio.
-   >
-   > #elkhunting #guidedhunts #outfitter #huntingoutfitters
-8. **Add the Story link sticker** to griffincreativelab.com/starter-kit.html. Post a Story with it. This is the only clickable path from Instagram.
-9. **Engage 20 elk outfitter accounts (25 min):** follow, then like and leave a real comment on 2–3 posts each. No DMs yet. Outfitters who follow back are warm.
+## 4. Decisions only you can make (these slow closing a client)
+- **Founding offer:** who pays ad spend, and a deadline for it.
+- **Partners:** queue the 23 gear and camp-equipment makers too, or hold them.
+- **Send rate:** keep 25 a day or raise it. 194 are queued, about 8 days left at 25.
 
-### 4. Lead-building (90 min)
-10. **Find emails for the phone-only leads (45 min).** Their websites are in `phone-leads.csv`. Check contact pages for an address, then add found emails to `outreach_leads` as queued. I can script the website scan so you only review the results. Say the word and I'll run it first.
-11. **Pipeline decision (15 min).** MT and ID are almost out, and WY/OR cover about 15 more days. Pick one:
-    - **Widen to Colorado and Utah.** Biggest elk markets, public outfitter registries, and I can run discovery on them.
-    - **Stay NW + WY** and hand-search Oregon and California.
-12. **Facebook groups (20 min).** Answer questions and comment. No links. The group question post is for Thursday per the calendar.
-13. **Check the expo lists (10 min):** Western Hunting & Conservation Expo exhibitor page. Lists usually post in December, so only a quick look.
+## 5. Get found on Google (20 min, you)
+- **Set up Google Search Console.** Sign in as hello@ at search.google.com/search-console, add property `https://www.griffincreativelab.com/` (URL prefix), pick the "HTML tag" method, and send me the `content="..."` value. I add it to the homepage and push; then click Verify, submit `sitemap.xml`, and request indexing for the homepage and the three new pages.
+- New public pages are live: `outfitter-marketing.html`, `google-business-profile-for-outfitters.html`, `rebook-past-hunters.html`.
 
-### 5. Wrap-up (30 min)
-14. **Log it.** Calls made, emails collected, Rugg's outcome. Tell me and I'll update the lead notes and write Tuesday's list.
-15. **Prep Tuesday's post:** Draw Dates Tuesday, Montana timeline (Mar 1 open, Apr 1 due, mid-April results, Elk B Jun 1). I'll render it when you say.
+## What I can do for you tomorrow (say the word)
+- ~~Fix the reply checker so "stop" counts as a no and bounces are logged as bounces.~~ Done Oct 30 (not pushed yet). 13 old bounces re-marked `bounced`.
+- Update the call sheet: Wyoming's Finest and Trixie to the top, drop scanner-only "warm" labels.
+- Update the Google profile description (eight states, "the West", the call option) so it's ready to paste when Google verifies.
+- Build the Saturday post and the next Thursday question (Nov 5: "How do you collect past clients' emails today?").
 
-## Decisions waiting on you
-- **Colorado/Utah or stay NW + WY** (item 11).
-- **Send rate:** keep 25/day or raise to about 40. At 25/day the queue lasts 13–14 days. I recommend keeping it.
-- **Subscriber unsubscribe flag:** build only once real signups show up.
-- **Commit** the calendar edit and the Oct 17 thank-you-tip spec when you want them pushed.
-
-## Already scheduled
-- **Tue Oct 20:** Google Places API key decision.
-- **Wed Oct 21:** Google Business Profile verification, plus the Teardown Wednesday post.
-- **Thu Oct 22:** follow up with IOGA / WYOGA / MOGA, plus the Outfitter Question post.
-- **Nov 30 – Dec 4:** IOGA annual meeting + vendor fair (Dec 1).
+## Coming up
+- **~Nov 1–3:** Wyoming's Finest and Trixie get the call-pitch email automatically.
+- **~Nov 4–5:** Google verification result. If rejected or silent by Nov 5: postcard or Google support. Then upload the logo and cover in `gbp-images/` and paste the description.
+- **Nov 20:** revisit managed Google Ads for clients (parked; practice on our own spend first).
+- **Nov 30 – Dec 4:** IOGA annual meeting and vendor fair (Dec 1, Tamarack Resort, Donnelly ID). Hardy Bender (Hardy@ioga.org, (208) 514-4502) will hand out our handout with agendas at check-in the morning of 12/1 (~175 members expected). **Plan: print about 200 copies of the black-and-orange tri-fold** (`handouts/ioga-brochure.pdf`, 2 pages, print double-sided landscape, flip on short edge). The one-page `handouts/ioga-handout.pdf` is the backup. Booth payment due **Nov 10** ($450 4'x4' / $550 6'x6'); exhibitors must join as a $125 Business Associate. Newsletter blurb wanted (a paragraph or two). Open: can he take the handouts and blurb without a booth, and can they be shipped? He has not said either.
+- **December:** Buck Horn Outfitters (ID) call; 2027 draw-date tracker; booking-window content ramps Dec 1.
+- **Still open:** Google Places API key (taxidermists, photographers, tack shops, insurance agents in all eight states); Google Ads practice account.

@@ -10,9 +10,25 @@
     {
       "src": "**/*.html",
       "use": "@vercel/static"
+    },
+    {
+      "src": "images/*.webp",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "robots.txt",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "sitemap.xml",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/api/(connect-mailbox|log-hunters|review-link|save-onboarding|get-upload-url|send-review-requests)",
+      "dest": "/api/portal.js?action=$1"
+    },
     {
       "src": "/api/(.*)",
       "dest": "/api/$1.js"
@@ -29,15 +45,31 @@
     },
     {
       "path": "/api/check-replies",
-      "schedule": "0 14 * * *"
+      "schedule": "0 18 * * *"
     },
     {
       "path": "/api/send-followups",
       "schedule": "0 17 * * *"
     },
     {
+      "path": "/api/send-followups",
+      "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/send-followups",
+      "schedule": "0 23 * * *"
+    },
+    {
       "path": "/api/send-starter-kit-drip",
       "schedule": "0 18 * * *"
+    },
+    {
+      "path": "/api/send-partner-outreach",
+      "schedule": "30 17 * * 1-5"
+    },
+    {
+      "path": "/api/send-review-requests",
+      "schedule": "15 17 * * *"
     }
   ]
 }

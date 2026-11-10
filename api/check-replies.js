@@ -1,9 +1,26 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const { google } = require('googleapis');
 const { createClient } = require('@supabase/supabase-js');
+const {
+  buildGuidesEmail,
+  buildRawReply,
+  wantsGuides,
+  plainBodyOf,
+  isAutomated,
+} = require('../lib/guide-autoreply');
+const { classifyBounce, isOptOut, isUnsubscribe } = require('../lib/reply-rules');
 
 // ============================================================
 // Reply tracker
+// Also auto-answers a plain "send" / "yes" from an elk_guide lead with the five
+// free guides (buttons, not raw URLs) — see lib/guide-autoreply.js. Once per
+// lead (guides_sent_at); anything that isn't a short plain yes is left for a
+// human and shows up in the digest as usual.
+// Delivery failures are not replies (lib/reply-rules.js): a dead address is
+// marked status 'bounced' and listed in the digest with the phone number; a
+// temporary failure (inbox full, retrying) is ignored. A plain "stop" /
+// "unsubscribe" / "not interested" is a negative reply without asking the model,
+// and an explicit stop/unsubscribe also sets status 'unsubscribed'.
 // Matches inbound Gmail replies to sent outreach_leads, classifies intent,
 // and writes reply_received / replied_at / reply_text / reply_intent back to
 // Supabase so per-niche decision gates are measurable.
@@ -83,7 +100,7 @@ function encodeMimeHeader(value) {
   return `=?utf-8?B?${Buffer.from(value, 'utf-8').toString('base64')}?=`;
 }
 
-async function sendAlertEmail(hits) {
+async function sendAlertEmail(hits, bounced = []) {
   const to = process.env.ALERT_EMAIL || process.env.GMAIL_FROM_EMAIL;
   if (!to) return;
 
@@ -91,17 +108,27 @@ async function sendAlertEmail(hits) {
   const rest = hits.filter((h) => h.intent !== 'positive');
   const subject = hot.length
     ? `🔥 ${hot.length} hot lead${hot.length > 1 ? 's' : ''} replied — act today`
-    : `Outreach: ${hits.length} new repl${hits.length > 1 ? 'ies' : 'y'}`;
+    : hits.length
+      ? `Outreach: ${hits.length} new repl${hits.length > 1 ? 'ies' : 'y'}`
+      : `Outreach: ${bounced.length} bounced address${bounced.length > 1 ? 'es' : ''}`;
 
   const fmt = (h) =>
     `• ${h.company || 'Unknown'}${h.name ? ` (${h.name})` : ''} — ${h.email} [${h.niche || 'n/a'}] (${h.intent})\n` +
+    (h.auto_reply === 'sent' ? '  AUTO-SENT the five guides.\n' : '') +
+    (h.auto_reply === 'failed' ? '  AUTO-REPLY FAILED — send the guides by hand.\n' : '') +
+    (h.opt_out ? '  OPTED OUT — do not contact again.\n' : '') +
     `  "${h.snippet}"\n`;
 
   const body =
     (hot.length
       ? `HOT — reply to these first:\n\n${hot.map(fmt).join('\n')}\n`
       : '') +
-    (rest.length ? `Other replies:\n\n${rest.map(fmt).join('\n')}` : '') +
+    (rest.length ? `Other replies:\n\n${rest.map(fmt).join('\n')}\n` : '') +
+    (bounced.length
+      ? `Bounced (address is dead, marked bounced). Call for a good email:\n\n${bounced
+          .map((b) => `• ${b.company || 'Unknown'} — ${b.email}${b.phone ? ` — ${b.phone}` : ''}`)
+          .join('\n')}\n`
+      : '') +
     `\n—\nGriffin outreach agent · griffincreativelab.com/api/check-replies`;
 
   const headers = [
@@ -125,6 +152,66 @@ async function sendAlertEmail(hits) {
   await gmail.users.messages.send({ userId: 'me', requestBody: { raw } });
 }
 
+// ============================================================
+// Guides auto-reply
+// Answers a plain "send" / "yes" with the five guides as button links, in the
+// same thread. Returns null (not applicable), 'sent', 'would_send' (dry run) or
+// 'failed'. The guides_sent_at claim is taken before sending so a second run
+// can never send twice; a failed send releases it and the lead falls back to
+// the normal digest, flagged so Gabriel sends the guides by hand.
+// ============================================================
+async function maybeSendGuides({ lead, messageId, fromAddr, dryRun, results }) {
+  const ourEmail = (process.env.GMAIL_FROM_EMAIL || '').toLowerCase();
+  if (!fromAddr || fromAddr === ourEmail) return null;
+
+  const msg = (
+    await gmail.users.messages.get({ userId: 'me', id: messageId, format: 'full' })
+  ).data;
+  const headers = msg.payload?.headers || [];
+  const header = (name) =>
+    (headers.find((h) => h.name.toLowerCase() === name) || {}).value || '';
+
+  if (isAutomated(fromAddr, headers)) return null;
+  if (!wantsGuides(plainBodyOf(msg.payload))) return null;
+  if (dryRun) return 'would_send';
+
+  const { data: claimed, error: claimError } = await supabase
+    .from('outreach_leads')
+    .update({ guides_sent_at: new Date().toISOString() })
+    .eq('id', lead.id)
+    .is('guides_sent_at', null)
+    .select('id');
+  if (claimError || !claimed || claimed.length === 0) return null;
+
+  try {
+    const sameAddress = fromAddr === String(lead.email || '').toLowerCase();
+    const { text, html } = buildGuidesEmail({
+      first: sameAddress ? String(lead.first_name || '').trim().split(/\s+/)[0] : '',
+      state: lead.company_state,
+      leadId: lead.id,
+    });
+    const subject = /^re:/i.test(header('subject')) ? header('subject') : `Re: ${header('subject')}`;
+    const raw = buildRawReply({
+      to: fromAddr,
+      fromEmail: process.env.GMAIL_FROM_EMAIL,
+      fromName: process.env.GMAIL_FROM_NAME,
+      subject,
+      text,
+      html,
+      inReplyTo: header('message-id'),
+    });
+    await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: { raw, threadId: msg.threadId },
+    });
+    return 'sent';
+  } catch (err) {
+    await supabase.from('outreach_leads').update({ guides_sent_at: null }).eq('id', lead.id);
+    results.errors.push({ lead_id: lead.id, stage: 'guides_autoreply', error: err.message });
+    return 'failed';
+  }
+}
+
 module.exports = async (req, res) => {
   const authHeader = req.headers.authorization || '';
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -137,7 +224,7 @@ module.exports = async (req, res) => {
     // 1. Pull sent leads that haven't been marked as replied yet.
     const { data: leads, error: fetchError } = await supabase
       .from('outreach_leads')
-      .select('id,email,first_name,job_title,company_name,niche,gmail_thread_id')
+      .select('id,email,first_name,job_title,company_name,company_state,niche,gmail_thread_id,guides_sent_at,phone')
       .eq('status', 'sent')
       .eq('reply_received', false);
 
@@ -181,6 +268,8 @@ module.exports = async (req, res) => {
       updated: 0,
       dry_run: dryRun,
       hits: [],
+      bounced: [],
+      soft_bounces: [],
       errors: [],
     };
     const handledLeadIds = new Set();
@@ -196,15 +285,52 @@ module.exports = async (req, res) => {
         });
         const headers = full.data.payload?.headers || [];
         const fromHeader = (headers.find((h) => h.name === 'From') || {}).value || '';
+        const subjectHeader = (headers.find((h) => h.name === 'Subject') || {}).value || '';
         const fromAddr = parseFromAddress(fromHeader);
 
         const lead = byThreadId.get(full.data.threadId) || byEmail.get(fromAddr);
         if (!lead || handledLeadIds.has(lead.id)) continue;
+
+        const snippet = full.data.snippet || '';
+
+        // A delivery failure is not a reply. It must not hide a later real reply
+        // in the same thread, so the lead is only marked handled when it was a
+        // hard bounce (the lead leaves the scan once its status is 'bounced').
+        const bounce = classifyBounce({ fromAddr, subject: subjectHeader, snippet });
+        if (bounce === 'soft') {
+          results.soft_bounces.push({ lead_id: lead.id, company: lead.company_name, email: lead.email });
+          continue;
+        }
+        if (bounce === 'hard') {
+          handledLeadIds.add(lead.id);
+          results.bounced.push({
+            lead_id: lead.id,
+            company: lead.company_name,
+            email: lead.email,
+            phone: lead.phone || '',
+          });
+          if (!dryRun) {
+            const { error: bounceError } = await supabase
+              .from('outreach_leads')
+              .update({ status: 'bounced' })
+              .eq('id', lead.id);
+            if (bounceError) results.errors.push({ lead_id: lead.id, error: bounceError.message });
+          }
+          continue;
+        }
+
         handledLeadIds.add(lead.id);
         results.matched++;
 
-        const snippet = full.data.snippet || '';
-        const intent = dryRun ? 'skipped' : await classifyIntent(snippet);
+        const optOut = isOptOut(snippet);
+        const autoReply =
+          lead.niche === 'elk_guide' && !lead.guides_sent_at
+            ? await maybeSendGuides({ lead, messageId: ref.id, fromAddr, dryRun, results })
+            : null;
+        const intent = autoReply === 'sent' || autoReply === 'would_send'
+          ? 'positive'
+          : optOut ? 'negative'
+          : dryRun ? 'skipped' : await classifyIntent(snippet);
 
         results.hits.push({
           lead_id: lead.id,
@@ -213,6 +339,8 @@ module.exports = async (req, res) => {
           company: lead.company_name,
           niche: lead.niche,
           intent,
+          auto_reply: autoReply,
+          opt_out: optOut,
           snippet: snippet.slice(0, 160),
         });
 
@@ -224,6 +352,7 @@ module.exports = async (req, res) => {
               replied_at: new Date().toISOString(),
               reply_text: snippet.slice(0, 2000),
               reply_intent: intent,
+              ...(isUnsubscribe(snippet) ? { status: 'unsubscribed' } : {}),
             })
             .eq('id', lead.id);
 
@@ -239,9 +368,9 @@ module.exports = async (req, res) => {
     }
 
     // 4. Hot-lead alert: one digest per run when anything matched (live runs only).
-    if (!dryRun && results.hits.length > 0) {
+    if (!dryRun && (results.hits.length > 0 || results.bounced.length > 0)) {
       try {
-        await sendAlertEmail(results.hits);
+        await sendAlertEmail(results.hits, results.bounced);
         results.alert_sent = true;
       } catch (err) {
         results.errors.push({ stage: 'alert_email', error: err.message });

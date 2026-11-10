@@ -34,6 +34,9 @@ const INFILE = arg('in');
 const LIMIT = parseInt(arg('limit', '100000'), 10);
 const CONCURRENCY = Math.max(1, Math.min(6, parseInt(arg('concurrency', '4'), 10)));
 const REPORT = arg('report', null);
+// --any-game: accept any land-game hunting outfitter (deer, bear, antelope, moose, sheep,
+// goat, lion, turkey, hogs...), not only elk. Non-elk ones are tagged in company_industry.
+const ANY_GAME = process.argv.includes('--any-game');
 const FROM_REPORT = arg('from-report', null);
 const EXCLUDE = arg('exclude', '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
 
@@ -114,6 +117,9 @@ const STATE_RE = {
   OR: /\bOregon\b|\bOR\s*97\d{3}\b|,\s*OR\b/,
   WA: /\bWashington\b|\bWA\s*9[89]\d{3}\b|,\s*WA\b/,
   CA: /\bCalifornia\b|\bCA\s*9\d{4}\b|,\s*CA\b/,
+  CO: /\bColorado\b|\bCO\s*8[01]\d{3}\b|,\s*CO\b/,
+  UT: /\bUtah\b|\bUT\s*84\d{3}\b|,\s*UT\b/,
+  WY: /\bWyoming\b|\bWY\s*8[23]\d{3}\b|,\s*WY\b/,
 };
 const inState = (text, st) => (STATE_RE[st] ? STATE_RE[st].test(text) : true);
 
@@ -124,6 +130,13 @@ function isElkOutfitter(text) {
   const guiding = /\b(outfitter|outfitters|outfitting|guided|guide service|guides?|hunting camp|drop camp|pack trips?)\b/i;
   return elkHunt.test(text) && guiding.test(text);
 }
+
+function isHuntOutfitter(text) {
+  const game = /\b(elk|deer|whitetail|mule deer|bear|antelope|pronghorn|moose|bighorn|sheep|mountain goat|mountain lion|cougar|turkey|bison|hogs?|boar|big game|predator)\b[^.]{0,90}\b(hunt|hunts|hunting|hunters|season)\b|\b(hunt|hunts|hunting|hunters)\b[^.]{0,90}\b(elk|deer|whitetail|bear|antelope|pronghorn|moose|bighorn|sheep|goat|lion|cougar|turkey|bison|hogs?|boar|big game)\b/i;
+  const guiding = /\b(outfitter|outfitters|outfitting|guided|guide service|guides?|hunting camp|drop camp|pack trips?)\b/i;
+  return game.test(text) && guiding.test(text);
+}
+const mentionsGame = (t) => (ANY_GAME ? isHuntOutfitter(t) : isElkOutfitter(t));
 
 const PHONE = /\(?\b([2-9]\d{2})\)?[\s.-]?(\d{3})[\s.-](\d{4})\b/;
 function findPhone(htmls) {
@@ -165,6 +178,12 @@ async function readListing(c) {
 
 async function process1(c) {
   const out = { name: c.name, state: c.state, source: c.source, listing: c.listing };
+  // A state outfitter registry that publishes the outfitter's own email and the
+  // game units they hunt (e.g. the Colorado Outfitters Association directory) is
+  // proof enough: no website crawl needed.
+  if (c.trusted && c.email) {
+    return { ...out, website: c.website || null, email: c.email, phone: c.phone || null, mentionsElk: true, species: c.species || null, status: 'ok', how: 'registry' };
+  }
   try {
     if (c.listing) {
       const ok = await readListing(c);
@@ -181,7 +200,7 @@ async function process1(c) {
     if (!site && !c.listingText) return { ...out, status: 'no-website' };
     if (!site) {
       // No website on the listing: judge it from the listing page alone.
-      out.mentionsElk = isElkOutfitter(c.listingText);
+      out.mentionsElk = mentionsGame(c.listingText);
       out.email = c.email || null;
       out.phone = c.phone || null;
       if (!out.mentionsElk) return { ...out, status: 'no-elk' };
@@ -195,7 +214,7 @@ async function process1(c) {
       // Their own site can't be read (down, or robots disallows crawling). If
       // the directory listing already gave an email and describes elk hunting,
       // judge it from the listing alone instead of dropping a real outfitter.
-      if (c.listingText && c.email && isElkOutfitter(c.listingText)) {
+      if (c.listingText && c.email && mentionsGame(c.listingText)) {
         return { ...out, mentionsElk: true, email: c.email, phone: c.phone || null, status: 'ok', how: 'listing-only' };
       }
       return { ...out, status: 'skipped', reason: r.skipped };
@@ -206,8 +225,8 @@ async function process1(c) {
       const sn = (h.match(/<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']+)/i) || [])[1] || (h.match(/<title[^>]*>([^<]+)</i) || [])[1];
       out.name = cleanTitle(sn) || domainOf(out.website);
     }
-    if (site.how === 'guessed' && !inState(text, c.state)) return { ...out, status: 'wrong-state' };
-    out.mentionsElk = isElkOutfitter(text);
+    if ((site.how === 'guessed' || c.checkState) && !inState(text, c.state)) return { ...out, status: 'wrong-state' };
+    out.mentionsElk = mentionsGame(text);
     out.phone = c.phone || findPhone(r.html);
     out.email = c.email || r.email || null;
     out.candidates = r.candidates;
@@ -284,10 +303,10 @@ async function main() {
     const em = r.email.toLowerCase();
     const dom = domainOf(r.website);
     const nk = nameKey(r.name || '');
-    if (haveEmail.has(em) || seenEmail.has(em) || haveDomain.has(dom) || seenDomain.has(dom)) continue;
+    if (haveEmail.has(em) || seenEmail.has(em) || (dom && (haveDomain.has(dom) || seenDomain.has(dom)))) continue;
     if (nk.length > 3 && haveName.has(nk)) continue; // same business already held under another email
     seenEmail.add(em);
-    seenDomain.add(dom);
+    if (dom) seenDomain.add(dom);
     ok.push(r);
   }
   const tally = results.reduce((a, r) => ((a[r.status] = (a[r.status] || 0) + 1), a), {});
@@ -306,7 +325,7 @@ async function main() {
     company_website: /jsdelivr|cdnjs|unpkg|googleapis/i.test(r.website || '') ? null : r.website,
     company_city: null,
     company_state: r.state,
-    company_industry: 'Elk Hunting Outfitter',
+    company_industry: ANY_GAME && !(r.species == null || /elk/i.test(r.species)) ? 'Hunting Outfitter (non-elk)' : (ANY_GAME && r.species == null ? 'Hunting Outfitter' : 'Elk Hunting Outfitter'),
     niche: 'elk_guide',
     status: 'queued',
   }));

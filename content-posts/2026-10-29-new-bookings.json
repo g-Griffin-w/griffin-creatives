@@ -1,0 +1,11 @@
+{
+  "slug": "2026-10-29-new-bookings",
+  "slides": [
+    { "layout": "hook", "white": ["OUTFITTERS:"], "orange": ["WHERE DO", "MOST OF YOUR", "NEW BOOKINGS", "COME FROM?"] },
+    { "layout": "bullets", "label": "PICK ONE", "title": "Most of my new hunters come from…",
+      "items": ["Word of mouth", "Past clients referring friends", "Google or my website", "Facebook or Instagram", "Booking sites or expos"] },
+    { "layout": "cta", "headline": ["TELL US IN", "THE COMMENTS."],
+      "body": "No wrong answers. We're collecting how elk outfitters actually get found.",
+      "button": "FREE GUIDES: TAP THE LINK IN OUR BIO ↑", "foot": "griffincreativelab.com/starter-kit.html", "buttonSize": 52 }
+  ]
+}

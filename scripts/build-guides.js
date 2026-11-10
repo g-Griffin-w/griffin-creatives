@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // scripts/build-guides.js
 //
-// Generates the four DIY lead-magnet guide pages (+ an index) into guides/*.html.
+// Generates the five DIY lead-magnet guide pages (+ an index) into guides/*.html.
 // Static output, no serverless functions. Run:  node scripts/build-guides.js
 //
 // Why a generator: the site's Vercel build only ships *.html (see vercel.json),
@@ -234,7 +234,7 @@ function shell({ slug, title, desc, body }) {
 <body data-guide="${slug}">
 <nav>
   <a href="/index.html" class="logo">GRIFFIN<span>CREATIVE</span></a>
-  <a href="/guides/index.html" class="nav-r">All 4 guides</a>
+  <a href="/guides/index.html" class="nav-r">All 5 guides</a>
 </nav>
 ${body}
 <footer>Griffin Creative · griffincreativelab.com</footer>
@@ -281,6 +281,7 @@ const GUIDES = [
   { slug: 'google-business-profile', num: 2, short: 'Google Business Profile', time: '45 min' },
   { slug: 'season-calendar', num: 3, short: 'Season Calendar', time: '30 min' },
   { slug: 'review-requests', num: 4, short: 'Reviews After Every Hunt', time: '20 min' },
+  { slug: 'get-found-on-google', num: 5, short: 'Get Found on Google', time: '45 min' },
 ];
 const G = (slug) => GUIDES.find((x) => x.slug === slug);
 function pager(slug) {
@@ -294,7 +295,7 @@ const cta = () =>
   `<section class="cta"><span class="tag">// Rather not do this yourself?</span><h2>That's what <em style="font-style:normal;color:var(--orange)">Booked Out</em> is.</h2><p>Everything in this guide, done for you and kept running all season. We build it, we keep it fresh, and we send it on schedule while you're out guiding.</p><a class="btn" href="/index.html#pricing">See how Booked Out works</a></section>`;
 
 function hero(g, title, lede, pills) {
-  return `<header class="hero wrap"><span class="tag">// Free Guide ${g.num} of 4</span><h1>${title}</h1><p class="lede">${lede}</p><div class="pills">${pills
+  return `<header class="hero wrap"><span class="tag">// Free Guide ${g.num} of 5</span><h1>${title}</h1><p class="lede">${lede}</p><div class="pills">${pills
     .map(([k, v]) => `<span class="pill">${k}: <b>${v}</b></span>`)
     .join('')}</div></header>`;
 }
@@ -649,6 +650,134 @@ ${pager('season-calendar')}
   return shell({ slug: g.slug, title: 'Your Elk Season Marketing Calendar', desc: 'A month-by-month marketing calendar for elk outfitters built around the tag-draw year, so you stop scrambling to fill September.', body });
 }
 
+
+// ============================================================
+// BONUS GUIDE — Get found on Google (local search blueprint)
+// ============================================================
+function guide5() {
+  const g = G('get-found-on-google');
+  const steps = [
+    'Search yourself first',
+    'Fix your website’s title and description',
+    'Give each hunt its own page',
+    'Get listed where Google already looks',
+    'Collect links and reviews',
+    'Set up Google Search Console (free)',
+    'Check once a month',
+  ];
+  const body = `
+<header class="hero wrap"><span class="tag">// Free Guide 5 of 5</span><h1>GET FOUND <em>ON GOOGLE.</em></h1><p class="lede">A hunter who hears your name searches for you. A hunter who has not heard of you searches for an outfitter. This is how you show up for both, without paying anyone.</p><div class="pills"><span class="pill">Time: <b>45 min</b></span><span class="pill">Then: <b>10 min a month</b></span><span class="pill">Cost: <b>Free</b></span></div></header>
+<main class="wrap">
+<div class="why">
+<p><b>Why this matters.</b> Most hunters start with a search. If your name, your website and your listing do not show up, or show up wrong, the hunter books whoever does. Google does not rank you because you ask nicely. It shows the pages that clearly answer what the hunter typed, from a business it can tell is real.</p>
+<p><b>Be realistic about timing.</b> A new page usually takes weeks to show up and longer to climb. Nobody can honestly guarantee page one. What you can do is make sure Google can read your site, understand each hunt, and see that real people vouch for you.</p>
+</div>
+${toc(steps)}
+
+${step(1, 'Search yourself first', `
+<p>Open a private browser window and run these searches. Write down where you show up, if at all.</p>
+<figure class="vis"><table class="tbl"><thead><tr><th>Search</th><th>Where you show up</th></tr></thead><tbody>
+<tr><td>Your business name</td><td><input data-save="s1" placeholder="e.g. #1, map result, not at all"></td></tr>
+<tr><td>Your business name + your state</td><td><input data-save="s2" placeholder="e.g. #1"></td></tr>
+<tr><td>elk hunting outfitter + your region</td><td><input data-save="s3" placeholder="e.g. not on page 1"></td></tr>
+<tr><td>guided elk hunts + your unit or area</td><td><input data-save="s4" placeholder="e.g. #7"></td></tr>
+<tr><td>Your phone number</td><td><input data-save="s5" placeholder="e.g. two old listings"></td></tr>
+</tbody></table><figcaption>Your answers save in this browser. Repeat the same five searches once a month.</figcaption></figure>
+${tip('<b>Look at the top three results for the third search.</b> What do their titles say? Do they have a map listing? A page for the exact hunt? That is the bar you are measuring against.')}
+`)}
+
+${step(2, 'Fix your website’s title and description', `
+<p>The <b>title</b> is the blue link in the results. The <b>description</b> is the grey text under it. Most outfitter sites leave both as the default or repeat one title on every page, which tells Google nothing.</p>
+${tpl('Title formula', "[Hunt type], [region or state] | [Your camp name]")}
+${tpl('Example title (mock)', "Guided Elk Hunts, Western Montana | Bear Paw Outfitters")}
+${tpl('Description template (aim for about 155 characters)', "Fully guided [archery / rifle] elk hunts in [region]. [Pack-in camp / lodge], meals and meat care included. [Year] dates open. Call or book online.")}
+${list([
+  'Keep titles under about 60 characters so they do not get cut off.',
+  'Every page gets its own title and description. Never reuse one.',
+  'In Wix, Squarespace and WordPress this is usually under the page’s <b>SEO settings</b>.',
+])}
+${warn('Do not stuff the title with keywords, like “Best Elk Hunting Guide Outfitter Montana Elk Hunts.” Write it for a hunter, not a robot.')}
+`)}
+
+${step(3, 'Give each hunt its own page', `
+<p>Someone searching for an archery elk hunt in your area needs a page about that hunt. A single catch-all “Hunts” page rarely answers it. Make one page per real hunt, and put the details in real text, not inside an image. Google cannot read text that is part of a photo.</p>
+${tpl('Hunt page outline', `Title: 5-Day Guided Archery Elk Hunt, [region]
+Short intro: who it is for, where, how many hunters per guide
+Dates and price: [2027 dates], from $[price]
+Included: lodging, meals, guide, pack-out, meat care
+Not included: license, tags, transport to camp
+The country and the camp: three or four real photos with captions
+How to book: phone number as text, plus a simple form
+Questions hunters ask: fitness, tags, what to bring`)}
+${tip('Put your phone number on the page as plain text, and make it match your Google profile exactly.')}
+`)}
+
+${step(4, 'Get listed where Google already looks', `
+<p>Google checks whether other trusted places agree you exist. Claim or update each of these, and keep your <b>name, phone and website identical</b> on all of them (see Guide 2).</p>
+${list([
+  '<b>Google Business Profile.</b> The big one. See Guide 2.',
+  '<b>Your state outfitter association’s directory.</b> The Montana, Idaho and Wyoming associations all list members on their websites. Check that your listing has your current website and phone.',
+  '<b>Bing Places and Apple Business Connect.</b> Both are free and take about ten minutes.',
+  '<b>Your Facebook page,</b> with the same name, phone and website.',
+  '<b>Any hunting directory you already pay for.</b> Make sure it links to your site.',
+])}
+${emailTpl('Email to your association', 'Please update our member listing', `Hi [name],
+
+Could you update the [Camp name] listing in the member directory? Our website is [your website] and our phone is [number]. Please link the listing to the website if it does not already.
+
+Thanks,
+[Your name]`)}
+`)}
+
+${step(5, 'Collect links and reviews', `
+<p>A link to your site from another real website is a vote of trust. A few good ones beat dozens of junk ones. Ask the people who already know you:</p>
+${list([
+  'The landowner or ranch you lease from, if they have a website',
+  'A local gear shop, taxidermist or meat processor you refer hunters to',
+  'Your outfitter association and any conservation group you support',
+  'A local chamber of commerce or tourism site',
+  'A local paper, if you have a story worth telling',
+])}
+${emailTpl('Link request', 'A link to our website?', `Hi [name],
+
+We send hunters your way and I would like to return the favor. Would you be willing to list [Camp name] on your website, with a link to [your website]? Happy to do the same for you.
+
+Thanks,
+[Your name]`)}
+${warn('Never buy links or hire anyone who promises page one in a month. Paid links can get a site penalized, and the promise cannot be kept.')}
+<p>Reviews are the other half. Ask after every hunt (Guide 4), and answer every review.</p>
+`)}
+
+${step(6, 'Set up Google Search Console (free)', `
+<p>Search Console shows what Google knows about your site: which pages it has found, and what people typed before they clicked you. It takes about 15 minutes.</p>
+<ol>
+<li>Go to <b>search.google.com/search-console</b> and sign in with the Google account for your business.</li>
+<li>Add your website as a property. A <b>Domain</b> property covers every version of your address and verifies with a DNS record. A <b>URL prefix</b> property verifies with an HTML tag or file. If your site builder has an “SEO” or “Google” settings page, check there first.</li>
+<li>Verify ownership using the method Google shows.</li>
+<li>Open <b>Sitemaps</b> and submit your sitemap. Most site builders make one at <b>yourwebsite.com/sitemap.xml</b>.</li>
+<li>Paste your homepage and each hunt page into the top search bar, wait for it to load, and click <b>Request indexing</b>.</li>
+</ol>
+${tip('Reports take a day or two to fill in. “Still checking” or “processing data” at first is normal.')}
+`)}
+
+${step(7, 'Check once a month', `
+<p>Ten minutes, the same day each month:</p>
+${list([
+  'Repeat the five searches from Step 1 and note where you show up.',
+  'In Search Console, open <b>Pages</b> to confirm your new pages are indexed, and <b>Performance</b> to see what people searched.',
+  'Count new reviews and reply to any you missed.',
+  'Add a few new real photos to your profile and your hunt pages.',
+])}
+<p>When a page starts getting impressions but few clicks, rewrite its title and description. When a hunt gets searched but has no page, build one.</p>
+`)}
+
+${checklist(['Five searches done and written down', 'A unique title and description on every page', 'One page for each hunt, with details in real text', 'Association directory and Bing Places updated with matching name, phone and website', 'Two or three link requests sent', 'Search Console set up with the sitemap submitted', 'A monthly 10-minute check on the calendar'])}
+${cta()}
+${pager('get-found-on-google')}
+</main>`;
+  return shell({ slug: g.slug, title: 'Get Your Outfitter Business Found on Google', desc: 'A free step-by-step local search blueprint for elk outfitters: titles, hunt pages, listings, links, reviews and Google Search Console.', body });
+}
+
 // ============================================================
 // Index
 // ============================================================
@@ -658,16 +787,17 @@ function index() {
     'google-business-profile': 'Claim it, fill it out, and show up when hunters search. Ten steps, with a photo shot list.',
     'season-calendar': 'Your whole marketing year, built around tag-draw timing. Fill in four dates and follow it.',
     'review-requests': 'The link, the QR card, the message, and the rules. Turn happy hunters into reviews.',
+    'get-found-on-google': 'Titles, hunt pages, listings, links and Google Search Console, so hunters find you.',
   };
   const body = `
-<header class="hero wrap"><span class="tag">// Free, no catch</span><h1>THE BOOKED OUT <em>STARTER KIT.</em></h1><p class="lede">Four step-by-step guides for elk outfitters. Follow them yourself and you'll be easier to find, better reviewed, and booked earlier. Each one takes under an hour.</p></header>
+<header class="hero wrap"><span class="tag">// Free, no catch</span><h1>THE BOOKED OUT <em>STARTER KIT.</em></h1><p class="lede">Five step-by-step guides for elk outfitters. Follow them yourself and you'll be easier to find, better reviewed, and booked earlier. Each one takes under an hour.</p></header>
 <main class="wrap">
 <div class="cards">
-${GUIDES.map((g) => `<a class="gc" href="/guides/${g.slug}.html"><span class="tag">// Guide ${g.num} of 4 · ${g.time}</span><h3>${g.short}</h3><p>${blurbs[g.slug]}</p></a>`).join('')}
+${GUIDES.map((g) => `<a class="gc" href="/guides/${g.slug}.html"><span class="tag">// Guide ${g.num} of 5 · ${g.time}</span><h3>${g.short}</h3><p>${blurbs[g.slug]}</p></a>`).join('')}
 </div>
 ${cta()}
 </main>`;
-  return shell({ slug: 'index', title: 'The Booked Out Starter Kit', desc: 'Four free step-by-step guides for elk outfitters: Google Business Profile, reviews, rebooking emails, and a season marketing calendar.', body });
+  return shell({ slug: 'index', title: 'The Booked Out Starter Kit', desc: 'Five free step-by-step marketing guides for elk outfitters: Google Business Profile, reviews, rebooking emails, a season marketing calendar, and getting found on Google.', body });
 }
 
 // ---------- write ----------
@@ -678,6 +808,7 @@ const files = {
   'review-requests.html': guide2(),
   'rebooking-emails.html': guide3(),
   'season-calendar.html': guide4(),
+  'get-found-on-google.html': guide5(),
 };
 for (const [name, html] of Object.entries(files)) {
   fs.writeFileSync(path.join(OUT, name), html);

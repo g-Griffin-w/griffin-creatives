@@ -1,0 +1,11 @@
+{
+  "slug": "2026-11-05-outfitter-question",
+  "slides": [
+    { "layout": "hook", "white": ["OUTFITTERS:"], "orange": ["HOW DO YOU", "COLLECT PAST", "CLIENTS'", "EMAILS TODAY?"], "sub": "Be honest. No wrong answers." },
+    { "layout": "topic", "n": "1", "label": "PICK ONE", "head": ["A", "SPREADSHEET."], "example": "Names, emails, the year they hunted." },
+    { "layout": "topic", "n": "2", "label": "PICK ONE", "head": ["MY", "PHONE."], "example": "Contacts, texts and call history." },
+    { "layout": "topic", "n": "3", "label": "PICK ONE", "head": ["MY", "HEAD."], "example": "I know who they are. Just not where the emails are." },
+    { "layout": "topic", "n": "4", "label": "PICK ONE", "head": ["I DON'T", "HAVE THEM."], "example": "Booked by phone and never wrote them down." },
+    { "layout": "cta", "top": "COMMENT YOUR PICK", "big": "1 TO 4", "body": "We're collecting how elk outfitters actually do it.", "foot": "Free guides! Tap the link in our bio." }
+  ]
+}

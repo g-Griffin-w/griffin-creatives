@@ -1,0 +1,33 @@
+{
+  "slug": "2026-10-23-reviews-guide",
+  "slides": [
+    { "layout": "hook", "white": ["GUIDE 4:"], "orange": ["GET A REVIEW", "AFTER EVERY", "HUNT."] },
+    { "layout": "text", "label": "WHY REVIEWS DECIDE BOOKINGS", "firstBig": true,
+      "lines": ["Elk hunts are expensive, rare and hard to undo. Hunters look for proof before they trust you.",
+                "A happy hunter rarely leaves a review on their own. Asking is the only thing that fixes that."] },
+    { "layout": "steps", "label": "SET IT UP ONCE", "title": "20 minutes, three steps",
+      "items": [["Get your direct review link", "In your Google Business Profile, open “Ask for reviews” and copy the short link. Test it on your phone."],
+                ["Turn it into a QR code", "Paste the link into any free QR generator. Print it on a card for the gear bag or camp wall."],
+                ["Save the message in your phone", "One text you can send in two minutes after each hunt."]] },
+    { "layout": "template", "label": "THE MESSAGE", "sub": "Text it two or three days after the hunt.",
+      "subject": "Thank you from camp",
+      "body": ["Hey [first name], hope you're settled back in. It was a pleasure having you in camp.",
+               "If you've got a minute, a quick Google review helps other hunters find us. If you want to mention which hunt you were on and who guided you, that's what other hunters look for: [your link]",
+               "Thank you. [your name]"] },
+    { "layout": "timeline", "label": "RUN IT EVERY HUNT",
+      "rows": [["AT DROP-OFF", "Hand them the QR card. One sentence: “this helps other hunters find us.”"],
+               ["2–3 DAYS LATER", "Send the text. Email too if that's all you have."],
+               ["A WEEK AFTER", "One gentle reminder. Only one."]] },
+    { "layout": "checklist", "label": "THE RULES THAT KEEP YOU OUT OF TROUBLE",
+      "items": [["Ask everyone", "Not only the hunters you think were happy."],
+                ["Never offer a discount or gift", "It's against Google's rules."],
+                ["A hunt went sideways? Call first", "Then send the same message everyone gets."],
+                ["No tag punched?", "They can still have had a great trip. Ask them too."]] },
+    { "layout": "text", "label": "THEN REPLY TO EVERY REVIEW", "firstBig": true,
+      "lines": ["Answer within a couple of days, with their first name and one specific detail.",
+                "Hunters reading a bad review care more about how you responded than what it said."] },
+    { "layout": "cta", "headline": ["WANT THE", "FULL GUIDE?"],
+      "body": "Free. The setup steps, the message, the rules, reply examples and a tracking sheet.",
+      "button": "TAP “FREE GUIDES!” IN OUR BIO ↑", "foot": "griffincreativelab.com/starter-kit.html", "buttonSize": 60 }
+  ]
+}

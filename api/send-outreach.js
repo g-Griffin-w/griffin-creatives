@@ -1,6 +1,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const { google } = require('googleapis');
 const { createClient } = require('@supabase/supabase-js');
+const { tipForSite, buildTipEmail } = require('../lib/outreach-audit');
 
 // ============================================================
 // Configuration
@@ -126,48 +127,48 @@ const PITCH_VARIANTS = {
   dtc: `here's the idea: we turn your existing product photos into finished, ready-to-upload static ads — designed with the copy right on the image, in every placement ratio. not concepts or briefs — actual files in your google drive within 48 hours, ready to test before your current winners burn out.
 
 want me to make you 2 free samples? you send nothing — i'll pull a product from your site, design 2 finished static ads, and they're yours to run whether or not we ever work together.`,
-  // The guide play is opt-in: this cold email explains the four free guides and
+  // The guide play is opt-in: this cold email explains the five free marketing guides and
   // has a CTA button to /starter-kit.html (name + email). Only people who sign
   // up receive the guides — the first immediately, then one every 2 days from
   // send-starter-kit-drip.js — and the Booked Out pitch comes at the end of
   // that drip. Follow-ups to
   // non-subscribers (send-followups.js) are just reminders of this ask.
   // No inner quotes: Claude returns this inside JSON.
-  guide: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back.
+  guide: `so instead of pitching you anything, i'm giving away five step-by-step guides we put together for outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, bringing past clients back, and showing up on google searches.
 
-sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
+sign up with your name and email and the first one lands in your inbox right away, with the rest over the next week. it's free: {{signup_link}}`,
   // Wyoming variant (2026-10-15): nonresident elk applications there are due
   // Feb 2, ahead of Montana, Oregon and Idaho, so December is when new hunters
   // pick an outfitter and when a note to past clients catches them. Verified on wgfd.wyo.gov (2026-27
   // announcement). Re-check the date each January when the new cycle posts.
   // No inner quotes: Claude returns this inside JSON.
-  guide_wy: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back.
+  guide_wy: `so instead of pitching you anything, i'm giving away five step-by-step guides we put together for outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back.
 
 one thing worth knowing in wyoming: nonresident elk applications are due feb 2, so december is when hunters pick an outfitter, and when a note to past clients catches them before they apply.
 
-sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
+sign up with your name and email and the first one lands in your inbox right away, with the rest over the next week. it's free: {{signup_link}}`,
   // Colorado variant (2026-10-19): CPW's 2026 primary draw ran Mar 1 to Apr 7
   // (cpw.state.co.us/activities/hunting/big-game/primary-draw). Re-check each
   // spring when the new cycle posts. No inner quotes: Claude returns this inside JSON.
-  guide_co: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back
+  guide_co: `so instead of pitching you anything, i'm giving away five step-by-step guides we put together for outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back
 
 one thing worth knowing in colorado: the primary draw closed april 7 this year, so the winter before it is when hunters pick an outfitter, and when a note to past clients lands before they apply.
 
-sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
+sign up with your name and email and the first one lands in your inbox right away, with the rest over the next week. it's free: {{signup_link}}`,
   // Utah variant (2026-10-19): the 2026 big game drawing ran Mar 19 to Apr 23
   // (wildlife.utah.gov). Re-check each spring. No inner quotes.
-  guide_ut: `so instead of pitching you anything, i'm giving away four step-by-step guides we put together for elk outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back
+  guide_ut: `so instead of pitching you anything, i'm giving away five step-by-step guides we put together for outfitters — getting found by new hunters on google, earning reviews after every hunt, a season marketing calendar, and bringing past clients back
 
 one thing worth knowing in utah: the big game drawing ran march 19 to april 23 this year, so the winter before it is when hunters pick an outfitter, and when a note to past clients lands before they apply.
 
-sign up with your name and email and the first one lands in your inbox right away, with the other three over the next week. it's free: {{signup_link}}`,
+sign up with your name and email and the first one lands in your inbox right away, with the rest over the next week. it's free: {{signup_link}}`,
 };
 const NICHE_PITCH = { salmon_guide: 'guide', elk_guide: 'guide' };
 const SUBJECT_VARIANTS = {
   dtc: 'a couple free ads for {{company_name}}?',
-  guide: '4 free marketing guides for elk outfitters in the West',
+  guide: '5 free marketing guides for outfitters in the West',
 };
-const GUIDE_CTA_LABEL = 'Get the 4 free guides';
+const GUIDE_CTA_LABEL = 'Get the 5 free marketing guides';
 // Links use the .html path: the site has no clean-URL routing, so
 // extensionless paths 404. ?lead=<id> ties the signup back to this lead.
 const signupUrl = (leadId) =>
@@ -552,6 +553,71 @@ async function sendEmail({ to, subject, body, cta }) {
   return { ...result.data, rfcMessageId };
 }
 
+// ============================================================
+// Elk outfitter email: a fixed, short, personal ask (2026-10-21).
+// No AI writing, no link in the first email. It asks one question ("Want me to
+// send them over?") and the follow-ups (send-followups.js) carry the signup
+// link. A "yes" reply is answered by hand with the starter-kit link.
+// ============================================================
+const ELK_ASK = 'Want me to send them over?';
+const STATE_FULL = {
+  OR: 'Oregon', ID: 'Idaho', MT: 'Montana', WA: 'Washington', CA: 'California', WY: 'Wyoming', CO: 'Colorado', UT: 'Utah',
+};
+function stateFull(raw) {
+  const t = String(raw || '').trim();
+  if (STATE_FULL[t.toUpperCase()]) return STATE_FULL[t.toUpperCase()];
+  const hit = Object.values(STATE_FULL).find((n) => n.toLowerCase() === t.toLowerCase());
+  return hit || 'the West';
+}
+function elkFirstName(lead) {
+  const n = String(lead.first_name || '').trim().split(/\s+/)[0];
+  return /^[A-Za-z'’-]{2,}$/.test(n) ? n : 'there';
+}
+function buildElkEmail(lead) {
+  const company = sanitizeCompanyName(lead.company_name).replace(/[,.;\s]+$/, '') || 'your outfit';
+  const state = stateFull(lead.company_state);
+  // The season-calendar guide has all eight states' application dates filled in.
+  const dates = state === 'the West' ? "your state's application dates" : `${state}'s application dates`;
+  const body =
+    `Hey ${elkFirstName(lead)},\n\n` +
+    `I came across ${company} while looking at hunting outfitters in ${state}. I'm Gabriel with Griffin Creative Labs, a marketing agency that works with outfitters in the West.\n\n` +
+    `I put together five free marketing guides for outfitters:\n` +
+    `- Setting up and editing your Google Business Profile\n` +
+    `- A rebooking email sequence for past hunters\n` +
+    `- A marketing season calendar, with ${dates} filled in\n` +
+    `- A review system to run after every hunt\n` +
+    `- Getting found on Google\n\n` +
+    `${ELK_ASK} Just reply "send" and I will.\n\n` +
+    `Gabriel\nGriffin Creative Labs`;
+  return { subject: `Guides for ${company}`, body, resolvedNiche: 'elk_guide', productContext: '' };
+}
+
+// Tip opener (2026-11-02): when the lead's own home page shows one clear, checkable
+// gap (no 2027 dates, no reviews, a title that doesn't say elk, no description),
+// the email leads with a free fix for it and a "Book a 15-minute call" button.
+// It keeps ELK_ASK so send-followups.js treats it like the standard email.
+// Any miss (no site, unreadable, nothing wrong, kill switch) returns the standard
+// email, so a bad site can never block a send.
+async function buildElkEmailForLead(lead) {
+  // The site tip talks about elk (title, description). Outfitters who hunt other game
+  // (company_industry 'Hunting Outfitter (non-elk)') get the standard email instead.
+  if (/non-elk|^hunting outfitter/i.test(lead.company_industry || '')) return buildElkEmail(lead);
+  try {
+    const company = sanitizeCompanyName(lead.company_name).replace(/[,.;\s]+$/, '') || 'your outfit';
+    const state = stateFull(lead.company_state);
+    const stateName = state === 'the West' ? '' : state;
+    const tip = await tipForSite(lead.company_website, { company, state: stateName });
+    if (tip) {
+      const datesPhrase = stateName ? `${stateName}'s application dates` : "your state's application dates";
+      const email = buildTipEmail({ firstName: elkFirstName(lead), company, datesPhrase, tip });
+      return { ...email, resolvedNiche: 'elk_guide', productContext: '' };
+    }
+  } catch {
+    // fall through to the standard email
+  }
+  return buildElkEmail(lead);
+}
+
 // Sleep helper
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const randomDelay = () =>
@@ -607,7 +673,8 @@ module.exports = async (req, res) => {
     for (const lead of leads) {
       try {
         // Generate personalized email (also scrapes site + classifies niche)
-        const { subject, body, resolvedNiche, productContext } = await generateEmail(lead);
+        const isElkTemplate = lead.niche === 'elk_guide';
+        const { subject, body, resolvedNiche, productContext, cta: elkCta } = isElkTemplate ? await buildElkEmailForLead(lead) : await generateEmail(lead);
 
         if (dryRun) {
           // Don't actually send — just capture the draft for inspection
@@ -627,7 +694,7 @@ module.exports = async (req, res) => {
             to: lead.email,
             subject,
             body,
-            cta: isGuide ? { url: signupUrl(lead.id), label: GUIDE_CTA_LABEL } : null,
+            cta: elkCta || (isGuide && !isElkTemplate ? { url: signupUrl(lead.id), label: GUIDE_CTA_LABEL } : null),
           });
 
           // Schedule the first follow-up 3 days out. The follow-up job threads

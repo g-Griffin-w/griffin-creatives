@@ -1,0 +1,12 @@
+{
+  "slug": "2026-10-30-instagram-2027-reel",
+  "slides": [
+    { "layout": "hook", "white": ["IF I WAS", "AN OUTFITTER,"], "orange": ["HOW I'D FILL", "MY 2027", "CALENDAR"], "sub": "5 things. About 10 minutes each." },
+    { "layout": "topic", "n": "1", "label": "YOUR BIO", "head": ["WHAT.", "WHERE.", "HOW TO BOOK."], "example": "“Elk hunts, Unit 61, Idaho. 2027 dates open. Book below.”", "tag": "EXAMPLE" },
+    { "layout": "topic", "n": "2", "label": "A “2027 DATES” HIGHLIGHT", "head": ["OPEN DATES.", "SPOTS LEFT."], "example": "Update it monthly, so nobody has to DM to ask if September is open." },
+    { "layout": "topic", "n": "3", "label": "ONE REAL HUNT A WEEK", "head": ["THE CLIENT.", "THE BULL.", "ONE LINE OF THE STORY."], "example": "No stock photos. Hunters book guys who look like they actually do this." },
+    { "layout": "topic", "n": "4", "label": "DM 10 PAST HUNTERS", "head": ["THEIR OWN", "HUNT PHOTO."], "example": "“Thought of you. 2027 dates just opened.”", "tag": "EXAMPLE" },
+    { "layout": "topic", "n": "5", "label": "LINK + PHONE EVERYWHERE", "head": ["BOOKING LINK", "IN YOUR BIO.", "PHONE ON GOOGLE."], "example": "Make it easy to book from either place." },
+    { "layout": "cta", "top": "COMMENT", "big": "2027", "body": "and I'll send you the checklist.", "foot": "griffincreativelab.com" }
+  ]
+}

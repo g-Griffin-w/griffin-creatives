@@ -79,19 +79,19 @@ through May 8); resident elk due **Jun 1**; deer/pronghorn Jun 1; moose/sheep/go
 | 3 | Mon Oct 19 | Rebook Monday | Carousel, 9 slides | E/G | The three-email rebooking sequence (POSTED) |
 | 4 | Tue Oct 20 | Draw Dates Tuesday | Reel, 20–30 sec | S | Montana timeline: Mar 1 open, Apr 1 due, mid-April results, Elk B Jun 1 (script READY) |
 | 5 | Wed Oct 21 | Teardown Wednesday | Carousel, 8–10 slides | E | Mock Google listing teardown: the 5 questions hunters answer in 20 seconds |
-| 6 | Thu Oct 22 | Outfitter Question | Reel, 15–30 sec | B | When do you start talking to last year's clients about next season? |
+| 6 | Thu Oct 22 | Outfitter Question | Reel, 15–30 sec | B | When do you start talking to last year's clients about next season? (SKIPPED, on vacation; stills built in `content-posts/2026-10-22-outfitter-question/` if you want to use them another Thursday) |
 | 7 | Fri Oct 23 | Free Guide Friday | Carousel, 8 slides | G | Guide 4 · Reviews: your direct link and QR code |
 | 8 | Sat Oct 24 | Camp Notes | Single image or text | B/M | What we're building: the free guides, honestly |
 | 9 | Mon Oct 26 | Rebook Monday | Carousel, 9 slides | E/G | Build the past-client list: the columns that matter |
-| 10 | Tue Oct 27 | Draw Dates Tuesday | Reel, 20–30 sec | S | Oregon timeline: May 15 deadline, results mid-June |
-| 11 | Wed Oct 28 | Teardown Wednesday | Carousel, 8–10 slides | E | Mock homepage teardown: what shows above the fold |
-| 12 | Thu Oct 29 | Outfitter Question | Reel, 15–30 sec | B | Where do most of your new bookings come from? |
-| 13 | Fri Oct 30 | Free Guide Friday | Carousel, 8 slides | G | Guide 2 · Google Profile: claim it and clear duplicates |
+| 10 | Tue Oct 27 | Draw Dates Tuesday | Reel, 20–30 sec | S | Oregon timeline: May 15 deadline, results mid-June (script READY) |
+| 11 | Wed Oct 28 | Teardown Wednesday | Carousel, 8–10 slides | E | Mock homepage teardown: what shows above the fold (9 slides READY in `content-posts/2026-10-28-homepage-teardown/`) |
+| 12 | Thu Oct 29 | Outfitter Question | Reel, 15–30 sec | B | Where do most of your new bookings come from? (3 stills READY in `content-posts/2026-10-29-new-bookings/`, use as Reel frames or post as a 3-slide carousel) |
+| 13 | Fri Oct 30 | Free Guide Friday | Reel, 20–30 sec | G | Guide 2 · Google Profile: the 5 questions a hunter asks on your listing (script READY in `content-posts/2026-10-30-google-profile-reel.md`) |
 | 14 | Sat Oct 31 | Camp Notes | Single image or text | B/M | Halloween: the scariest thing for an outfitter is an empty September |
-| 15 | Mon Nov 2 | Rebook Monday | Carousel, 9 slides | E/G | Email 1 deep-dive: 6 ways to open with a real moment |
-| 16 | Tue Nov 3 | Draw Dates Tuesday | Reel, 20–30 sec | S | Idaho timeline: May 1 to Jun 5, results mid-June to early July, August second draw |
+| 15 | Mon Nov 2 | Rebook Monday | Carousel, 9 slides | E/G | Email 1 deep-dive: 6 ways to open with a real moment (9 slides + caption READY in `content-posts/2026-11-02-email-1-openers/` and `CAPTIONS-NOV-2.md`) |
+| 16 | Tue Nov 3 | Draw Dates Tuesday | Reel, 20–30 sec | S | Idaho timeline: May 1 to Jun 5, results mid-June to early July, August second draw (6 stills + script + caption READY in `content-posts/2026-11-03-idaho-reel/` and `2026-11-03-idaho-reel.md`) |
 | 17 | Wed Nov 4 | Teardown Wednesday | Carousel, 8–10 slides | E | Hunt page teardown: dates, price, what's included |
-| 18 | Thu Nov 5 | Outfitter Question | Reel, 15–30 sec | B | How do you collect past clients' emails today? |
+| 18 | Thu Nov 5 | Outfitter Question | Reel, 15–30 sec | B | How do you collect past clients' emails today? (6 stills + script + caption READY in `content-posts/2026-11-05-outfitter-question/` and `2026-11-05-outfitter-question.md`) |
 | 19 | Fri Nov 6 | Free Guide Friday | Carousel, 8 slides | G | Guide 3 · Calendar: fill in your four key dates |
 | 20 | Sat Nov 7 | Camp Notes | Single image or text | B/M | One-line tip: add one real detail to every email (the "remember this" column) |
 | 21 | Mon Nov 9 | Rebook Monday | Carousel, 9 slides | E/G | Email 2 deep-dive: dates, spots and deposit, said plainly |
