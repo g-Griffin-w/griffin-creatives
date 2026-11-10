@@ -20,7 +20,7 @@ Today's date: use the date in the conversation. Pacific time for anything shown 
     (select count(*) from outreach_leads where status='bounced' and sent_at > now() - interval '1 day') bounces_24h,
     (select max(sent_at) from outreach_leads where status='sent') last_first_email;
   ```
-  Also: follow-ups sent in the last 24h (`select count(*) from outreach_leads where followup_stage>=1 and next_followup_at is not null and next_followup_at > now() and updated...` is not available, so judge it from the change in `followups_overdue` against the last saved report). **Flag it** if `last_first_email` is more than 26 hours old, `queued` is under 50 (about 2 days of sends left), or `followups_overdue` did not go down since the last report. Cron: first emails ~09:00 PT (send-outreach), follow-ups 17:00, 20:00 and 23:00 UTC.
+  There is no follow-up send timestamp, so judge follow-ups from the change in `followups_overdue` against the last saved report. **Flag it** if `last_first_email` is more than 26 hours old, `queued` is under 50 (about 2 days of sends left), or `followups_overdue` did not go down since the last report. Cron: first emails ~09:00 PT (send-outreach), follow-ups 17:00, 20:00 and 23:00 UTC.
 
 ## 2. Guide engagement
 ```sql
