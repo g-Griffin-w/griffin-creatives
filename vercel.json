@@ -48,6 +48,14 @@
       "schedule": "0 18 * * *"
     },
     {
+      "path": "/api/send-outreach",
+      "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/send-outreach",
+      "schedule": "0 21 * * *"
+    },
+    {
       "path": "/api/send-followups",
       "schedule": "0 17 * * *"
     },

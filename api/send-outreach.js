@@ -15,6 +15,15 @@ const BATCH_SIZE = Math.max(
 );
 const DELAY_MS_MIN = 5000;
 const DELAY_MS_MAX = 15000;
+// The platform kills a function at ~300s. Stop starting new sends after this
+// so the run always finishes and reports; the next scheduled run (see the
+// crons in vercel.json) picks up whatever is left of the day's batch.
+const RUN_BUDGET_MS = 235000;
+// Never send more than BATCH_SIZE first emails in any rolling 20 hours, no
+// matter how many times this is triggered (cron, a second cron, by hand).
+const DAILY_WINDOW_MS = 20 * 60 * 60 * 1000;
+let runStarted = Date.now(); // reset at the start of every request
+const overBudget = () => Date.now() - runStarted > RUN_BUDGET_MS;
 
 // ============================================================
 // Clients
@@ -627,6 +636,7 @@ const randomDelay = () =>
 // Main handler
 // ============================================================
 module.exports = async (req, res) => {
+  runStarted = Date.now();
   // Bearer token auth (prevents random people from triggering this)
   const authHeader = req.headers.authorization || '';
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -639,11 +649,32 @@ module.exports = async (req, res) => {
   // Optional: ?limit=N caps the batch size (useful for fast dry-run tests).
   // Defaults to BATCH_SIZE (25). Clamped 1..BATCH_SIZE.
   const rawLimit = parseInt(req.query?.limit, 10);
-  const batchLimit = Number.isFinite(rawLimit)
+  let batchLimit = Number.isFinite(rawLimit)
     ? Math.max(1, Math.min(BATCH_SIZE, rawLimit))
     : BATCH_SIZE;
 
   try {
+    // Daily cap: how many first emails already went out in the last 20 hours?
+    if (!dryRun) {
+      const { count: sentRecently, error: capError } = await supabase
+        .from('outreach_leads')
+        .select('id', { count: 'exact', head: true })
+        .gte('sent_at', new Date(Date.now() - DAILY_WINDOW_MS).toISOString());
+      if (capError) {
+        return res.status(500).json({ error: 'Supabase cap check failed', detail: capError.message });
+      }
+      const remaining = BATCH_SIZE - (sentRecently || 0);
+      if (remaining <= 0) {
+        return res.status(200).json({
+          success: true,
+          message: `Daily cap reached (${sentRecently} sent in the last 20 hours)`,
+          sent: 0,
+          timestamp: new Date().toISOString(),
+        });
+      }
+      batchLimit = Math.min(batchLimit, remaining);
+    }
+
     // Pull next batch of queued leads. elk_guide leads are included: their
     // email is the opt-in guide pitch (CTA button to /starter-kit.html), and
     // the follow-up + drip crons in vercel.json take it from there.
@@ -671,6 +702,10 @@ module.exports = async (req, res) => {
     const results = { sent: 0, failed: 0, dry_run: dryRun, errors: [], drafts: [] };
 
     for (const lead of leads) {
+      if (overBudget()) {
+        results.stopped_for_time = true;
+        break;
+      }
       try {
         // Generate personalized email (also scrapes site + classifies niche)
         const isElkTemplate = lead.niche === 'elk_guide';
@@ -748,6 +783,7 @@ module.exports = async (req, res) => {
       }
     }
 
+    console.log('send-outreach', JSON.stringify({ batch: leads.length, sent: results.sent, failed: results.failed, errors: results.errors.slice(0, 5), stopped_for_time: Boolean(results.stopped_for_time) }));
     return res.status(200).json({
       success: true,
       batch_size: leads.length,
