@@ -32,3 +32,4 @@ reports/*
 client-packets/
 COLD-CALL-LIST-FULL.csv
 leads-work/
+cold-call-list.csv
