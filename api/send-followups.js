@@ -124,48 +124,49 @@ const GUIDE_CTA_LABEL = 'Get the 5 free marketing guides';
 const signupUrl = (lead) => `https://www.griffincreativelab.com/starter-kit.html?lead=${lead.id}`;
 // Leads emailed before Oct 12 2026 got the old ask-first pitch, which never
 // explained the guides. Their first follow-up is the explanation.
-const sawGuideIntro = (lead) => (lead.email_body || '').includes('starter-kit');
-// Leads emailed on or after Oct 21 2026 got the short question email (no link).
-const ELK_ASK = 'Want me to send them over?';
-const sawQuestion = (lead) => (lead.email_body || '').includes(ELK_ASK);
+
+// Nov 11 2026: follow-ups now lead with a free audit (reply "audit"; Gabriel
+// writes it by hand when someone replies), with the guides as the secondary
+// button. Leads that already finished both touches under the old copy were
+// re-queued for Dec 1+ with followup_stage=1 and this marker in notes; they
+// get ONE round-two email (not "last note", they already had one).
+const ROUND_TWO_MARKER = '[audit-round-2]';
+const isRoundTwo = (lead) => (lead.notes || '').includes(ROUND_TWO_MARKER);
+
+const AUDIT_OFFER =
+  `i'll look at your Google profile and website and send you a short write-up of the three things i'd fix first: ` +
+  `how you show up when a hunter Googles you, your reviews, and what a hunter sees first on your site on a phone. ` +
+  `for each one i'll say how i'd fix it, whether or not you ever hire us.`;
 
 function buildGuideFollowup(lead, stage) {
   const first = firstName(lead);
   const url = signupUrl(lead);
-  const list = 'Google Business Profile setup, a rebooking email sequence, a marketing season calendar, a review system for after every hunt, and getting found on Google';
 
-  if (stage === 0 && sawQuestion(lead)) {
+  if (stage === 0) {
     return (
-      `Hey ${first} \u2014 floating this back up.\n\n` +
-      `The five free marketing guides are still yours if you want them: ${list}. ` +
-      `Just reply "send" and I'll send the first one, or grab them here with your name and email:\n\n` +
-      `${url}\n\n` +
-      `Gabriel\nGriffin Creative Labs`
-    );
-  }
-  if (stage === 0 && !sawGuideIntro(lead)) {
-    return (
-      `hi ${first},\n\n` +
-      `following up on my note — here's the simpler version of what i offered. we put together five free ` +
-      `step-by-step guides for outfitters: ${list}.\n\n` +
-      `sign up with your name and email and the first one lands right away, with the rest over the next week. no catch:\n\n` +
+      `hey ${first}, quick follow-up.\n\n` +
+      `here's something more useful than another reminder. ${AUDIT_OFFER}\n\n` +
+      `free, and it takes me a day. just reply "audit" and i'll send it.\n\n` +
+      `the five free marketing guides are still yours too if you'd rather start there:\n\n` +
       `${url}` +
       GUIDE_SIGNATURE
     );
   }
-  if (stage === 0) {
+  if (isRoundTwo(lead)) {
     return (
-      `hi ${first} — floating this back up.\n\n` +
-      `the five free marketing guides are still yours if you want them: ${list}. ` +
-      `just your name and email, and the first one lands right away:\n\n` +
+      `hey ${first}, it's been a few weeks, so instead of another reminder, one idea as you plan next season.\n\n` +
+      `${AUDIT_OFFER}\n\n` +
+      `free, and it takes me a day. just reply "audit" and i'll send it.\n\n` +
+      `the five free marketing guides are still available if you want them:\n\n` +
       `${url}` +
       GUIDE_SIGNATURE
     );
   }
   return (
-    `hey ${first}, last note from me on this.\n\n` +
-    `if the guides aren't useful, no worries at all — i won't keep landing in your inbox. ` +
-    `if they are, it takes about ten seconds:\n\n` +
+    `hey ${first}, last note from me.\n\n` +
+    `if a free look at your Google profile and website would help, reply "audit" and i'll send you the three things i'd fix first this week. ` +
+    `if not, no worries at all, i won't keep landing in your inbox.\n\n` +
+    `the free guides are here if they're useful:\n\n` +
     `${url}` +
     GUIDE_SIGNATURE
   );
