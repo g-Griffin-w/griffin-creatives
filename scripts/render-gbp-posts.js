@@ -11,6 +11,8 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const OUTDIR = path.join(ROOT, 'gbp-images', 'posts');
+// Public copy (served at /images/gbp/<slug>.jpg) so Make.com can fetch each image by URL.
+const PUBDIR = path.join(ROOT, 'images', 'gbp');
 const FONT_DIR = path.join(ROOT, 'api', 'fonts');
 const DIN = '/System/Library/Fonts/Supplemental/DIN Condensed Bold.ttf';
 const ASSET = (k) => path.join(ROOT, 'content-posts', 'assets', `elk-skull-${k}.jpg`);
@@ -22,6 +24,8 @@ const POSTS = [
   { slug: 'post-2-thank-you-email', skull: 'antlers', white: ['6 WAYS TO OPEN YOUR'], orange: ['THANK-YOU EMAIL.'], sub: "Start with a real moment from the hunt. From our free rebooking guide." },
   { slug: 'post-3-reviews', skull: 'side', white: ['GET A REVIEW'], orange: ['AFTER EVERY HUNT.'], sub: 'Your direct review link, a QR card for camp, and the message to send.' },
   { slug: 'post-4-idaho-dates', skull: 'tracks', white: ['IDAHO ELK:'], orange: ['MAY 1 TO JUNE 5.'], sub: "The 2026 controlled-hunt application window. 2027 dates aren't posted yet." },
+  { slug: 'post-6-eight-photos', skull: 'antlers', white: ['THE 8 PHOTOS EVERY'], orange: ['OUTFITTER PAGE NEEDS.'], sub: 'A hunter cannot visit before they book. Your photos do the talking.' },
+  { slug: 'post-7-review-message', skull: 'side', white: ['THE MESSAGE TO SEND'], orange: ['FOR A GOOGLE REVIEW.'], sub: 'Word for word, plus the one reminder and how to reply to every review.' },
   { slug: 'post-5-google-listing', skull: 'front', white: ['5 QUESTIONS A HUNTER', 'ASKS ON YOUR'], orange: ['GOOGLE LISTING.'], sub: 'A filled-out profile answers all five before they ever click your website.' },
 ];
 
@@ -54,6 +58,7 @@ function tree(p) {
     { name: 'DIN', data: fs.readFileSync(DIN), weight: 400, style: 'normal' },
   ];
   fs.mkdirSync(OUTDIR, { recursive: true });
+  fs.mkdirSync(PUBDIR, { recursive: true });
   for (const f of fs.readdirSync(OUTDIR)) fs.unlinkSync(path.join(OUTDIR, f));
   for (const p of POSTS) {
     const skull = await sharp(ASSET(p.skull)).resize({ width: 900, height: 900, fit: 'cover' }).linear(0.5, 0).toBuffer();
@@ -64,6 +69,7 @@ function tree(p) {
     const svg = await satori(tree(p), { width: W, height: H, fonts });
     const text = new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
     await sharp(base).composite([{ input: text, left: 0, top: 0 }]).jpeg({ quality: 92 }).toFile(path.join(OUTDIR, p.slug + '.jpg'));
-    console.log('wrote', path.join('gbp-images/posts', p.slug + '.jpg'));
+    fs.copyFileSync(path.join(OUTDIR, p.slug + '.jpg'), path.join(PUBDIR, p.slug + '.jpg'));
+    console.log('wrote', path.join('gbp-images/posts', p.slug + '.jpg'), '+ images/gbp/');
   }
 })().catch((e) => { console.error(e); process.exit(1); });
